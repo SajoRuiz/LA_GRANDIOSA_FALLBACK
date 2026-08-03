@@ -12,7 +12,7 @@ const videoRates = [
 
 const packages = [
   {
-    tier: "Entry",
+    tier: "Entry Monthly Package",
     promise: "Frame the landmark",
     items: [
       ["Side Frame 15", "Left + Right · 15-sec still", "14,880 plays", "$3,037.50"],
@@ -21,7 +21,7 @@ const packages = [
     ],
   },
   {
-    tier: "Mid-Tier",
+    tier: "Mid-Tier Monthly Package",
     promise: "Command the center",
     items: [
       ["Center Impact", "Center · 30-sec still", "7,440 plays", "$13,500"],
@@ -29,7 +29,7 @@ const packages = [
     ],
   },
   {
-    tier: "Flagship",
+    tier: "Flagship Monthly Package",
     promise: "Own the complete structure",
     items: [
       ["Landmark Takeover", "All 3 screens · 60-sec still", "3,720 plays", "$35,100"],
@@ -269,8 +269,8 @@ export default function Home() {
         </div>
 
         <div className="rates-grid">
-          <RateTable title="Still Image" rates={stillRates} />
-          <RateTable title="Silent Video" rates={videoRates} accent />
+          <RateTable title="Still Image • Monthly Rate" rates={stillRates} />
+          <RateTable title="Silent Video • Monthly Rate" rates={videoRates} accent />
         </div>
 
         <p className="fine-print">

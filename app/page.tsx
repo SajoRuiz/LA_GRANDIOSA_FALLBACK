@@ -137,7 +137,7 @@ export default function Home() {
         <div className="hero-content">
           <p className="eyebrow orange">The NEW Mall of San Juan Digital Ad Space is now available.</p>
 
-          <h1>A Premier Digital Landmark</h1>
+          <h1>The Only Premier Digital Landmark in Puerto Rico</h1>
 
           <div className="orange-rule" />
 

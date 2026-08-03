@@ -135,15 +135,14 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="hero-content">
-          <p className="eyebrow orange">Be seen. Be remembered.</p>
+          <p className="eyebrow orange">The NEW Mall of San Juan Digital Ad Space is now available.</p>
 
-          <h1>Puerto Rico&apos;s premier digital landmark.</h1>
+          <h1>A Premier Digital Landmark</h1>
 
           <div className="orange-rule" />
 
           <p className="hero-lede">
-            A one-of-a-kind three-screen digital canvas inside The Mall of San
-            Juan, designed to give premium brands commanding visibility in a
+            A one-of-a-kind three-screen digital canvas, designed to give premium brands commanding visibility in a
             premium environment.
           </p>
 
@@ -162,7 +161,7 @@ export default function Home() {
       <section className="section experience-section" id="experience">
         <div className="section-heading">
           <p className="eyebrow">Experience La Grandiosa</p>
-          <h2>See the landmark come to life.</h2>
+          <h2>See your brand come to life.</h2>
           <p>
             Explore the arrival experience and the scale of the environment
             through two cinematic views captured inside The Mall of San Juan.
@@ -196,7 +195,7 @@ export default function Home() {
               playsInline
               preload="metadata"
               poster="/la-grandiosa-tour-poster.jpg"
-              aria-label="La Grandiosa location tour video"
+              aria-label="La Grandiosa arrival experience video"
             >
               <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
               Your browser does not support embedded video.
@@ -283,7 +282,7 @@ export default function Home() {
       <section className="section package-section" id="packages">
         <div className="section-heading">
           <p className="eyebrow">A clear path to ownership</p>
-          <h2>Seven packages. Three levels of ambition.</h2>
+          <h2>Seven packages. Three levels of impact.</h2>
           <p>
             Move from a strong architectural frame to complete three-screen
             ownership.

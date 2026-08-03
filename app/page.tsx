@@ -224,12 +224,12 @@ export default function Home() {
         <div className="screen-diagram">
           <article className="side-screen">
             <span>Left</span>
-            <strong>6&apos;8&quot; × 31&apos;2&quot;</strong>
+            <strong>6&apos;8&quot;w × 31&apos;2&quot;h</strong>
           </article>
 
           <article className="center-screen">
             <span>Center</span>
-            <strong>29&apos;6&quot; × 31&apos;2&quot;</strong>
+            <strong>29&apos;6&quot;w × 31&apos;2&quot;h</strong>
             <p>
               The hero canvas for premium storytelling and landmark-scale brand
               presence.
@@ -238,7 +238,7 @@ export default function Home() {
 
           <article className="side-screen">
             <span>Right</span>
-            <strong>6&apos;8&quot; × 31&apos;2&quot;</strong>
+            <strong>6&apos;8&quot;w × 31&apos;2&quot;h</strong>
           </article>
         </div>
 

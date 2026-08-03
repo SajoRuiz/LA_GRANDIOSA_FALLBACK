@@ -364,7 +364,7 @@ export default function Home() {
             src="/la-grandiosa-logo.png"
             alt="La Grandiosa"
           />
-          <span>The Mall of San Juan · Premium digital media</span>
+          <span>THE MALL OF SAN JUAN · PREMIUM DIGITAL MEDIA</span>
         </div>
 
         <div className="footer-links">

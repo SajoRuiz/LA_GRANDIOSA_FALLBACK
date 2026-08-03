@@ -1079,4 +1079,49 @@ footer {
     width: 205px;
     height: 60px;
   }
+}/* =========================================================
+   FOOTER TEXT SIZE AND TYPOGRAPHY
+   ========================================================= */
+
+footer {
+  font-size: clamp(15px, 1.05vw, 18px);
+  line-height: 1.55;
+}
+
+.footer-brand > span {
+  color: var(--mist);
+  font-size: clamp(16px, 1.15vw, 20px);
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.footer-links a,
+.footer-contact a,
+.footer-contact span {
+  font-size: clamp(15px, 1.05vw, 18px);
+}
+
+.footer-links,
+.footer-contact {
+  gap: 14px;
+}
+
+/* Mobile footer text */
+
+@media (max-width: 680px) {
+  footer {
+    font-size: 16px;
+  }
+
+  .footer-brand > span {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .footer-links a,
+  .footer-contact a,
+  .footer-contact span {
+    font-size: 16px;
+  }
 }

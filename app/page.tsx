@@ -170,16 +170,16 @@ export default function Home() {
 
         <div className="video-grid">
           <article className="video-card">
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              poster="/la-grandiosa-experience-poster.jpg"
-              aria-label="La Grandiosa arrival experience video"
-            >
-              <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
-              Your browser does not support embedded video.
-            </video>
+         <video
+  controls
+  playsInline
+  preload="metadata"
+  poster="/la-grandiosa-tour-poster.jpg"
+  aria-label="La Grandiosa location tour video"
+>
+  <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
+  Your browser does not support embedded video.
+</video>
             <div className="video-caption">
               <span>01</span>
               <div>
@@ -190,16 +190,16 @@ export default function Home() {
           </article>
 
           <article className="video-card">
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              poster="/la-grandiosa-tour-poster.jpg"
-              aria-label="La Grandiosa arrival experience video"
-            >
-              <source src="/la-grandiosa-experience.mp4" type="video/mp4" />
-              Your browser does not support embedded video.
-            </video>
+           <video
+  controls
+  playsInline
+  preload="metadata"
+  poster="/la-grandiosa-experience-poster.jpg"
+  aria-label="La Grandiosa arrival experience video"
+>
+  <source src="/la-grandiosa-experience.mp4" type="video/mp4" />
+  Your browser does not support embedded video.
+</video>
             <div className="video-caption">
               <span>02</span>
               <div>
@@ -364,7 +364,7 @@ export default function Home() {
             src="/la-grandiosa-logo.png"
             alt="La Grandiosa"
           />
-          <span>The Mall of San Juan · Premium digital media</span>
+          <span>THE MALL OF SAN JUAN · PREMIUM DIGITAL MEDIA</span>
         </div>
 
         <div className="footer-links">

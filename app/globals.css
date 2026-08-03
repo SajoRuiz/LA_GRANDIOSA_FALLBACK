@@ -617,7 +617,7 @@ h1 {
   color: var(--white);
   background: linear-gradient(155deg, var(--panel-bright), var(--deep));
   border-color: var(--orange);
-  transform: translateY(-14px);
+  transform: none;
 }
 
 .tier {
@@ -1043,7 +1043,7 @@ footer {
 .brand-logo {
   width: clamp(180px, 16vw, 230px);
   height: clamp(52px, 4.8vw, 68px);
-  
+
 }
 
 /* Footer logo */

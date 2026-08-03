@@ -177,7 +177,7 @@ export default function Home() {
               poster="/la-grandiosa-experience-poster.jpg"
               aria-label="La Grandiosa arrival experience video"
             >
-              <source src="/la-grandiosa-experience.mp4" type="video/mp4" />
+              <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
               Your browser does not support embedded video.
             </video>
             <div className="video-caption">
@@ -197,7 +197,7 @@ export default function Home() {
               poster="/la-grandiosa-tour-poster.jpg"
               aria-label="La Grandiosa arrival experience video"
             >
-              <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
+              <source src="/la-grandiosa-experience.mp4" type="video/mp4" />
               Your browser does not support embedded video.
             </video>
             <div className="video-caption">

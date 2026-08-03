@@ -269,8 +269,8 @@ export default function Home() {
         </div>
 
         <div className="rates-grid">
-          <RateTable title="Still Image • Monthly Rate" rates={stillRates} />
-          <RateTable title="Silent Video • Monthly Rate" rates={videoRates} accent />
+          <RateTable title="Still Image • Monthly" rates={stillRates} />
+          <RateTable title="Silent Video • Monthly" rates={videoRates} accent />
         </div>
 
         <p className="fine-print">

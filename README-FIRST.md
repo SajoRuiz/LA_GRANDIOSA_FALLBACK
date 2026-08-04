@@ -47,3 +47,11 @@ PRICING-TEST-MATRIX.md
 ```
 
 before enabling production payment.
+
+
+## Revision 4
+
+- Every valid date range is accepted.
+- 30–31, 60–61, 90–91 days, and onward multipliers are full-month buys.
+- Other ranges are split into monthly units plus partial days.
+- The order page now contains an always-visible inline calendar.

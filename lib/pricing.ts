@@ -1,4 +1,5 @@
 import {
+  addUtcDays,
   countInclusiveCalendarDays,
   formatUtcDateToIso,
   parseIsoDateToUtc,
@@ -7,48 +8,85 @@ import {
 } from "./service-calendar";
 
 export const BILLING_MONTH_DAYS = 31;
+export const ROLLING_MONTH_DAYS = 30;
+export const MONTH_GRACE_DAYS = 1;
 export const DATE_SELECTION_PREMIUM_PERCENT = 10;
 export const MULTI_MONTH_DISCOUNT_PERCENT = 10;
 
 export type PricingBasis =
   | "daily-prorated"
   | "monthly-buy"
-  | "multi-month-buy";
+  | "multi-month-buy"
+  | "mixed-month-partial";
 
 export interface CampaignPriceBreakdown extends ServiceScheduleSummary {
   monthlyRateCents: number;
   pricingBasis: PricingBasis;
-  fullCalendarMonths: number;
+
+  /**
+   * Number of full monthly billing units.
+   *
+   * Examples:
+   * 30-31 days = 1
+   * 60-61 days = 2
+   * 90-91 days = 3
+   *
+   * A selection that is exactly one or more complete calendar months also
+   * uses the actual calendar-month count, including February.
+   */
+  fullMonthUnits: number;
+
+  /** Calendar days assigned to full monthly billing units. */
+  monthlyCoverageDays: number;
+
+  /** Calendar days remaining after the monthly portion. */
+  partialCalendarDays: number;
+
+  /** Operating days inside the partial remainder. */
+  partialBillableDays: number;
+
+  /** Total operating days across the complete selected range. */
   billableDays: number;
+
+  /** Monthly units plus partial-day gross subtotal before holiday deductions. */
   grossMediaSubtotalCents: number;
+
+  /** Holiday deductions across both monthly and partial portions. */
   closedHolidayDeductionCents: number;
+
+  /** Media subtotal after holiday deductions and before premium/discount. */
   mediaSubtotalCents: number;
+
+  /** 10% premium applied only to the adjusted partial remainder. */
   dateSelectionPremiumCents: number;
+
+  /**
+   * 10% discount applied only when the entire range is an exact purchase of
+   * two or more monthly units, with no partial remainder.
+   */
   multiMonthDiscountCents: number;
+
   totalCents: number;
+}
+
+interface BillingStructure {
+  completeCalendarMonths: number;
+  fullMonthUnits: number;
+  monthlyCoverageDays: number;
+  partialCalendarDays: number;
+  exactMonthMultiplier: boolean;
 }
 
 function lastDayOfUtcMonth(year: number, monthIndex: number): number {
   return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
 }
 
-function monthEndIso(year: number, monthIndex: number): string {
-  return formatUtcDateToIso(
-    new Date(Date.UTC(year, monthIndex, lastDayOfUtcMonth(year, monthIndex))),
-  );
-}
-
-function monthStartIso(year: number, monthIndex: number): string {
-  return formatUtcDateToIso(new Date(Date.UTC(year, monthIndex, 1)));
-}
-
 /**
- * Returns the number of complete calendar months only when:
- * - the range begins on the first day of a month; and
- * - the range ends on the final day of a month.
+ * Count complete calendar months only when the entire selection begins on the
+ * first day of a month and ends on the final day of a month.
  *
- * A complete February therefore qualifies as one complete calendar month,
- * even though it contains only 28 or 29 calendar days.
+ * This preserves February as a full monthly purchase even when it has 28 or
+ * 29 calendar days.
  */
 export function countCompleteCalendarMonths(
   startDate: string,
@@ -80,69 +118,117 @@ export function countCompleteCalendarMonths(
 }
 
 /**
- * A range qualifies for one monthly buy before any holiday adjustment when:
- * - it is one complete calendar month, including February; or
- * - it contains exactly 30 or 31 inclusive calendar days.
+ * Determine how an arbitrary range is divided between full monthly billing
+ * units and a remaining partial period.
  *
- * Closed holidays never change this classification. They reduce the monthly
- * price after the monthly rule has already been selected.
+ * Rules:
+ * - Any complete calendar month range uses the actual month count.
+ * - Otherwise, every 30-day block is one monthly unit.
+ * - One additional grace day may be absorbed by the monthly portion:
+ *   30-31 = 1 month, 60-61 = 2 months, 90-91 = 3 months, etc.
+ * - Any days beyond that become a partial remainder.
  */
-function qualifiesForOneMonthlyBuy(
-  calendarDays: number,
-  completeMonths: number,
-): boolean {
-  return (
-    completeMonths === 1 ||
-    calendarDays === 30 ||
-    calendarDays === 31
+export function getBillingStructure(
+  startDate: string,
+  endDate: string,
+): BillingStructure {
+  const calendarDays = countInclusiveCalendarDays(startDate, endDate);
+  const completeCalendarMonths = countCompleteCalendarMonths(
+    startDate,
+    endDate,
+  );
+
+  if (completeCalendarMonths >= 1) {
+    return {
+      completeCalendarMonths,
+      fullMonthUnits: completeCalendarMonths,
+      monthlyCoverageDays: calendarDays,
+      partialCalendarDays: 0,
+      exactMonthMultiplier: true,
+    };
+  }
+
+  const fullMonthUnits = Math.floor(calendarDays / ROLLING_MONTH_DAYS);
+
+  if (fullMonthUnits === 0) {
+    return {
+      completeCalendarMonths: 0,
+      fullMonthUnits: 0,
+      monthlyCoverageDays: 0,
+      partialCalendarDays: calendarDays,
+      exactMonthMultiplier: false,
+    };
+  }
+
+  const baseMonthlyCoverageDays =
+    fullMonthUnits * ROLLING_MONTH_DAYS;
+  const remainingAfterBase =
+    calendarDays - baseMonthlyCoverageDays;
+
+  const graceDaysUsed =
+    remainingAfterBase >= MONTH_GRACE_DAYS
+      ? MONTH_GRACE_DAYS
+      : 0;
+
+  const monthlyCoverageDays =
+    baseMonthlyCoverageDays + graceDaysUsed;
+  const partialCalendarDays =
+    calendarDays - monthlyCoverageDays;
+
+  return {
+    completeCalendarMonths: 0,
+    fullMonthUnits,
+    monthlyCoverageDays,
+    partialCalendarDays,
+    exactMonthMultiplier: partialCalendarDays === 0,
+  };
+}
+
+function scheduleForFirstDays(
+  startDate: string,
+  numberOfDays: number,
+): ServiceScheduleSummary | undefined {
+  if (numberOfDays <= 0) {
+    return undefined;
+  }
+
+  const start = parseIsoDateToUtc(startDate);
+  const end = addUtcDays(start, numberOfDays - 1);
+
+  return summarizeServiceSchedule(
+    startDate,
+    formatUtcDateToIso(end),
   );
 }
 
-function calculateClosedHolidayDeduction(
-  monthlyRateCents: number,
-  closedDays: number,
-): number {
-  return Math.round((monthlyRateCents * closedDays) / BILLING_MONTH_DAYS);
-}
-
-/**
- * For complete multi-month selections, calculate each month's closed-holiday
- * subtraction separately and add those deductions together.
- */
-function calculateCompleteMonthsHolidayDeduction(
-  monthlyRateCents: number,
+function scheduleForRemainingDays(
   startDate: string,
-  endDate: string,
-): number {
-  const start = parseIsoDateToUtc(startDate);
-  const end = parseIsoDateToUtc(endDate);
-
-  let year = start.getUTCFullYear();
-  let month = start.getUTCMonth();
-  const endYear = end.getUTCFullYear();
-  const endMonth = end.getUTCMonth();
-  let totalDeductionCents = 0;
-
-  while (year < endYear || (year === endYear && month <= endMonth)) {
-    const monthSchedule = summarizeServiceSchedule(
-      monthStartIso(year, month),
-      monthEndIso(year, month),
-    );
-
-    totalDeductionCents += calculateClosedHolidayDeduction(
-      monthlyRateCents,
-      monthSchedule.closedDays,
-    );
-
-    month += 1;
-
-    if (month === 12) {
-      month = 0;
-      year += 1;
-    }
+  monthlyCoverageDays: number,
+  partialCalendarDays: number,
+): ServiceScheduleSummary | undefined {
+  if (partialCalendarDays <= 0) {
+    return undefined;
   }
 
-  return totalDeductionCents;
+  const start = addUtcDays(
+    parseIsoDateToUtc(startDate),
+    monthlyCoverageDays,
+  );
+  const end = addUtcDays(start, partialCalendarDays - 1);
+
+  return summarizeServiceSchedule(
+    formatUtcDateToIso(start),
+    formatUtcDateToIso(end),
+  );
+}
+
+function calculateDailyEquivalent(
+  monthlyRateCents: number,
+  days: number,
+): number {
+  return Math.round(
+    (monthlyRateCents * days) / BILLING_MONTH_DAYS,
+  );
 }
 
 export function getCampaignRangeError(
@@ -151,24 +237,12 @@ export function getCampaignRangeError(
 ): string | undefined {
   try {
     const schedule = summarizeServiceSchedule(startDate, endDate);
-    const completeMonths = countCompleteCalendarMonths(startDate, endDate);
 
-    if (completeMonths >= 1) {
-      return undefined;
+    if (schedule.operatingDays === 0) {
+      return "The selected range contains no operating days.";
     }
 
-    if (schedule.calendarDays <= 31) {
-      if (schedule.calendarDays <= 29 && schedule.operatingDays === 0) {
-        return "The selected range contains no operating days.";
-      }
-
-      return undefined;
-    }
-
-    return (
-      "Selections longer than 31 days must begin on the first day of a " +
-      "calendar month and end on the last day of a later calendar month."
-    );
+    return undefined;
   } catch (error) {
     return error instanceof Error
       ? error.message
@@ -179,15 +253,27 @@ export function getCampaignRangeError(
 export function pricingBasisLabel(
   pricing: Pick<
     CampaignPriceBreakdown,
-    "pricingBasis" | "fullCalendarMonths"
+    | "pricingBasis"
+    | "fullMonthUnits"
+    | "partialCalendarDays"
   >,
 ): string {
   if (pricing.pricingBasis === "multi-month-buy") {
-    return `${pricing.fullCalendarMonths}-month buy`;
+    return `${pricing.fullMonthUnits}-month buy`;
   }
 
   if (pricing.pricingBasis === "monthly-buy") {
     return "Monthly buy";
+  }
+
+  if (pricing.pricingBasis === "mixed-month-partial") {
+    const monthLabel =
+      pricing.fullMonthUnits === 1 ? "month" : "months";
+
+    return (
+      `${pricing.fullMonthUnits} ${monthLabel} + ` +
+      `${pricing.partialCalendarDays}-day partial`
+    );
   }
 
   return "Daily proration";
@@ -199,7 +285,9 @@ export function calculateCampaignPrice(
   endDate: string,
 ): CampaignPriceBreakdown {
   if (!Number.isInteger(monthlyRateCents) || monthlyRateCents < 0) {
-    throw new Error("The monthly rate must be a non-negative integer in cents.");
+    throw new Error(
+      "The monthly rate must be a non-negative integer in cents.",
+    );
   }
 
   const rangeError = getCampaignRangeError(startDate, endDate);
@@ -208,119 +296,128 @@ export function calculateCampaignPrice(
     throw new Error(rangeError);
   }
 
-  const schedule = summarizeServiceSchedule(startDate, endDate);
-  const completeMonths = countCompleteCalendarMonths(startDate, endDate);
+  const completeSchedule = summarizeServiceSchedule(
+    startDate,
+    endDate,
+  );
+  const structure = getBillingStructure(startDate, endDate);
 
-  /**
-   * TWO OR MORE COMPLETE CALENDAR MONTHS
-   *
-   * 1. Select multi-month pricing based on the original calendar range.
-   * 2. Calculate the gross monthly total.
-   * 3. Subtract closed holidays month by month.
-   * 4. Do not apply the 10% exact-date premium.
-   * 5. Apply the 10% multi-month discount after holiday deductions.
-   */
-  if (completeMonths >= 2) {
-    const grossMediaSubtotalCents = monthlyRateCents * completeMonths;
-
-    const closedHolidayDeductionCents =
-      calculateCompleteMonthsHolidayDeduction(
-        monthlyRateCents,
-        startDate,
-        endDate,
-      );
-
-    const mediaSubtotalCents = Math.max(
-      0,
-      grossMediaSubtotalCents - closedHolidayDeductionCents,
-    );
-
-    const multiMonthDiscountCents = Math.round(
-      (mediaSubtotalCents * MULTI_MONTH_DISCOUNT_PERCENT) / 100,
-    );
-
-    return {
-      ...schedule,
-      monthlyRateCents,
-      pricingBasis: "multi-month-buy",
-      fullCalendarMonths: completeMonths,
-      billableDays: schedule.operatingDays,
-      grossMediaSubtotalCents,
-      closedHolidayDeductionCents,
-      mediaSubtotalCents,
-      dateSelectionPremiumCents: 0,
-      multiMonthDiscountCents,
-      totalCents: mediaSubtotalCents - multiMonthDiscountCents,
-    };
-  }
-
-  /**
-   * ONE MONTHLY BUY
-   *
-   * This includes:
-   * - one complete calendar month, including February; or
-   * - any rolling 30- or 31-day selection.
-   *
-   * The monthly classification is determined BEFORE holidays are subtracted.
-   * Therefore, closed holidays reduce the monthly price but never turn the
-   * purchase into a partial campaign and never activate the 10% premium.
-   */
-  if (qualifiesForOneMonthlyBuy(schedule.calendarDays, completeMonths)) {
-    const grossMediaSubtotalCents = monthlyRateCents;
-
-    const closedHolidayDeductionCents = calculateClosedHolidayDeduction(
-      monthlyRateCents,
-      schedule.closedDays,
-    );
-
-    const mediaSubtotalCents = Math.max(
-      0,
-      grossMediaSubtotalCents - closedHolidayDeductionCents,
-    );
-
-    return {
-      ...schedule,
-      monthlyRateCents,
-      pricingBasis: "monthly-buy",
-      fullCalendarMonths: completeMonths,
-      billableDays: schedule.operatingDays,
-      grossMediaSubtotalCents,
-      closedHolidayDeductionCents,
-      mediaSubtotalCents,
-      dateSelectionPremiumCents: 0,
-      multiMonthDiscountCents: 0,
-      totalCents: mediaSubtotalCents,
-    };
-  }
-
-  /**
-   * PARTIAL CAMPAIGN: 1–29 CALENDAR DAYS
-   *
-   * Closed holidays are excluded from billable operating days.
-   * The 10% exact-date premium applies to the resulting partial subtotal.
-   */
-  const billableDays = schedule.operatingDays;
-
-  const grossMediaSubtotalCents = Math.round(
-    (monthlyRateCents * billableDays) / BILLING_MONTH_DAYS,
+  const monthlySchedule = scheduleForFirstDays(
+    startDate,
+    structure.monthlyCoverageDays,
+  );
+  const partialSchedule = scheduleForRemainingDays(
+    startDate,
+    structure.monthlyCoverageDays,
+    structure.partialCalendarDays,
   );
 
-  const dateSelectionPremiumCents = Math.round(
-    (grossMediaSubtotalCents * DATE_SELECTION_PREMIUM_PERCENT) / 100,
+  const monthlyGrossCents =
+    monthlyRateCents * structure.fullMonthUnits;
+
+  const partialGrossCents = calculateDailyEquivalent(
+    monthlyRateCents,
+    structure.partialCalendarDays,
   );
+
+  const monthlyHolidayDeductionCents =
+    calculateDailyEquivalent(
+      monthlyRateCents,
+      monthlySchedule?.closedDays ?? 0,
+    );
+
+  const partialHolidayDeductionCents =
+    calculateDailyEquivalent(
+      monthlyRateCents,
+      partialSchedule?.closedDays ?? 0,
+    );
+
+  const closedHolidayDeductionCents =
+    monthlyHolidayDeductionCents +
+    partialHolidayDeductionCents;
+
+  const adjustedMonthlyCents = Math.max(
+    0,
+    monthlyGrossCents - monthlyHolidayDeductionCents,
+  );
+
+  const adjustedPartialCents = Math.max(
+    0,
+    partialGrossCents - partialHolidayDeductionCents,
+  );
+
+  const grossMediaSubtotalCents =
+    monthlyGrossCents + partialGrossCents;
+
+  const mediaSubtotalCents =
+    adjustedMonthlyCents + adjustedPartialCents;
+
+  /**
+   * The 10% exact-date premium applies only to the adjusted partial remainder.
+   * Monthly units never receive this premium. Holiday deductions do not
+   * activate or increase the premium.
+   */
+  const dateSelectionPremiumCents =
+    structure.partialCalendarDays > 0
+      ? Math.round(
+          (adjustedPartialCents *
+            DATE_SELECTION_PREMIUM_PERCENT) /
+            100,
+        )
+      : 0;
+
+  /**
+   * The 10% multi-month discount applies only when the complete selection is
+   * an exact purchase of two or more monthly units, with no partial remainder.
+   * Holiday deductions happen first.
+   */
+  const multiMonthDiscountCents =
+    structure.exactMonthMultiplier &&
+    structure.fullMonthUnits >= 2
+      ? Math.round(
+          (mediaSubtotalCents *
+            MULTI_MONTH_DISCOUNT_PERCENT) /
+            100,
+        )
+      : 0;
+
+  let pricingBasis: PricingBasis;
+
+  if (
+    structure.exactMonthMultiplier &&
+    structure.fullMonthUnits >= 2
+  ) {
+    pricingBasis = "multi-month-buy";
+  } else if (
+    structure.exactMonthMultiplier &&
+    structure.fullMonthUnits === 1
+  ) {
+    pricingBasis = "monthly-buy";
+  } else if (structure.fullMonthUnits >= 1) {
+    pricingBasis = "mixed-month-partial";
+  } else {
+    pricingBasis = "daily-prorated";
+  }
 
   return {
-    ...schedule,
+    ...completeSchedule,
     monthlyRateCents,
-    pricingBasis: "daily-prorated",
-    fullCalendarMonths: 0,
-    billableDays,
+    pricingBasis,
+    fullMonthUnits: structure.fullMonthUnits,
+    monthlyCoverageDays: structure.monthlyCoverageDays,
+    partialCalendarDays: structure.partialCalendarDays,
+    partialBillableDays:
+      partialSchedule?.operatingDays ?? 0,
+    billableDays: completeSchedule.operatingDays,
     grossMediaSubtotalCents,
-    closedHolidayDeductionCents: 0,
-    mediaSubtotalCents: grossMediaSubtotalCents,
+    closedHolidayDeductionCents,
+    mediaSubtotalCents,
     dateSelectionPremiumCents,
-    multiMonthDiscountCents: 0,
-    totalCents: grossMediaSubtotalCents + dateSelectionPremiumCents,
+    multiMonthDiscountCents,
+    totalCents:
+      mediaSubtotalCents +
+      dateSelectionPremiumCents -
+      multiMonthDiscountCents,
   };
 }
 

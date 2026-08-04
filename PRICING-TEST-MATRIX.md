@@ -1,67 +1,33 @@
-# Pricing Test Matrix — Revision 3
+# Pricing Test Matrix — Revision 4
 
-Use a hypothetical `Tarifa Mensual` of `$3,100` for easy verification.
+Use one SKU and one known `Tarifa Mensual` to verify each scenario.
 
-## Test 1 — 29 days, no holiday
+| Inclusive days / range | Expected pricing |
+|---|---|
+| 1–29 days | Partial proration + 10% premium |
+| Complete February | 1 monthly unit; no premium |
+| 30 days | 1 monthly unit; no premium |
+| 31 days | 1 monthly unit; no premium |
+| 32 days | 1 monthly unit + 1 partial day |
+| 59 days | 1 monthly unit + 28 partial days |
+| 60 days | 2 monthly units; 10% multi-month discount |
+| 61 days | 2 monthly units; 10% multi-month discount |
+| 62 days | 2 monthly units + 1 partial day; no multi-month discount |
+| 89 days | 2 monthly units + 28 partial days |
+| 90 days | 3 monthly units; 10% multi-month discount |
+| 91 days | 3 monthly units; 10% multi-month discount |
+| 92 days | 3 monthly units + 1 partial day; no multi-month discount |
+| Complete two calendar months | 2 monthly units; 10% discount |
+| Any range containing holidays | Holiday deductions; premium only on partial operating subtotal |
+| Range containing no operating days | Blocked |
 
-```text
-Billable days: 29
-Subtotal: $3,100 ÷ 31 × 29 = $2,900
-Premium: $290
-Total: $3,190
-Pricing basis: Daily proration
-```
+## Visible calendar QA
 
-## Test 2 — 29 selected days with one closed holiday
-
-```text
-Operating/billable days: 28
-Subtotal: $3,100 ÷ 31 × 28 = $2,800
-Premium: $280
-Total: $3,080
-Pricing basis: Daily proration
-```
-
-## Test 3 — 30 selected days with one closed holiday
-
-```text
-Gross monthly price: $3,100
-Holiday subtraction: $100
-Premium: Not applied — monthly rule
-Total: $3,000
-Pricing basis: Monthly buy
-```
-
-The holiday does not reduce the range to a 29-day partial purchase.
-
-## Test 4 — Complete February with no holiday
-
-```text
-Gross monthly price: $3,100
-Holiday subtraction: $0
-Premium: Not applied — monthly rule
-Total: $3,100
-Pricing basis: Monthly buy
-```
-
-## Test 5 — Complete month with two closed holidays
-
-```text
-Gross monthly price: $3,100
-Holiday subtraction: $200
-Premium: Not applied — monthly rule
-Total: $2,900
-Pricing basis: Monthly buy
-```
-
-## Test 6 — Two complete months with two total closed holidays
-
-```text
-Gross subtotal: $6,200
-Holiday subtraction: $200
-Adjusted subtotal: $6,000
-Exact-date premium: $0
-Multi-month discount: $600
-Total: $5,400
-Pricing basis: 2-month buy
-```
+- Calendar panel is visible before a date is selected.
+- Desktop shows two months.
+- Mobile shows one month.
+- Clicking once selects the start date.
+- Clicking again selects the end date.
+- The selected range is highlighted.
+- Previous, Today, Next, and Clear Dates controls work.
+- Native date inputs remain available and their calendar icons are visible.

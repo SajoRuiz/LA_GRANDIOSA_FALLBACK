@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import DateRangeCalendar from "./DateRangeCalendar";
 import {
   adCombinations,
   durationOptions,
@@ -139,8 +140,9 @@ export default function BookingConfigurator() {
           <div>
             <h2>Select campaign dates</h2>
             <p>
-              The start and end dates are both included. A normal operating
-              day provides 12 hours of screen time.
+              The start and end dates are both included. Use the
+              always-visible calendar or the date fields below. A normal
+              operating day provides 12 hours of screen time.
             </p>
           </div>
         </div>
@@ -168,6 +170,14 @@ export default function BookingConfigurator() {
             />
           </label>
         </div>
+
+        <DateRangeCalendar
+          startDate={startDate}
+          endDate={endDate}
+          minDate={today}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+        />
 
         {dateError ? (
           <p className={styles.error} role="alert">
@@ -345,7 +355,23 @@ export default function BookingConfigurator() {
                   <dd>{pricingBasisLabel(pricing)}</dd>
                 </div>
                 <div>
-                  <dt>Billable days</dt>
+                  <dt>Full month units</dt>
+                  <dd>{pricing.fullMonthUnits}</dd>
+                </div>
+                <div>
+                  <dt>Monthly coverage days</dt>
+                  <dd>{pricing.monthlyCoverageDays}</dd>
+                </div>
+                <div>
+                  <dt>Partial calendar days</dt>
+                  <dd>{pricing.partialCalendarDays}</dd>
+                </div>
+                <div>
+                  <dt>Partial billable days</dt>
+                  <dd>{pricing.partialBillableDays}</dd>
+                </div>
+                <div>
+                  <dt>Total billable days</dt>
                   <dd>{pricing.billableDays}</dd>
                 </div>
                 <div>
@@ -427,13 +453,13 @@ export default function BookingConfigurator() {
           ) : null}
 
           <p className={styles.disclaimer}>
-            1–29 day campaigns are prorated from Tarifa Mensual using operating
-            days and receive a 10% exact-date premium. A complete calendar
-            month—including February—or any 30–31 day selection remains a
-            monthly buy even after closed holidays are subtracted. The holiday
-            adjustment does not activate the 10% premium. Complete multi-month
-            buys receive holiday subtractions first, followed by a 10% discount
-            on the adjusted total.
+            Every valid date range is admissible. Exact 30–31, 60–61,
+            90–91 day ranges—and onward multipliers—are priced as full monthly
+            buys. Complete calendar months, including February, also qualify.
+            Any remaining days are prorated and receive the 10% exact-date
+            premium. Closed holidays are subtracted without activating the
+            premium. Exact purchases of two or more monthly units receive the
+            10% multi-month discount after holiday deductions.
           </p>
 
           <button

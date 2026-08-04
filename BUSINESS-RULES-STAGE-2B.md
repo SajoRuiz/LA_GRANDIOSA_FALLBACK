@@ -1,96 +1,101 @@
-# Locked Commerce Rules — Stage 2B, Revision 3
+# La Grandiosa — Pricing and Calendar Rules (Revision 4)
 
-## Full-day ordering
+## Date selection
 
-- The Daypart selector is removed.
-- Every selected advertising combination receives a full operating day.
-- A standard operating day contains 12 screen hours.
-- An approved extended-hours date contains 14 screen hours.
-- A closed holiday contains 0 screen hours.
+Every date range is admissible when:
 
-The source-backed customer matrix contains 40 selectable full-day combinations:
+- The end date is on or after the start date.
+- The selected range contains at least one operating day.
+
+The date-range calendar remains visible on the order page at all times.
+
+## Inclusive dates
+
+Both the start date and the end date are included.
+
+## Exact rolling monthly multipliers
+
+The following durations are exact full-month purchases:
 
 ```text
-4 durations × 2 formats × 5 screen packages = 40
+30–31 days = 1 month
+60–61 days = 2 months
+90–91 days = 3 months
+120–121 days = 4 months
+...and the same pattern continues.
 ```
 
-The combinations use the Prime `Tarifa Mensual` rows because those match the
-rates already published on the La Grandiosa website.
+## Complete calendar months
+
+A selection that begins on the first day of a month and ends on the final day
+of a month uses the actual calendar-month count.
+
+This preserves:
+
+```text
+Complete February = 1 monthly buy
+Complete February + March = 2 monthly buys
+```
+
+even when their combined day count differs from a rolling 30-day multiplier.
+
+## Other date ranges
+
+Any non-exact range is divided into:
+
+```text
+Largest qualifying full monthly portion
++
+Remaining partial days
+```
+
+Examples:
+
+```text
+32 days = 1 monthly unit + 1 partial day
+59 days = 1 monthly unit + 28 partial days
+62 days = 2 monthly units + 1 partial day
+92 days = 3 monthly units + 1 partial day
+```
+
+The monthly portion is assigned first from the start date. The remaining days
+form the partial period.
 
 ## Closed holidays
 
-The service calendar closes on:
-
-- December 25
-- January 1
-- Thanksgiving
-- Good Friday
-- Mother's Day
-- Father's Day
-- January 6
-- General Election Day
-
-One-time closures and special elections can be added in:
+Closed holidays are subtracted at the 31-day daily equivalent:
 
 ```text
-lib/service-calendar.ts
-ADDITIONAL_CLOSED_DATES
+Tarifa Mensual ÷ 31
 ```
 
-## Partial campaign pricing: 1–29 days
+Closed holidays do not activate or increase the 10% exact-date premium.
 
-Closed holidays are excluded from billable operating days.
+## Exact-date premium
+
+The 10% premium applies only to the adjusted partial remainder.
+
+It never applies to full monthly units.
+
+## Multi-month discount
+
+The 10% multi-month discount applies only when the entire selection is an exact
+purchase of two or more monthly units with no partial remainder.
+
+Examples:
 
 ```text
-Billable days = operating days, excluding closed holidays
-Media subtotal = Tarifa Mensual ÷ 31 × billable days
-Date selection premium = 10% of media subtotal
-Line total = media subtotal + premium
+60 or 61 days = discount applies
+62 days = 2 monthly units + 1 partial day; discount does not apply
+Complete two calendar months = discount applies
 ```
 
-## One monthly buy
+Holiday deductions are made before the multi-month discount.
 
-Either of the following counts as one monthly buy:
-
-- one complete calendar month, including February; or
-- any rolling 30- or 31-day selection.
-
-Monthly qualification is determined from the original selected calendar range
-before any holiday adjustment.
+## Standard service
 
 ```text
-Gross monthly price = Tarifa Mensual
-Daily holiday subtraction = Tarifa Mensual ÷ 31
-Closed-holiday subtraction = daily holiday subtraction × closed holidays
-Adjusted monthly subtotal = Tarifa Mensual − closed-holiday subtraction
-Date selection premium = $0
-Line total = adjusted monthly subtotal
+Normal day: 12 hours
+Approved extended day: 14 hours
+Closed holiday: 0 hours
 ```
-
-A holiday subtraction never changes the purchase from monthly to partial and
-never activates the 10% exact-date premium. This is the same principle that
-allows a complete February to remain a monthly buy despite having 28 or 29
-calendar days.
-
-## Complete multi-month buy
-
-A full multi-month selection:
-
-- starts on the first day of a calendar month;
-- ends on the final day of a later calendar month; and
-- contains at least two complete calendar months.
-
-```text
-Gross subtotal = Tarifa Mensual × complete calendar months
-Closed-holiday subtraction = sum of each month's holiday subtraction
-Adjusted subtotal = gross subtotal − closed-holiday subtraction
-Exact-date premium = $0
-Multi-month discount = 10% of adjusted subtotal
-Line total = adjusted subtotal − multi-month discount
-```
-
-## Unsupported long partial ranges
-
-A selection longer than 31 days that does not begin on the first of a month
-and end on the final day of a later month remains blocked until a mixed
-month-plus-partial-month formula is approved.

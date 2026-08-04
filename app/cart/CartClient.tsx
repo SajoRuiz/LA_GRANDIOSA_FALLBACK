@@ -207,7 +207,23 @@ export default function CartClient() {
                 <dd>{pricingBasisLabel(pricing)}</dd>
               </div>
               <div>
-                <dt>Billable days</dt>
+                <dt>Full month units</dt>
+                <dd>{pricing.fullMonthUnits}</dd>
+              </div>
+              <div>
+                <dt>Monthly coverage days</dt>
+                <dd>{pricing.monthlyCoverageDays}</dd>
+              </div>
+              <div>
+                <dt>Partial calendar days</dt>
+                <dd>{pricing.partialCalendarDays}</dd>
+              </div>
+              <div>
+                <dt>Partial billable days</dt>
+                <dd>{pricing.partialBillableDays}</dd>
+              </div>
+              <div>
+                <dt>Total billable days</dt>
                 <dd>{pricing.billableDays}</dd>
               </div>
               <div>
@@ -242,9 +258,9 @@ export default function CartClient() {
                     ? currency.format(
                         pricing.dateSelectionPremiumCents / 100,
                       )
-                    : pricing.pricingBasis === "daily-prorated"
+                    : pricing.partialCalendarDays > 0
                       ? currency.format(0)
-                      : "Not applied — monthly rule"}
+                      : "Not applied — no partial remainder"}
                 </dd>
               </div>
               <div>
@@ -341,14 +357,17 @@ export default function CartClient() {
         </div>
 
         <p className={styles.notice}>
-          Monthly qualification is determined from the selected calendar
-          range before holiday adjustments. Closed holidays subtract one
-          31-day daily-rate amount, but they do not activate the 10% exact-date
-          premium—just as a complete February remains a monthly buy. For
-          complete multi-month purchases, the 10% multi-month discount is
-          applied after holiday subtractions. Taxes, availability holds,
-          customer identity, legal terms, credit-card payment, and customer-code
-          payment will be connected in the next production stage.
+          Every valid date range is accepted. Exact 30–31, 60–61, 90–91 day
+          ranges—and onward multipliers—qualify as full monthly purchases.
+          Complete calendar months, including February, also qualify. Longer
+          non-exact ranges are divided into full monthly units plus a prorated
+          partial remainder. The 10% exact-date premium applies only to that
+          partial remainder. Closed holidays are subtracted without activating
+          the premium. An exact purchase of two or more monthly units receives
+          the 10% multi-month discount after holiday deductions. Taxes,
+          availability holds, customer identity, legal terms, credit-card
+          payment, and customer-code payment will be connected in the next
+          production stage.
         </p>
 
         <button className={styles.disabledButton} type="button" disabled>

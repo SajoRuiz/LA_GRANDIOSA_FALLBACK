@@ -1,30 +1,31 @@
-# Install Stage 2B — Revision 2
+# Install Stage 2B — Revision 3
 
-## If Stage 2A or the first Stage 2B package is already installed
+Revision 3 makes the holiday/monthly rule explicit:
+
+```text
+Monthly qualification is determined before holiday subtraction.
+```
+
+Therefore:
+
+- a complete calendar month, including February, is a monthly buy;
+- any rolling 30- or 31-day range is a monthly buy;
+- closed holidays subtract from the monthly price;
+- holiday subtraction does not activate the 10% exact-date premium;
+- full multi-month buys receive holiday deductions first and the 10% discount
+  second.
+
+## Replace an existing Stage 2B installation
 
 Replace:
 
 ```text
-app/order/
-app/cart/
-data/
-lib/
+lib/pricing.ts
+app/order/BookingConfigurator.tsx
+app/cart/CartClient.tsx
 ```
 
-The browser-cart storage key remains `v2`, so any old Daypart-based test items
-will not appear in the full-day cart.
-
-## If no commerce package is installed
-
-Copy the same folders into the root of the existing Next.js project.
-
-## Homepage
-
-The existing PLACE ORDER buttons should continue pointing to:
-
-```text
-/order
-```
+The full package also includes the unchanged supporting commerce files.
 
 ## Run locally
 
@@ -39,34 +40,10 @@ http://localhost:3000/order
 http://localhost:3000/cart
 ```
 
-## Required tests
+Review the examples in:
 
-1. 1–29 days with no closure:
-   - daily proration;
-   - 10% exact-date premium.
+```text
+PRICING-TEST-MATRIX.md
+```
 
-2. 1–29 days containing a closed holiday:
-   - closed date shows 0 hours;
-   - closed date is excluded from partial billable days.
-
-3. 30- or 31-day monthly buy containing closed holidays:
-   - gross price begins at Tarifa Mensual;
-   - one Tarifa Mensual ÷ 31 amount is subtracted per closed holiday;
-   - no 10% exact-date premium.
-
-4. Complete February:
-   - monthly buy;
-   - holiday subtraction applies when relevant;
-   - no exact-date premium.
-
-5. Two or more complete calendar months:
-   - gross price = Tarifa Mensual × complete months;
-   - monthly holiday subtractions are deducted;
-   - 10% multi-month discount applies to the adjusted subtotal.
-
-6. More than 31 days without full calendar-month boundaries:
-   - blocked.
-
-7. Multiple combinations in one contract:
-   - holiday deductions, premiums, and discounts calculate per item;
-   - contract totals combine all adjustments.
+before enabling production payment.

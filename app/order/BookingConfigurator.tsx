@@ -380,7 +380,9 @@ export default function BookingConfigurator() {
                       ? currency.format(
                           pricing.dateSelectionPremiumCents / 100,
                         )
-                      : "Not applied"}
+                      : pricing.pricingBasis === "daily-prorated"
+                        ? currency.format(0)
+                        : "Not applied — monthly rule"}
                   </dd>
                 </div>
                 <div>
@@ -427,11 +429,11 @@ export default function BookingConfigurator() {
           <p className={styles.disclaimer}>
             1–29 day campaigns are prorated from Tarifa Mensual using operating
             days and receive a 10% exact-date premium. A complete calendar
-            month, or any 30–31 day selection, starts with Tarifa Mensual and
-            subtracts one 31-day daily-rate amount for each closed holiday; no
-            10% premium is added. Complete multi-month buys receive the same
-            holiday subtractions, followed by a 10% discount on the adjusted
-            total.
+            month—including February—or any 30–31 day selection remains a
+            monthly buy even after closed holidays are subtracted. The holiday
+            adjustment does not activate the 10% premium. Complete multi-month
+            buys receive holiday subtractions first, followed by a 10% discount
+            on the adjusted total.
           </p>
 
           <button

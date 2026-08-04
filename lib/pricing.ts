@@ -7,17 +7,8 @@ import {
 } from "./service-calendar";
 
 export const BILLING_MONTH_DAYS = 31;
-export const MONTHLY_BUY_MIN_DAYS = 30;
 export const DATE_SELECTION_PREMIUM_PERCENT = 10;
 export const MULTI_MONTH_DISCOUNT_PERCENT = 10;
-
-/**
- * For 1–29 day campaigns, closed holidays are excluded from billable days.
- * For monthly and complete multi-month buys, each closed holiday creates a
- * daily-rate subtraction from the monthly price. No 10% date-selection
- * premium is added to that subtraction.
- */
-export const EXCLUDE_CLOSED_DAYS_FROM_PARTIAL_PRORATION = true;
 
 export type PricingBasis =
   | "daily-prorated"
@@ -55,6 +46,9 @@ function monthStartIso(year: number, monthIndex: number): string {
  * Returns the number of complete calendar months only when:
  * - the range begins on the first day of a month; and
  * - the range ends on the final day of a month.
+ *
+ * A complete February therefore qualifies as one complete calendar month,
+ * even though it contains only 28 or 29 calendar days.
  */
 export function countCompleteCalendarMonths(
   startDate: string,
@@ -85,6 +79,25 @@ export function countCompleteCalendarMonths(
   );
 }
 
+/**
+ * A range qualifies for one monthly buy before any holiday adjustment when:
+ * - it is one complete calendar month, including February; or
+ * - it contains exactly 30 or 31 inclusive calendar days.
+ *
+ * Closed holidays never change this classification. They reduce the monthly
+ * price after the monthly rule has already been selected.
+ */
+function qualifiesForOneMonthlyBuy(
+  calendarDays: number,
+  completeMonths: number,
+): boolean {
+  return (
+    completeMonths === 1 ||
+    calendarDays === 30 ||
+    calendarDays === 31
+  );
+}
+
 function calculateClosedHolidayDeduction(
   monthlyRateCents: number,
   closedDays: number,
@@ -93,8 +106,8 @@ function calculateClosedHolidayDeduction(
 }
 
 /**
- * For complete multi-month selections, calculate each month's holiday
- * subtraction separately and then add the monthly deductions together.
+ * For complete multi-month selections, calculate each month's closed-holiday
+ * subtraction separately and add those deductions together.
  */
 function calculateCompleteMonthsHolidayDeduction(
   monthlyRateCents: number,
@@ -103,6 +116,7 @@ function calculateCompleteMonthsHolidayDeduction(
 ): number {
   const start = parseIsoDateToUtc(startDate);
   const end = parseIsoDateToUtc(endDate);
+
   let year = start.getUTCFullYear();
   let month = start.getUTCMonth();
   const endYear = end.getUTCFullYear();
@@ -121,6 +135,7 @@ function calculateCompleteMonthsHolidayDeduction(
     );
 
     month += 1;
+
     if (month === 12) {
       month = 0;
       year += 1;
@@ -196,22 +211,30 @@ export function calculateCampaignPrice(
   const schedule = summarizeServiceSchedule(startDate, endDate);
   const completeMonths = countCompleteCalendarMonths(startDate, endDate);
 
-  // Two or more complete calendar months:
-  // 1. Gross monthly total.
-  // 2. Subtract closed-holiday daily amounts for each month.
-  // 3. Apply the 10% multi-month discount to the adjusted subtotal.
+  /**
+   * TWO OR MORE COMPLETE CALENDAR MONTHS
+   *
+   * 1. Select multi-month pricing based on the original calendar range.
+   * 2. Calculate the gross monthly total.
+   * 3. Subtract closed holidays month by month.
+   * 4. Do not apply the 10% exact-date premium.
+   * 5. Apply the 10% multi-month discount after holiday deductions.
+   */
   if (completeMonths >= 2) {
     const grossMediaSubtotalCents = monthlyRateCents * completeMonths;
+
     const closedHolidayDeductionCents =
       calculateCompleteMonthsHolidayDeduction(
         monthlyRateCents,
         startDate,
         endDate,
       );
+
     const mediaSubtotalCents = Math.max(
       0,
       grossMediaSubtotalCents - closedHolidayDeductionCents,
     );
+
     const multiMonthDiscountCents = Math.round(
       (mediaSubtotalCents * MULTI_MONTH_DISCOUNT_PERCENT) / 100,
     );
@@ -231,19 +254,25 @@ export function calculateCampaignPrice(
     };
   }
 
-  // A complete calendar month, including February, or any rolling 30–31 day
-  // selection counts as one monthly buy. Each closed holiday subtracts one
-  // 31-day daily-rate amount. No 10% date-selection premium applies.
-  if (
-    completeMonths === 1 ||
-    schedule.calendarDays === 30 ||
-    schedule.calendarDays === 31
-  ) {
+  /**
+   * ONE MONTHLY BUY
+   *
+   * This includes:
+   * - one complete calendar month, including February; or
+   * - any rolling 30- or 31-day selection.
+   *
+   * The monthly classification is determined BEFORE holidays are subtracted.
+   * Therefore, closed holidays reduce the monthly price but never turn the
+   * purchase into a partial campaign and never activate the 10% premium.
+   */
+  if (qualifiesForOneMonthlyBuy(schedule.calendarDays, completeMonths)) {
     const grossMediaSubtotalCents = monthlyRateCents;
+
     const closedHolidayDeductionCents = calculateClosedHolidayDeduction(
       monthlyRateCents,
       schedule.closedDays,
     );
+
     const mediaSubtotalCents = Math.max(
       0,
       grossMediaSubtotalCents - closedHolidayDeductionCents,
@@ -264,16 +293,18 @@ export function calculateCampaignPrice(
     };
   }
 
-  // 1–29 days:
-  // Daily proration uses operating days, excluding closed holidays. The 10%
-  // exact-date premium applies only to the resulting operating-day subtotal.
-  const billableDays = EXCLUDE_CLOSED_DAYS_FROM_PARTIAL_PRORATION
-    ? schedule.operatingDays
-    : schedule.calendarDays;
+  /**
+   * PARTIAL CAMPAIGN: 1–29 CALENDAR DAYS
+   *
+   * Closed holidays are excluded from billable operating days.
+   * The 10% exact-date premium applies to the resulting partial subtotal.
+   */
+  const billableDays = schedule.operatingDays;
 
   const grossMediaSubtotalCents = Math.round(
     (monthlyRateCents * billableDays) / BILLING_MONTH_DAYS,
   );
+
   const dateSelectionPremiumCents = Math.round(
     (grossMediaSubtotalCents * DATE_SELECTION_PREMIUM_PERCENT) / 100,
   );

@@ -242,7 +242,9 @@ export default function CartClient() {
                     ? currency.format(
                         pricing.dateSelectionPremiumCents / 100,
                       )
-                    : "Not applied"}
+                    : pricing.pricingBasis === "daily-prorated"
+                      ? currency.format(0)
+                      : "Not applied — monthly rule"}
                 </dd>
               </div>
               <div>
@@ -339,9 +341,12 @@ export default function CartClient() {
         </div>
 
         <p className={styles.notice}>
-          Closed holidays subtract one 31-day daily-rate amount from monthly
-          and complete multi-month pricing. The 10% multi-month discount is
-          applied after those holiday subtractions. Taxes, availability holds,
+          Monthly qualification is determined from the selected calendar
+          range before holiday adjustments. Closed holidays subtract one
+          31-day daily-rate amount, but they do not activate the 10% exact-date
+          premium—just as a complete February remains a monthly buy. For
+          complete multi-month purchases, the 10% multi-month discount is
+          applied after holiday subtractions. Taxes, availability holds,
           customer identity, legal terms, credit-card payment, and customer-code
           payment will be connected in the next production stage.
         </p>

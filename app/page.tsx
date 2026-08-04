@@ -38,8 +38,7 @@ const packages = [
   },
 ];
 
-const orderEmail =
-  "mailto:ventas@lagrandiosapr.com?subject=La%20Grandiosa%20Place%20Order%20Request";
+const orderPath = "/order";
 
 function RateTable({
   title,
@@ -109,7 +108,7 @@ export default function Home() {
           <a href="#canvas">The Canvas</a>
           <a href="#packages">Packages</a>
           <a href="#rates">Rates</a>
-          <a className="nav-cta" href={orderEmail}>
+          <a className="nav-cta" href={orderPath}>
             Place Order
           </a>
         </nav>
@@ -126,7 +125,7 @@ export default function Home() {
             <a href="#canvas">The Canvas</a>
             <a href="#packages">Packages</a>
             <a href="#rates">Rates</a>
-            <a className="nav-cta" href={orderEmail}>
+            <a className="nav-cta" href={orderPath}>
               Place Order
             </a>
           </nav>
@@ -147,7 +146,7 @@ export default function Home() {
           </p>
 
           <div className="hero-actions">
-            <a className="button primary" href={orderEmail}>
+            <a className="button primary" href={orderPath}>
               Place Order <span aria-hidden="true">→</span>
             </a>
 
@@ -309,7 +308,7 @@ export default function Home() {
                 </div>
               ))}
 
-              <a className="package-order" href={orderEmail}>
+              <a className="package-order" href={orderPath}>
                 Place Order
               </a>
             </article>
@@ -347,7 +346,7 @@ export default function Home() {
             to place your order and confirm campaign availability.
           </p>
 
-          <a className="button primary" href={orderEmail}>
+          <a className="button primary" href={orderPath}>
             Place Order <span aria-hidden="true">→</span>
           </a>
 

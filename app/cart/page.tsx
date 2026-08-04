@@ -6,7 +6,7 @@ import styles from "./cart.module.css";
 export const metadata: Metadata = {
   title: "Contract Cart | La Grandiosa",
   description:
-    "Review multiple La Grandiosa advertising combinations in one contract.",
+    "Review multiple full-day La Grandiosa advertising combinations in one contract.",
 };
 
 export default function CartPage() {
@@ -30,9 +30,10 @@ export default function CartPage() {
         <p className={styles.eyebrow}>SHOPPING CART · CONTRACT PREVIEW</p>
         <h1>Review your campaign contract.</h1>
         <p>
-          Multiple advertising combinations may be included in the same
-          contract. Each line is priced from Tarifa Mensual using its inclusive
-          date range plus the 10% date-selection premium.
+          Every line includes full-day screen service. Short buys use daily
+          proration and the exact-date premium, monthly buys use Tarifa
+          Mensual, and qualifying full multi-month buys receive a 10%
+          discount.
         </p>
       </section>
 

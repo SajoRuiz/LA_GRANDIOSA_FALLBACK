@@ -1,4 +1,4 @@
-export const CART_STORAGE_KEY = "la-grandiosa-contract-cart-v1";
+export const CART_STORAGE_KEY = "la-grandiosa-contract-cart-v2";
 
 export interface ContractCartItem {
   id: string;

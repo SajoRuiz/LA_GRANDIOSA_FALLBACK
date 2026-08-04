@@ -16,7 +16,9 @@ import {
 import { addContractCartItem } from "../../lib/cart";
 import {
   calculateProratedPrice,
+  countInclusiveDays,
   DATE_SELECTION_PREMIUM_PERCENT,
+  MAX_SUPPORTED_CAMPAIGN_DAYS,
 } from "../../lib/pricing";
 import styles from "./order.module.css";
 
@@ -25,11 +27,6 @@ const currency = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 2,
 });
-
-function dateToUtcValue(value: string): number {
-  const [year, month, day] = value.split("-").map(Number);
-  return Date.UTC(year, month - 1, day);
-}
 
 export default function BookingConfigurator() {
   const router = useRouter();
@@ -44,10 +41,24 @@ export default function BookingConfigurator() {
 
   const today = new Date().toISOString().slice(0, 10);
 
+  const inclusiveDays = useMemo(() => {
+    if (!startDate || !endDate) {
+      return undefined;
+    }
+
+    try {
+      return countInclusiveDays(startDate, endDate);
+    } catch {
+      return undefined;
+    }
+  }, [startDate, endDate]);
+
   const dateError =
-    startDate && endDate && dateToUtcValue(endDate) < dateToUtcValue(startDate)
+    startDate && endDate && !inclusiveDays
       ? "The end date must be on or after the start date."
-      : "";
+      : inclusiveDays && inclusiveDays > MAX_SUPPORTED_CAMPAIGN_DAYS
+        ? `This checkout currently supports campaign ranges of up to ${MAX_SUPPORTED_CAMPAIGN_DAYS} inclusive days.`
+        : "";
 
   const selectedCombination = useMemo(() => {
     if (!duration || !format || !screen || !daypart) {
@@ -275,17 +286,30 @@ export default function BookingConfigurator() {
                   </dd>
                 </div>
                 <div>
-                  <dt>Daily prorated subtotal</dt>
+                  <dt>Pricing basis</dt>
+                  <dd>
+                    {pricing.pricingBasis === "monthly-buy"
+                      ? "Monthly buy"
+                      : "Daily proration"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Media subtotal</dt>
                   <dd>{currency.format(pricing.proratedBaseCents / 100)}</dd>
                 </div>
                 <div>
                   <dt>
-                    Date selection premium ({DATE_SELECTION_PREMIUM_PERCENT}%)
+                    Date selection premium
+                    {pricing.dateSelectionPremiumCents > 0
+                      ? ` (${DATE_SELECTION_PREMIUM_PERCENT}%)`
+                      : ""}
                   </dt>
                   <dd>
-                    {currency.format(
-                      pricing.dateSelectionPremiumCents / 100,
-                    )}
+                    {pricing.dateSelectionPremiumCents > 0
+                      ? currency.format(
+                          pricing.dateSelectionPremiumCents / 100,
+                        )
+                      : "Not applied"}
                   </dd>
                 </div>
                 <div>
@@ -315,9 +339,11 @@ export default function BookingConfigurator() {
           ) : null}
 
           <p className={styles.disclaimer}>
-            Price formula: (Tarifa Mensual ÷ 31) × inclusive campaign days,
-            plus a 10% exact-date selection premium. Availability is not yet
-            reserved in this prototype.
+            Pricing rule: campaigns of 1–29 inclusive days are prorated from
+            Tarifa Mensual and receive a 10% exact-date selection premium.
+            Campaigns of 30 or 31 inclusive days are monthly buys at Tarifa
+            Mensual with no premium. Availability is not yet reserved in this
+            prototype.
           </p>
 
           <button

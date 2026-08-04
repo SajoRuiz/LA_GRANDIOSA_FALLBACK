@@ -113,7 +113,7 @@
 }
 
 .fieldGridTwo,
-.fieldGridFour {
+.fieldGridThree {
   display: grid;
   gap: 18px;
 }
@@ -122,8 +122,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.fieldGridFour {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.fieldGridThree {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .field {
@@ -310,7 +310,7 @@
   }
 
   .fieldGridTwo,
-  .fieldGridFour {
+  .fieldGridThree {
     grid-template-columns: 1fr;
   }
 
@@ -368,5 +368,110 @@
 
   .backLink {
     display: none;
+  }
+}
+
+
+.scheduleNotice {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  color: var(--mist);
+  background: rgba(255, 157, 0, 0.08);
+  border-left: 3px solid var(--orange);
+  line-height: 1.55;
+}
+
+.holidayList {
+  margin-top: 22px;
+  padding: 16px;
+  color: var(--mist);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(183, 192, 255, 0.22);
+}
+
+.holidayList strong {
+  color: var(--orange);
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.holidayList ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+}
+
+.holidayList li + li {
+  margin-top: 7px;
+}
+
+@media (max-width: 1080px) {
+  .fieldGridThree {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.scheduleSummary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 22px;
+  border: 1px solid rgba(88, 104, 217, 0.55);
+}
+
+.scheduleSummary > div {
+  display: grid;
+  gap: 5px;
+  padding: 18px 14px;
+  text-align: center;
+}
+
+.scheduleSummary > div + div {
+  border-left: 1px solid rgba(88, 104, 217, 0.45);
+}
+
+.scheduleSummary strong {
+  color: var(--orange);
+  font-size: 1.6rem;
+}
+
+.scheduleSummary span {
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.holidayNotice,
+.extendedNotice {
+  margin: 16px 0 0;
+  padding: 13px 15px;
+  color: var(--mist);
+  line-height: 1.5;
+}
+
+.holidayNotice {
+  background: rgba(255, 105, 97, 0.08);
+  border-left: 3px solid #ff6961;
+}
+
+.extendedNotice {
+  background: rgba(255, 157, 0, 0.1);
+  border-left: 3px solid var(--orange);
+}
+
+@media (max-width: 760px) {
+  .scheduleSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scheduleSummary > div:nth-child(3) {
+    border-top: 1px solid rgba(88, 104, 217, 0.45);
+    border-left: 0;
+  }
+
+  .scheduleSummary > div:nth-child(4) {
+    border-top: 1px solid rgba(88, 104, 217, 0.45);
   }
 }

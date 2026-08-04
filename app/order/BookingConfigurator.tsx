@@ -4,22 +4,25 @@ import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   adCombinations,
-  daypartOptions,
   durationOptions,
   formatOptions,
   screenOptions,
   type AdFormat,
-  type Daypart,
   type DurationSeconds,
   type ScreenPackage,
 } from "../../data/ad-combinations";
 import { addContractCartItem } from "../../lib/cart";
 import {
-  calculateProratedPrice,
-  countInclusiveDays,
+  calculateCampaignPrice,
   DATE_SELECTION_PREMIUM_PERCENT,
-  MAX_SUPPORTED_CAMPAIGN_DAYS,
+  getCampaignRangeError,
+  MULTI_MONTH_DISCOUNT_PERCENT,
+  pricingBasisLabel,
 } from "../../lib/pricing";
+import {
+  estimatePlaysForServiceHours,
+  summarizeServiceSchedule,
+} from "../../lib/service-calendar";
 import styles from "./order.module.css";
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -36,32 +39,32 @@ export default function BookingConfigurator() {
   const [duration, setDuration] = useState<DurationSeconds | "">("");
   const [format, setFormat] = useState<AdFormat | "">("");
   const [screen, setScreen] = useState<ScreenPackage | "">("");
-  const [daypart, setDaypart] = useState<Daypart | "">("");
   const [message, setMessage] = useState("");
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const inclusiveDays = useMemo(() => {
+  const dateError = useMemo(() => {
     if (!startDate || !endDate) {
+      return "";
+    }
+
+    return getCampaignRangeError(startDate, endDate) ?? "";
+  }, [startDate, endDate]);
+
+  const serviceSchedule = useMemo(() => {
+    if (!startDate || !endDate || dateError) {
       return undefined;
     }
 
     try {
-      return countInclusiveDays(startDate, endDate);
+      return summarizeServiceSchedule(startDate, endDate);
     } catch {
       return undefined;
     }
-  }, [startDate, endDate]);
-
-  const dateError =
-    startDate && endDate && !inclusiveDays
-      ? "The end date must be on or after the start date."
-      : inclusiveDays && inclusiveDays > MAX_SUPPORTED_CAMPAIGN_DAYS
-        ? `This checkout currently supports campaign ranges of up to ${MAX_SUPPORTED_CAMPAIGN_DAYS} inclusive days.`
-        : "";
+  }, [startDate, endDate, dateError]);
 
   const selectedCombination = useMemo(() => {
-    if (!duration || !format || !screen || !daypart) {
+    if (!duration || !format || !screen) {
       return undefined;
     }
 
@@ -69,22 +72,33 @@ export default function BookingConfigurator() {
       (combination) =>
         combination.durationSeconds === duration &&
         combination.format === format &&
-        combination.screenPackage === screen &&
-        combination.daypart === daypart,
+        combination.screenPackage === screen,
     );
-  }, [duration, format, screen, daypart]);
+  }, [duration, format, screen]);
 
   const pricing = useMemo(() => {
     if (!selectedCombination || !startDate || !endDate || dateError) {
       return undefined;
     }
 
-    return calculateProratedPrice(
-      selectedCombination.monthlyRateCents,
-      startDate,
-      endDate,
-    );
+    try {
+      return calculateCampaignPrice(
+        selectedCombination.monthlyRateCents,
+        startDate,
+        endDate,
+      );
+    } catch {
+      return undefined;
+    }
   }, [selectedCombination, startDate, endDate, dateError]);
+
+  const estimatedPlays =
+    selectedCombination && pricing
+      ? estimatePlaysForServiceHours(
+          selectedCombination.playsPer12HourDay,
+          pricing.totalServiceHours,
+        )
+      : undefined;
 
   const canContinue =
     Boolean(startDate) &&
@@ -125,8 +139,8 @@ export default function BookingConfigurator() {
           <div>
             <h2>Select campaign dates</h2>
             <p>
-              The start and end dates are both included in the billable
-              campaign range.
+              The start and end dates are both included. A normal operating
+              day provides 12 hours of screen time.
             </p>
           </div>
         </div>
@@ -160,6 +174,45 @@ export default function BookingConfigurator() {
             {dateError}
           </p>
         ) : null}
+
+        {serviceSchedule ? (
+          <div className={styles.scheduleSummary}>
+            <div>
+              <strong>{serviceSchedule.calendarDays}</strong>
+              <span>Calendar days</span>
+            </div>
+            <div>
+              <strong>{serviceSchedule.operatingDays}</strong>
+              <span>Operating days</span>
+            </div>
+            <div>
+              <strong>{serviceSchedule.closedDays}</strong>
+              <span>Closed holidays</span>
+            </div>
+            <div>
+              <strong>{serviceSchedule.totalServiceHours}</strong>
+              <span>Scheduled hours</span>
+            </div>
+          </div>
+        ) : null}
+
+        {serviceSchedule?.closedDates.length ? (
+          <p className={styles.holidayNotice}>
+            Closed in this range:{" "}
+            {serviceSchedule.closedDates
+              .map((day) => `${day.date} · ${day.name ?? "Closed"}`)
+              .join("; ")}.
+          </p>
+        ) : null}
+
+        {serviceSchedule?.extendedDates.length ? (
+          <p className={styles.extendedNotice}>
+            Extended hours in this range:{" "}
+            {serviceSchedule.extendedDates
+              .map((day) => `${day.date} · ${day.name ?? "Extended hours"}`)
+              .join("; ")}.
+          </p>
+        ) : null}
       </section>
 
       <section className={styles.panel}>
@@ -168,13 +221,13 @@ export default function BookingConfigurator() {
           <div>
             <h2>Configure the advertising combination</h2>
             <p>
-              Duration × format × screen package × daypart produces one
-              source-backed SKU.
+              Duration × format × screen package produces one full-day,
+              source-backed SKU. Daypart is no longer selected.
             </p>
           </div>
         </div>
 
-        <div className={styles.fieldGridFour}>
+        <div className={styles.fieldGridThree}>
           <label className={styles.field}>
             <span>Duration</span>
             <select
@@ -232,24 +285,6 @@ export default function BookingConfigurator() {
               ))}
             </select>
           </label>
-
-          <label className={styles.field}>
-            <span>Daypart</span>
-            <select
-              value={daypart}
-              onChange={(event) =>
-                setDaypart(event.target.value as Daypart | "")
-              }
-              required
-            >
-              <option value="">Select daypart</option>
-              {daypartOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
       </section>
 
@@ -270,12 +305,32 @@ export default function BookingConfigurator() {
                   <dd>{selectedCombination.screenLabel}</dd>
                 </div>
                 <div>
-                  <dt>Daypart</dt>
-                  <dd>{selectedCombination.daypartLabel}</dd>
+                  <dt>Daily service</dt>
+                  <dd>12 hours</dd>
                 </div>
                 <div>
-                  <dt>Inclusive days</dt>
-                  <dd>{pricing.inclusiveDays}</dd>
+                  <dt>Calendar days</dt>
+                  <dd>{pricing.calendarDays}</dd>
+                </div>
+                <div>
+                  <dt>Operating days</dt>
+                  <dd>{pricing.operatingDays}</dd>
+                </div>
+                <div>
+                  <dt>Closed holidays</dt>
+                  <dd>{pricing.closedDays}</dd>
+                </div>
+                <div>
+                  <dt>Extended-hour days</dt>
+                  <dd>{pricing.extendedDays}</dd>
+                </div>
+                <div>
+                  <dt>Scheduled hours</dt>
+                  <dd>{pricing.totalServiceHours}</dd>
+                </div>
+                <div>
+                  <dt>Estimated plays</dt>
+                  <dd>{estimatedPlays?.toLocaleString("en-US")}</dd>
                 </div>
                 <div>
                   <dt>Monthly rate</dt>
@@ -287,15 +342,31 @@ export default function BookingConfigurator() {
                 </div>
                 <div>
                   <dt>Pricing basis</dt>
+                  <dd>{pricingBasisLabel(pricing)}</dd>
+                </div>
+                <div>
+                  <dt>Billable days</dt>
+                  <dd>{pricing.billableDays}</dd>
+                </div>
+                <div>
+                  <dt>Gross media subtotal</dt>
                   <dd>
-                    {pricing.pricingBasis === "monthly-buy"
-                      ? "Monthly buy"
-                      : "Daily proration"}
+                    {currency.format(pricing.grossMediaSubtotalCents / 100)}
                   </dd>
                 </div>
                 <div>
-                  <dt>Media subtotal</dt>
-                  <dd>{currency.format(pricing.proratedBaseCents / 100)}</dd>
+                  <dt>Closed-holiday subtraction</dt>
+                  <dd>
+                    {pricing.closedHolidayDeductionCents > 0
+                      ? `−${currency.format(
+                          pricing.closedHolidayDeductionCents / 100,
+                        )}`
+                      : "Not applied"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Adjusted media subtotal</dt>
+                  <dd>{currency.format(pricing.mediaSubtotalCents / 100)}</dd>
                 </div>
                 <div>
                   <dt>
@@ -313,6 +384,21 @@ export default function BookingConfigurator() {
                   </dd>
                 </div>
                 <div>
+                  <dt>
+                    Multi-month discount
+                    {pricing.multiMonthDiscountCents > 0
+                      ? ` (${MULTI_MONTH_DISCOUNT_PERCENT}%)`
+                      : ""}
+                  </dt>
+                  <dd>
+                    {pricing.multiMonthDiscountCents > 0
+                      ? `−${currency.format(
+                          pricing.multiMonthDiscountCents / 100,
+                        )}`
+                      : "Not applied"}
+                  </dd>
+                </div>
+                <div>
                   <dt>SKU</dt>
                   <dd>{selectedCombination.sku}</dd>
                 </div>
@@ -325,8 +411,8 @@ export default function BookingConfigurator() {
             </>
           ) : (
             <p className={styles.emptyState}>
-              Complete the dates and four package selections to see the
-              prorated item total.
+              Complete the dates and three package selections to see the item
+              schedule and price.
             </p>
           )}
         </div>
@@ -339,11 +425,13 @@ export default function BookingConfigurator() {
           ) : null}
 
           <p className={styles.disclaimer}>
-            Pricing rule: campaigns of 1–29 inclusive days are prorated from
-            Tarifa Mensual and receive a 10% exact-date selection premium.
-            Campaigns of 30 or 31 inclusive days are monthly buys at Tarifa
-            Mensual with no premium. Availability is not yet reserved in this
-            prototype.
+            1–29 day campaigns are prorated from Tarifa Mensual using operating
+            days and receive a 10% exact-date premium. A complete calendar
+            month, or any 30–31 day selection, starts with Tarifa Mensual and
+            subtracts one 31-day daily-rate amount for each closed holiday; no
+            10% premium is added. Complete multi-month buys receive the same
+            holiday subtractions, followed by a 10% discount on the adjusted
+            total.
           </p>
 
           <button

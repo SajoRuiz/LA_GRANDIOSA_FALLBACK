@@ -6,7 +6,7 @@ import styles from "./order.module.css";
 export const metadata: Metadata = {
   title: "Place Order | La Grandiosa",
   description:
-    "Select campaign dates and add La Grandiosa advertising combinations to one contract.",
+    "Select full-day campaign dates and add La Grandiosa advertising combinations to one contract.",
 };
 
 export default function OrderPage() {
@@ -35,9 +35,10 @@ export default function OrderPage() {
         <p className={styles.eyebrow}>PLACE YOUR ORDER</p>
         <h1>Build your campaign.</h1>
         <p>
-          Select the inclusive campaign dates, configure an advertising
-          combination, and add it to a contract. You may add multiple
-          combinations before checkout.
+          Every purchase includes the complete daily operating window:
+          12 hours on regular open days, 14 hours on configured extended
+          holidays, and no delivery on closed holidays. Add multiple
+          combinations to one contract.
         </p>
       </section>
 

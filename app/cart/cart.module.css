@@ -365,3 +365,28 @@
     width: 100%;
   }
 }
+
+
+.holidayList {
+  margin-top: 24px;
+  padding: 16px;
+  color: var(--mist);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(183, 192, 255, 0.22);
+}
+
+.holidayList strong {
+  color: var(--orange);
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.holidayList ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+}
+
+.holidayList li + li {
+  margin-top: 7px;
+}

@@ -1,57 +1,8 @@
-# La Grandiosa Commerce — Stage 2A
+# Install Stage 2B — Revision 2
 
-## Locked business decisions implemented
+## If Stage 2A or the first Stage 2B package is already installed
 
-1. Pricing:
-   - 1–29 days: daily proration from `Tarifa Mensual` plus 10%
-   - 30–31 days: full `Tarifa Mensual`, with no 10% premium
-   - More than 31 days: temporarily blocked pending a multi-month rule
-2. Selling rate:
-   - `Tarifa Mensual`
-3. Date range:
-   - Start and end dates are both included
-4. Contract:
-   - Multiple combinations in one cart/contract
-
-## Formula
-
-For 1–29 inclusive days:
-
-```text
-Prorated base = round((monthly rate in cents × inclusive days) ÷ 31)
-Premium = round(prorated base × 10%)
-Line total = prorated base + premium
-```
-
-For 30 or 31 inclusive days:
-
-```text
-Media subtotal = Tarifa Mensual
-Premium = $0
-Line total = Tarifa Mensual
-```
-
-## What this package adds
-
-- Shared pricing utility
-- Browser-based multi-item contract cart
-- Updated `/order` configurator
-- `/cart` contract preview
-- Per-line and contract totals
-- Add/remove/clear cart actions
-- Duplicate line prevention for the same SKU and exact date range
-
-## Prototype limitation
-
-The cart is stored in browser `localStorage`.
-
-That is appropriate for testing the customer flow, but it is not the final
-production order record. Stage 2B will move draft contracts and availability
-holds into the database.
-
-## Install
-
-Copy/replace these folders in the existing project:
+Replace:
 
 ```text
 app/order/
@@ -60,56 +11,62 @@ data/
 lib/
 ```
 
-You may delete the old:
+The browser-cart storage key remains `v2`, so any old Daypart-based test items
+will not appear in the full-day cart.
 
-```text
-app/order/review/
-```
+## If no commerce package is installed
 
-because `/cart` now serves as the multi-item contract preview.
+Copy the same folders into the root of the existing Next.js project.
 
-Ensure the homepage PLACE ORDER buttons point to:
+## Homepage
+
+The existing PLACE ORDER buttons should continue pointing to:
 
 ```text
 /order
 ```
 
-Run:
+## Run locally
 
 ```bash
 npm run dev
 ```
 
-Test:
+Open:
 
 ```text
 http://localhost:3000/order
 http://localhost:3000/cart
 ```
 
-## Suggested test
+## Required tests
 
-Add these two items to one contract:
+1. 1–29 days with no closure:
+   - daily proration;
+   - 10% exact-date premium.
 
-1. 15s Silent Video · All 3 Screens · Prime
-2. 30s Still Image · Center · Standard
+2. 1–29 days containing a closed holiday:
+   - closed date shows 0 hours;
+   - closed date is excluded from partial billable days.
 
-Use inclusive dates and confirm:
+3. 30- or 31-day monthly buy containing closed holidays:
+   - gross price begins at Tarifa Mensual;
+   - one Tarifa Mensual ÷ 31 amount is subtracted per closed holiday;
+   - no 10% exact-date premium.
 
-- A 1–29 day line shows daily proration and the 10% premium
-- A 30- or 31-day line shows a monthly buy and no premium
-- The cart shows the combined contract total
-- Remove and Clear Contract work correctly
+4. Complete February:
+   - monthly buy;
+   - holiday subtraction applies when relevant;
+   - no exact-date premium.
 
-## Not included yet
+5. Two or more complete calendar months:
+   - gross price = Tarifa Mensual × complete months;
+   - monthly holiday subtractions are deducted;
+   - 10% multi-month discount applies to the adjusted subtotal.
 
-- Database
-- Availability engine
-- Temporary inventory holds
-- Customer/agency information
-- Legal terms acceptance
-- PDF contract generation
-- Credit-card payment
-- Customer-code validation
-- Asset upload
-- Notifications
+6. More than 31 days without full calendar-month boundaries:
+   - blocked.
+
+7. Multiple combinations in one contract:
+   - holiday deductions, premiums, and discounts calculate per item;
+   - contract totals combine all adjustments.

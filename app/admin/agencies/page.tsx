@@ -39,9 +39,12 @@ export default async function AgencyAdministrationPage() {
             alt="La Grandiosa"
           />
         </Link>
-        <span className={styles.headerMeta}>
-          {staff.profile.full_name} · {staff.staff.role.replaceAll("_", " ")}
-        </span>
+        <div className={styles.headerNav}>
+          <Link href="/admin/credit">Credit administration</Link>
+          <span className={styles.headerMeta}>
+            {staff.profile.full_name} · {staff.staff.role.replaceAll("_", " ")}
+          </span>
+        </div>
       </header>
 
       <section className={styles.intro}>

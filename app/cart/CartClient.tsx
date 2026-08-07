@@ -7,6 +7,13 @@ import {
   type AdCombination,
 } from "../../data/ad-combinations";
 import {
+  calculateAgencyPricing,
+  discountPolicyLabel,
+  projectAgencyCredit,
+  type AgencyCreditSummary,
+  type DiscountPolicy,
+} from "../../lib/agency-pricing";
+import {
   clearContractCart,
   readContractCart,
   removeContractCartItem,
@@ -35,7 +42,20 @@ interface ResolvedCartLine {
   estimatedPlays: number;
 }
 
-export default function CartClient() {
+interface CartAgencyProps {
+  displayName: string;
+  accountNumber: string;
+  discountBasisPoints: number;
+  discountPolicy: DiscountPolicy;
+  paymentTermsDays: number;
+}
+
+interface CartClientProps {
+  agency: CartAgencyProps;
+  credit: AgencyCreditSummary;
+}
+
+export default function CartClient({ agency, credit }: CartClientProps) {
   const [items, setItems] = useState<ContractCartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -101,6 +121,39 @@ export default function CartClient() {
       },
     );
   }, [lines]);
+
+  const agencyPricing = useMemo(
+    () =>
+      calculateAgencyPricing(
+        {
+          preDiscountTotalCents:
+            totals.mediaSubtotalCents +
+            totals.dateSelectionPremiumCents,
+          campaignDiscountAvailableCents:
+            totals.multiMonthDiscountCents,
+        },
+        {
+          discountBasisPoints: agency.discountBasisPoints,
+          discountPolicy: agency.discountPolicy,
+        },
+      ),
+    [
+      agency.discountBasisPoints,
+      agency.discountPolicy,
+      totals.dateSelectionPremiumCents,
+      totals.mediaSubtotalCents,
+      totals.multiMonthDiscountCents,
+    ],
+  );
+
+  const creditProjection = useMemo(
+    () =>
+      projectAgencyCredit(
+        credit.availableCreditCents,
+        agencyPricing.netContractTotalCents,
+      ),
+    [agencyPricing.netContractTotalCents, credit.availableCreditCents],
+  );
 
   function handleRemove(id: string) {
     setItems(removeContractCartItem(id));
@@ -351,16 +404,123 @@ export default function CartClient() {
           </div>
         </dl>
 
+        <section className={styles.agencyPricing}>
+          <p className={styles.totalsLabel}>NEGOTIATED AGENCY PRICING</p>
+          <dl className={styles.totalList}>
+            <div>
+              <dt>Public published total</dt>
+              <dd>
+                {currency.format(
+                  agencyPricing.publicPublishedTotalCents / 100,
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>Discount policy</dt>
+              <dd>{discountPolicyLabel(agency.discountPolicy)}</dd>
+            </div>
+            {agencyPricing.agencyDiscountBaseCents !==
+            agencyPricing.publicPublishedTotalCents ? (
+              <div>
+                <dt>Agency pricing base</dt>
+                <dd>
+                  {currency.format(
+                    agencyPricing.agencyDiscountBaseCents / 100,
+                  )}
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>Negotiated discount</dt>
+              <dd>
+                {agency.discountBasisPoints > 0
+                  ? `${(agency.discountBasisPoints / 100).toFixed(2)}%`
+                  : "0%"}
+              </dd>
+            </div>
+            <div>
+              <dt>Agency discount applied</dt>
+              <dd>
+                {agencyPricing.agencyDiscountCents > 0
+                  ? `−${currency.format(
+                      agencyPricing.agencyDiscountCents / 100,
+                    )}`
+                  : currency.format(0)}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
         <div className={styles.grandTotal}>
-          <span>Contract total</span>
-          <strong>{currency.format(totals.totalCents / 100)}</strong>
+          <span>Agency contract total</span>
+          <strong>
+            {currency.format(
+              agencyPricing.netContractTotalCents / 100,
+            )}
+          </strong>
         </div>
+
+        <section className={styles.creditPanel}>
+          <p className={styles.totalsLabel}>CREDIT PROJECTION</p>
+          <dl className={styles.totalList}>
+            <div>
+              <dt>Approved credit</dt>
+              <dd>
+                {currency.format(
+                  credit.approvedCreditLimitCents / 100,
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>Current exposure</dt>
+              <dd>
+                {currency.format(credit.currentExposureCents / 100)}
+              </dd>
+            </div>
+            <div>
+              <dt>Available before this order</dt>
+              <dd>
+                {currency.format(credit.availableCreditCents / 100)}
+              </dd>
+            </div>
+            <div>
+              <dt>Credit requested</dt>
+              <dd>
+                {currency.format(
+                  creditProjection.requestedCreditCents / 100,
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>Projected available credit</dt>
+              <dd>
+                {currency.format(
+                  creditProjection.availableCreditAfterCents / 100,
+                )}
+              </dd>
+            </div>
+          </dl>
+          <p
+            className={
+              creditProjection.status === "within_limit"
+                ? styles.creditApproved
+                : styles.creditReview
+            }
+          >
+            {creditProjection.status === "within_limit"
+              ? `Within the approved credit limit · Net ${agency.paymentTermsDays}`
+              : `Finance review required · Credit shortfall ${currency.format(
+                  creditProjection.shortfallCents / 100,
+                )}`}
+          </p>
+        </section>
 
         <p className={styles.notice}>
           Continue to the mandatory client-information form. The server will
-          recalculate every line from the approved product catalog and create a
-          secure Stage 3A order record. Contract acceptance and payment choices
-          follow in Stage 3B.
+          recalculate campaign pricing, apply the agency agreement stored in
+          Supabase, and create either an active credit hold or a finance-review
+          request. Purchase-order upload and invoice generation follow in Stage
+          3B-C.
         </p>
 
         <Link className={styles.checkoutButton} href="/checkout/client">

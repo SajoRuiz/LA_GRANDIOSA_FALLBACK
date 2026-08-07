@@ -16,13 +16,25 @@ export const runtime = "nodejs";
 interface CreateOrderResult {
   order_id: string;
   order_number: string;
+  credit_status:
+    | "within_limit"
+    | "review_required"
+    | "exception_approved"
+    | "exception_declined";
+  credit_hold_id: string;
+  available_credit_before_cents: number | string;
+  available_credit_after_cents: number | string;
+  credit_shortfall_cents: number | string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const access = await requireAgencyPurchaseAccessForApi();
     const input = parseDraftCheckoutRequest(await request.json());
-    const built = buildDraftOrder(input.client, input.cartItems);
+    const built = buildDraftOrder(input.client, input.cartItems, {
+      discountBasisPoints: access.agency.discount_basis_points,
+      discountPolicy: access.agency.discount_policy,
+    });
     const config = getCommerceServerConfig();
     const supabase = createSupabaseAdminClient();
     const timestamp = Date.now();
@@ -30,18 +42,21 @@ export async function POST(request: NextRequest) {
     const notifications: Array<Record<string, unknown>> = [
       {
         channel: "email",
-        template_key: "customer_client_information_received",
+        template_key: "customer_agency_order_received",
         recipient: input.client.email,
         sender_email: config.transactionalFromEmail,
         reply_to_email: config.salesReplyToEmail,
-        dedupe_key: `customer-client-info-${access.identity.userId}-${timestamp}`,
+        dedupe_key: `customer-agency-order-${access.identity.userId}-${timestamp}`,
         payload: {
           clientName: input.client.fullName,
           purchaserName: access.profile.full_name,
           agencyName: access.agency.display_name,
           agencyAccountNumber: access.agency.account_number,
           itemCount: built.lines.length,
-          totalCents: built.totals.totalCents,
+          publishedTotalCents: built.agencyPricing.publicPublishedTotalCents,
+          agencyDiscountCents: built.agencyPricing.agencyDiscountCents,
+          netContractTotalCents:
+            built.agencyPricing.netContractTotalCents,
           currency: "USD",
           nextStep: "purchase_order_and_credit_review",
         },
@@ -63,7 +78,10 @@ export async function POST(request: NextRequest) {
           purchaserName: access.profile.full_name,
           purchaserUsername: access.profile.username,
           itemCount: built.lines.length,
-          totalCents: built.totals.totalCents,
+          publishedTotalCents: built.agencyPricing.publicPublishedTotalCents,
+          agencyDiscountCents: built.agencyPricing.agencyDiscountCents,
+          netContractTotalCents:
+            built.agencyPricing.netContractTotalCents,
           currency: "USD",
         },
       },
@@ -127,8 +145,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "The authenticated agency order could not be saved. Confirm that the Stage 3B-A migration has been applied.",
+            "The agency order could not be saved. Confirm that the Stage 3B-B migration has been applied.",
           code: "AGENCY_ORDER_SAVE_FAILED",
+          detail: error.message,
         },
         { status: 500 },
       );
@@ -148,12 +167,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (result.credit_status === "review_required") {
+      await supabase.from("notification_outbox").insert({
+        order_id: result.order_id,
+        channel: "email",
+        template_key: "internal_credit_exception_review_required",
+        recipient: config.internalProcessingEmail,
+        sender_email: config.transactionalFromEmail,
+        reply_to_email: config.salesReplyToEmail,
+        dedupe_key: `credit-review-${result.order_id}`,
+        payload: {
+          orderId: result.order_id,
+          orderNumber: result.order_number,
+          agencyName: access.agency.display_name,
+          agencyAccountNumber: access.agency.account_number,
+          netContractTotalCents:
+            built.agencyPricing.netContractTotalCents,
+          availableCreditBeforeCents: Number(
+            result.available_credit_before_cents,
+          ),
+          shortfallCents: Number(result.credit_shortfall_cents),
+        },
+      });
+    }
+
     return NextResponse.json(
       {
         orderId: result.order_id,
         orderNumber: result.order_number,
         status: "client_information_received",
         agencyAccountNumber: access.agency.account_number,
+        publishedTotalCents: built.agencyPricing.publicPublishedTotalCents,
+        agencyDiscountCents: built.agencyPricing.agencyDiscountCents,
+        netContractTotalCents:
+          built.agencyPricing.netContractTotalCents,
+        creditStatus: result.credit_status,
+        creditHoldId: result.credit_hold_id,
+        availableCreditBeforeCents: Number(
+          result.available_credit_before_cents,
+        ),
+        availableCreditAfterCents: Number(
+          result.available_credit_after_cents,
+        ),
+        creditShortfallCents: Number(
+          result.credit_shortfall_cents,
+        ),
       },
       { status: 201 },
     );

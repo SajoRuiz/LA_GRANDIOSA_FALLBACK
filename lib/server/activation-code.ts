@@ -1,16 +1,18 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "crypto";
 
-export function normalizeActivationCode(value: string): string {
-  return value.trim().toUpperCase().replace(/\s+/g, "");
-}
-
-export function hashActivationCode(value: string): string {
-  return createHash("sha256")
-    .update(normalizeActivationCode(value), "utf8")
-    .digest("hex");
-}
+const ACTIVATION_CODE_LENGTH = 24;
 
 export function generateActivationCode(): string {
-  const hex = randomBytes(8).toString("hex").toUpperCase();
-  return `LG-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}`;
+  return randomBytes(Math.ceil(ACTIVATION_CODE_LENGTH / 2))
+    .toString("hex")
+    .slice(0, ACTIVATION_CODE_LENGTH)
+    .toUpperCase();
+}
+
+export function hashActivationCode(code: string): string {
+  const normalizedCode = String(code).trim().toUpperCase();
+
+  return createHash("sha256")
+    .update(normalizedCode, "utf8")
+    .digest("hex");
 }

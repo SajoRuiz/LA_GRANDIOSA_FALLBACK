@@ -1,94 +1,123 @@
 .page {
-  min-height: 100vh;
-  color: var(--white);
+  --lg-deep: #030a3f;
+  --lg-navy: #06135e;
+  --lg-panel: #0d185e;
+  --lg-blue: #263cff;
+  --lg-orange: #ff9d00;
+  --lg-white: #ffffff;
+  --lg-mist: #e8ecff;
+  --lg-soft: #b7c0ff;
+  --lg-line: #5868d9;
+
+  min-height: 100svh;
+  color: var(--lg-white);
   background:
-    radial-gradient(circle at 80% 2%, rgba(38, 60, 255, 0.18), transparent 34%),
-    var(--deep);
+    radial-gradient(circle at 82% 0%, rgba(38, 60, 255, 0.2), transparent 31%),
+    linear-gradient(180deg, #030a3f 0%, #050d49 55%, #030a3f 100%);
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
-  min-height: 86px;
+  min-height: 88px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   padding: 12px clamp(22px, 5vw, 82px);
-  border-bottom: 1px solid rgba(88, 104, 217, 0.4);
+  background: rgba(3, 10, 63, 0.9);
+  border-bottom: 1px solid rgba(183, 192, 255, 0.22);
+  backdrop-filter: blur(18px);
 }
 
 .logo {
   display: block;
-  width: clamp(175px, 16vw, 235px);
-  height: 64px;
+  width: clamp(190px, 18vw, 280px);
+  height: clamp(54px, 5vw, 76px);
   object-fit: cover;
   object-position: center 45%;
   mix-blend-mode: screen;
 }
 
 .headerMeta {
-  color: var(--soft);
+  color: var(--lg-soft);
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .intro {
-  padding: clamp(60px, 8vw, 110px) clamp(22px, 5vw, 82px) 38px;
+  position: relative;
+  padding: clamp(70px, 8vw, 120px) clamp(22px, 5vw, 82px) 44px;
+}
+
+.intro::after {
+  display: block;
+  width: clamp(90px, 10vw, 170px);
+  height: 6px;
+  margin-top: 28px;
+  content: "";
+  background: var(--lg-orange);
 }
 
 .eyebrow {
   margin: 0 0 14px;
-  color: var(--orange);
+  color: var(--lg-orange);
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .intro h1 {
-  max-width: 900px;
-  margin: 0 0 18px;
-  font-size: clamp(3rem, 7vw, 6.8rem);
-  line-height: 0.91;
+  max-width: 980px;
+  margin: 0 0 20px;
+  font-size: clamp(3rem, 7vw, 7rem);
+  line-height: 0.9;
   letter-spacing: -0.055em;
   text-transform: uppercase;
 }
 
 .intro p:last-child {
-  max-width: 760px;
-  color: var(--mist);
-  line-height: 1.65;
+  max-width: 800px;
+  color: var(--lg-mist);
+  font-size: clamp(1rem, 1.45vw, 1.16rem);
+  line-height: 1.68;
 }
 
 .workspace {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: 26px;
   padding: 0 clamp(22px, 5vw, 82px) clamp(76px, 8vw, 120px);
 }
 
 .panel {
-  padding: clamp(26px, 3vw, 40px);
-  background: rgba(13, 24, 94, 0.92);
-  border: 1px solid rgba(88, 104, 217, 0.72);
+  padding: clamp(28px, 3.2vw, 44px);
+  background:
+    linear-gradient(155deg, rgba(38, 60, 255, 0.12), transparent 42%),
+    rgba(13, 24, 94, 0.94);
+  border: 1px solid rgba(88, 104, 217, 0.78);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
 }
 
 .panel h2 {
-  margin: 0 0 24px;
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  letter-spacing: -0.03em;
+  margin: 0 0 26px;
+  font-size: clamp(1.85rem, 3vw, 2.65rem);
+  letter-spacing: -0.035em;
 }
 
 .form {
   display: grid;
-  gap: 16px;
+  gap: 17px;
 }
 
 .fieldGridTwo {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 15px;
 }
 
 .field {
@@ -97,39 +126,70 @@
 }
 
 .field > span {
-  color: var(--mist);
+  color: var(--lg-mist);
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .field input,
 .field select {
   width: 100%;
-  min-height: 50px;
-  padding: 0 13px;
-  color: var(--white);
-  background: #071053;
-  border: 1px solid rgba(88, 104, 217, 0.75);
+  min-height: 52px;
+  padding: 0 14px;
+  color: var(--lg-white);
+  background: rgba(3, 10, 63, 0.76);
+  border: 1px solid rgba(183, 192, 255, 0.46);
+  border-radius: 0;
   font: inherit;
+}
+
+.field input:hover,
+.field select:hover,
+.field input:focus,
+.field select:focus {
+  border-color: var(--lg-orange);
+}
+
+.field input:focus,
+.field select:focus {
+  outline: 2px solid var(--lg-orange);
+  outline-offset: 2px;
+}
+
+.field select option {
+  color: #08102f;
+  background: #ffffff;
 }
 
 .checkbox {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--mist);
+  color: var(--lg-mist);
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--lg-orange);
 }
 
 .button {
-  min-height: 52px;
-  color: var(--deep);
-  background: var(--orange);
-  border: 0;
+  min-height: 54px;
+  color: var(--lg-deep);
+  background: var(--lg-orange);
+  border: 2px solid var(--lg-orange);
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 38px rgba(255, 157, 0, 0.2);
 }
 
 .button:disabled {
@@ -140,7 +200,7 @@
 .success,
 .codeBox {
   padding: 14px 16px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .error {
@@ -157,15 +217,15 @@
 
 .codeBox {
   margin-top: 16px;
-  color: var(--mist);
-  background: rgba(3, 10, 63, 0.72);
-  border: 1px solid var(--orange);
+  color: var(--lg-mist);
+  background: rgba(3, 10, 63, 0.82);
+  border: 1px solid var(--lg-orange);
 }
 
 .codeBox code {
   display: block;
   margin-top: 8px;
-  color: var(--orange);
+  color: var(--lg-orange);
   font-size: 18px;
   overflow-wrap: anywhere;
 }
@@ -181,17 +241,24 @@
   grid-template-columns: 1.3fr repeat(4, minmax(100px, 0.7fr));
   gap: 14px;
   align-items: center;
-  padding: 16px;
+  padding: 18px;
   background: rgba(7, 16, 83, 0.78);
-  border: 1px solid rgba(88, 104, 217, 0.48);
+  border: 1px solid rgba(88, 104, 217, 0.52);
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.agencyRow:hover {
+  transform: translateY(-1px);
+  border-color: var(--lg-orange);
 }
 
 .agencyRow strong {
   display: block;
+  color: var(--lg-white);
 }
 
 .agencyRow span {
-  color: var(--soft);
+  color: var(--lg-soft);
   font-size: 13px;
 }
 
@@ -212,7 +279,7 @@
   }
 
   .logo {
-    width: 145px;
+    width: 170px;
     height: 48px;
   }
 
@@ -224,6 +291,10 @@
   .workspace {
     padding-left: 18px;
     padding-right: 18px;
+  }
+
+  .intro h1 {
+    font-size: clamp(2.8rem, 14vw, 5rem);
   }
 
   .fieldGridTwo,

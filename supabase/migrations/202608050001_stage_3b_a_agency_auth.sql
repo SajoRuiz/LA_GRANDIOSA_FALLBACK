@@ -92,6 +92,31 @@ end $$;
 -- Numbering and shared helpers
 -- ------------------------------------------------------------------
 create sequence if not exists public.agency_account_number_seq start 1;
+create sequence if not exists public.order_number_seq start 1;
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.updated_at = timezone('utc', now());
+  return new;
+end;
+$$;
+
+create or replace function public.next_order_number()
+returns text
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    'LG-' ||
+    to_char(timezone('utc', now()), 'YYYY') ||
+    '-' ||
+    lpad(nextval('public.order_number_seq')::text, 6, '0');
+$$;
 
 create or replace function public.next_agency_account_number()
 returns text
@@ -225,24 +250,27 @@ create table if not exists public.agency_account_history (
 
 -- Agency-scope client contacts so one agency cannot overwrite or read another
 -- agency's contact record merely because the same email address was used.
-alter table public.client_contacts
-  add column if not exists agency_id uuid references public.agency_accounts(id);
-
-create index if not exists client_contacts_agency_id_idx
-  on public.client_contacts (agency_id);
-create unique index if not exists client_contacts_agency_email_unique_idx
-  on public.client_contacts (agency_id, lower(email))
-  where agency_id is not null;
+do $$
+begin
+  if to_regclass('public.client_contacts') is not null
+     and to_regclass('public.agency_accounts') is not null then
+    execute 'alter table public.client_contacts add column if not exists agency_id uuid references public.agency_accounts(id)';
+  end if;
+  if to_regclass('public.client_contacts') is not null then
+    execute 'create index if not exists client_contacts_agency_id_idx on public.client_contacts (agency_id)';
+    execute 'create unique index if not exists client_contacts_agency_email_unique_idx on public.client_contacts (agency_id, lower(email)) where agency_id is not null';
+  end if;
+end $$;
 
 -- Orders created after this migration belong to a signed-in agency buyer.
-alter table public.orders
-  add column if not exists agency_id uuid references public.agency_accounts(id),
-  add column if not exists ordered_by_user_id uuid references auth.users(id);
-
-create index if not exists orders_agency_id_idx
-  on public.orders (agency_id, created_at desc);
-create index if not exists orders_ordered_by_user_id_idx
-  on public.orders (ordered_by_user_id, created_at desc);
+do $$
+begin
+  if to_regclass('public.orders') is not null then
+    execute 'alter table public.orders add column if not exists agency_id uuid references public.agency_accounts(id), add column if not exists ordered_by_user_id uuid references auth.users(id)';
+    execute 'create index if not exists orders_agency_id_idx on public.orders (agency_id, created_at desc)';
+    execute 'create index if not exists orders_ordered_by_user_id_idx on public.orders (ordered_by_user_id, created_at desc)';
+  end if;
+end $$;
 
 -- ------------------------------------------------------------------
 -- Access helper functions
@@ -619,23 +647,57 @@ for each row execute function public.set_updated_at();
 -- ------------------------------------------------------------------
 -- Row Level Security
 -- ------------------------------------------------------------------
-alter table public.user_profiles enable row level security;
-alter table public.agency_accounts enable row level security;
-alter table public.agency_members enable row level security;
-alter table public.staff_members enable row level security;
-alter table public.agency_invites enable row level security;
-alter table public.agency_account_history enable row level security;
+do $$
+begin
+  if to_regclass('public.user_profiles') is not null then
+    execute 'alter table public.user_profiles enable row level security';
+  end if;
+  if to_regclass('public.agency_accounts') is not null then
+    execute 'alter table public.agency_accounts enable row level security';
+  end if;
+  if to_regclass('public.agency_members') is not null then
+    execute 'alter table public.agency_members enable row level security';
+  end if;
+  if to_regclass('public.staff_members') is not null then
+    execute 'alter table public.staff_members enable row level security';
+  end if;
+  if to_regclass('public.agency_invites') is not null then
+    execute 'alter table public.agency_invites enable row level security';
+  end if;
+  if to_regclass('public.agency_account_history') is not null then
+    execute 'alter table public.agency_account_history enable row level security';
+  end if;
+end $$;
 
 -- Drop policies so this migration can be rerun during development.
-drop policy if exists user_profiles_select_self on public.user_profiles;
-drop policy if exists user_profiles_update_self on public.user_profiles;
-drop policy if exists agency_accounts_select_member_or_staff on public.agency_accounts;
-drop policy if exists agency_members_select_self_admin_or_staff on public.agency_members;
-drop policy if exists staff_members_select_self on public.staff_members;
-drop policy if exists agency_history_select_member_or_staff on public.agency_account_history;
-drop policy if exists orders_select_agency_or_staff on public.orders;
-drop policy if exists order_items_select_agency_or_staff on public.order_items;
-drop policy if exists client_contacts_select_agency_or_staff on public.client_contacts;
+do $$
+begin
+  if to_regclass('public.user_profiles') is not null then
+    execute 'drop policy if exists user_profiles_select_self on public.user_profiles';
+    execute 'drop policy if exists user_profiles_update_self on public.user_profiles';
+  end if;
+  if to_regclass('public.agency_accounts') is not null then
+    execute 'drop policy if exists agency_accounts_select_member_or_staff on public.agency_accounts';
+  end if;
+  if to_regclass('public.agency_members') is not null then
+    execute 'drop policy if exists agency_members_select_self_admin_or_staff on public.agency_members';
+  end if;
+  if to_regclass('public.staff_members') is not null then
+    execute 'drop policy if exists staff_members_select_self on public.staff_members';
+  end if;
+  if to_regclass('public.agency_account_history') is not null then
+    execute 'drop policy if exists agency_history_select_member_or_staff on public.agency_account_history';
+  end if;
+  if to_regclass('public.orders') is not null then
+    execute 'drop policy if exists orders_select_agency_or_staff on public.orders';
+  end if;
+  if to_regclass('public.order_items') is not null then
+    execute 'drop policy if exists order_items_select_agency_or_staff on public.order_items';
+  end if;
+  if to_regclass('public.client_contacts') is not null then
+    execute 'drop policy if exists client_contacts_select_agency_or_staff on public.client_contacts';
+  end if;
+end $$;
 
 create policy user_profiles_select_self
 on public.user_profiles
@@ -701,49 +763,20 @@ using (
 
 -- Existing Stage 3A tables were already RLS-enabled. Add authenticated read
 -- policies now that orders belong to an agency account.
-create policy orders_select_agency_or_staff
-on public.orders
-for select
-to authenticated
-using (
-  public.session_is_aal2()
-  and agency_id is not null
-  and (
-    public.is_active_agency_member(agency_id)
-    or public.is_active_staff(null)
-  )
-);
+do $$
+begin
+  if to_regclass('public.orders') is not null then
+    execute 'create policy orders_select_agency_or_staff on public.orders for select to authenticated using (public.session_is_aal2() and agency_id is not null and (public.is_active_agency_member(agency_id) or public.is_active_staff(null)))';
+  end if;
 
-create policy order_items_select_agency_or_staff
-on public.order_items
-for select
-to authenticated
-using (
-  exists (
-    select 1
-    from public.orders order_record
-    where order_record.id = order_items.order_id
-      and public.session_is_aal2()
-      and order_record.agency_id is not null
-      and (
-        public.is_active_agency_member(order_record.agency_id)
-        or public.is_active_staff(null)
-      )
-  )
-);
+  if to_regclass('public.order_items') is not null then
+    execute 'create policy order_items_select_agency_or_staff on public.order_items for select to authenticated using (exists (select 1 from public.orders order_record where order_record.id = order_items.order_id and public.session_is_aal2() and order_record.agency_id is not null and (public.is_active_agency_member(order_record.agency_id) or public.is_active_staff(null))))';
+  end if;
 
-create policy client_contacts_select_agency_or_staff
-on public.client_contacts
-for select
-to authenticated
-using (
-  public.session_is_aal2()
-  and agency_id is not null
-  and (
-    public.is_active_agency_member(agency_id)
-    or public.is_active_staff(null)
-  )
-);
+  if to_regclass('public.client_contacts') is not null then
+    execute 'create policy client_contacts_select_agency_or_staff on public.client_contacts for select to authenticated using (public.session_is_aal2() and agency_id is not null and (public.is_active_agency_member(agency_id) or public.is_active_staff(null)))';
+  end if;
+end $$;
 
 -- Activation and MFA functions are available only to signed-in users.
 grant execute on function public.activate_agency_invite(uuid, text, text, text, text)

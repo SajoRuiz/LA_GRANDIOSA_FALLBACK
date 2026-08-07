@@ -4,6 +4,11 @@ import {
 } from "../../data/ad-combinations";
 import type { ContractCartItem } from "../cart";
 import {
+  calculateAgencyPricing,
+  type AgencyPricingBreakdown,
+  type AgencyPricingTerms,
+} from "../agency-pricing";
+import {
   calculateCampaignPrice,
   type CampaignPriceBreakdown,
 } from "../pricing";
@@ -23,13 +28,18 @@ export interface DraftOrderTotals {
   adjustedMediaSubtotalCents: number;
   dateSelectionPremiumCents: number;
   multiMonthDiscountCents: number;
+  preDiscountTotalCents: number;
+  publicPublishedTotalCents: number;
+  agencyDiscountBaseCents: number;
+  agencyDiscountCents: number;
+  netContractTotalCents: number;
   taxCents: number;
-  totalCents: number;
 }
 
 export interface BuiltDraftOrder {
   lines: DraftOrderLine[];
   totals: DraftOrderTotals;
+  agencyPricing: AgencyPricingBreakdown;
   clientPayload: Record<string, unknown>;
   orderPayload: Record<string, unknown>;
   itemPayloads: Array<Record<string, unknown>>;
@@ -59,8 +69,8 @@ function resolveLine(item: ContractCartItem): DraftOrderLine {
   };
 }
 
-function calculateTotals(lines: DraftOrderLine[]): DraftOrderTotals {
-  return lines.reduce<DraftOrderTotals>(
+function calculateCampaignTotals(lines: DraftOrderLine[]) {
+  return lines.reduce(
     (totals, line) => ({
       grossMediaSubtotalCents:
         totals.grossMediaSubtotalCents +
@@ -77,8 +87,6 @@ function calculateTotals(lines: DraftOrderLine[]): DraftOrderTotals {
       multiMonthDiscountCents:
         totals.multiMonthDiscountCents +
         line.pricing.multiMonthDiscountCents,
-      taxCents: totals.taxCents,
-      totalCents: totals.totalCents + line.pricing.totalCents,
     }),
     {
       grossMediaSubtotalCents: 0,
@@ -86,8 +94,6 @@ function calculateTotals(lines: DraftOrderLine[]): DraftOrderTotals {
       adjustedMediaSubtotalCents: 0,
       dateSelectionPremiumCents: 0,
       multiMonthDiscountCents: 0,
-      taxCents: 0,
-      totalCents: 0,
     },
   );
 }
@@ -95,9 +101,34 @@ function calculateTotals(lines: DraftOrderLine[]): DraftOrderTotals {
 export function buildDraftOrder(
   client: ClientInformationInput,
   cartItems: ContractCartItem[],
+  agencyTerms: AgencyPricingTerms,
 ): BuiltDraftOrder {
   const lines = cartItems.map(resolveLine);
-  const totals = calculateTotals(lines);
+  const campaign = calculateCampaignTotals(lines);
+  const preDiscountTotalCents =
+    campaign.adjustedMediaSubtotalCents +
+    campaign.dateSelectionPremiumCents;
+
+  const agencyPricing = calculateAgencyPricing(
+    {
+      preDiscountTotalCents,
+      campaignDiscountAvailableCents:
+        campaign.multiMonthDiscountCents,
+    },
+    agencyTerms,
+  );
+
+  const totals: DraftOrderTotals = {
+    ...campaign,
+    preDiscountTotalCents,
+    publicPublishedTotalCents:
+      agencyPricing.publicPublishedTotalCents,
+    agencyDiscountBaseCents:
+      agencyPricing.agencyDiscountBaseCents,
+    agencyDiscountCents: agencyPricing.agencyDiscountCents,
+    netContractTotalCents: agencyPricing.netContractTotalCents,
+    taxCents: 0,
+  };
 
   const clientPayload = {
     full_name: client.fullName,
@@ -118,7 +149,8 @@ export function buildDraftOrder(
 
   const orderPayload = {
     currency: "USD",
-    gross_media_subtotal_cents: totals.grossMediaSubtotalCents,
+    gross_media_subtotal_cents:
+      totals.grossMediaSubtotalCents,
     closed_holiday_deduction_cents:
       totals.closedHolidayDeductionCents,
     adjusted_media_subtotal_cents:
@@ -127,14 +159,17 @@ export function buildDraftOrder(
       totals.dateSelectionPremiumCents,
     multi_month_discount_cents:
       totals.multiMonthDiscountCents,
+    pre_discount_total_cents: totals.preDiscountTotalCents,
+    campaign_discount_available_cents:
+      totals.multiMonthDiscountCents,
     tax_cents: totals.taxCents,
-    total_cents: totals.totalCents,
-    source: "web_checkout",
+    source: "agency_portal",
     pricing_snapshot: {
-      pricingVersion: "stage-2b-v4",
+      pricingVersion: "stage-3b-b-v1",
       generatedAt: new Date().toISOString(),
       itemCount: lines.length,
-      totals,
+      campaign,
+      agencyPricing,
     },
   };
 
@@ -155,6 +190,7 @@ export function buildDraftOrder(
   return {
     lines,
     totals,
+    agencyPricing,
     clientPayload,
     orderPayload,
     itemPayloads,

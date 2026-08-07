@@ -34,6 +34,9 @@ interface DraftOrderResponse {
   orderId: string;
   orderNumber: string;
   status: string;
+  creditStatus: string;
+  availableCreditAfterCents: number;
+  creditShortfallCents: number;
   error?: string;
 }
 
@@ -121,20 +124,36 @@ export default function ClientInformationForm() {
         body: JSON.stringify({ client, cartItems: items }),
       });
 
-      const result = (await response.json()) as DraftOrderResponse;
+      const text = await response.text();
+      let result: DraftOrderResponse | undefined;
+
+      try {
+        result = text ? (JSON.parse(text) as DraftOrderResponse) : undefined;
+      } catch {
+        result = undefined;
+      }
 
       if (!response.ok) {
         throw new Error(
-          result.error || "The order information could not be saved.",
+          result?.error || text || "The order information could not be saved.",
+        );
+      }
+
+      if (!result) {
+        throw new Error(
+          "The order service returned an unexpected response.",
         );
       }
 
       clearContractCart();
-      router.push(
-        `/checkout/received?order=${encodeURIComponent(
-          result.orderNumber,
-        )}`,
-      );
+      const query = new URLSearchParams({
+        order: result.orderNumber,
+        credit: result.creditStatus,
+        available: String(result.availableCreditAfterCents ?? 0),
+        shortfall: String(result.creditShortfallCents ?? 0),
+      });
+
+      router.push(`/checkout/received?${query.toString()}`);
     } catch (submissionError) {
       setError(
         submissionError instanceof Error

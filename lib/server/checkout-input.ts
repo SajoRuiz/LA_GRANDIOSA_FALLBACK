@@ -23,170 +23,135 @@ export interface DraftCheckoutRequest {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  return typeof value === "object" && value !== null;
 }
 
-function readString(
+function isContractCartItem(value: unknown): value is ContractCartItem {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.id === "string" &&
+    typeof value.sku === "string" &&
+    typeof value.startDate === "string" &&
+    typeof value.endDate === "string" &&
+    typeof value.createdAt === "string"
+  );
+}
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function parseStringField(
   record: Record<string, unknown>,
-  key: string,
-  options: {
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-  } = {},
+  field: string,
+  required = true,
 ): string {
-  const value = record[key];
-  const text = typeof value === "string" ? value.trim() : "";
+  const value = record[field];
 
-  if (options.required && !text) {
-    throw new Error(`${key} is required.`);
+  if (typeof value !== "string") {
+    if (required) {
+      throw new Error(`Missing or invalid field: ${field}`);
+    }
+
+    return "";
   }
 
-  if (text && options.minLength && text.length < options.minLength) {
-    throw new Error(`${key} is too short.`);
-  }
-
-  if (text.length > (options.maxLength ?? 300)) {
-    throw new Error(`${key} is too long.`);
-  }
-
-  return text;
+  return value.trim();
 }
 
-function parseClient(value: unknown): ClientInformationInput {
-  if (!isRecord(value)) {
-    throw new Error("Client information is required.");
-  }
+function parseBooleanField(
+  record: Record<string, unknown>,
+  field: string,
+): boolean {
+  const value = record[field];
 
-  const email = readString(value, "email", {
-    required: true,
-    maxLength: 254,
-  }).toLowerCase();
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error("Enter a valid email address.");
-  }
-
-  const telephone = readString(value, "telephone", {
-    required: true,
-    minLength: 7,
-    maxLength: 40,
-  });
-
-  return {
-    fullName: readString(value, "fullName", {
-      required: true,
-      minLength: 2,
-      maxLength: 160,
-    }),
-    email,
-    telephone,
-    addressLine1: readString(value, "addressLine1", {
-      required: true,
-      minLength: 3,
-      maxLength: 200,
-    }),
-    addressLine2: readString(value, "addressLine2", {
-      maxLength: 200,
-    }),
-    city: readString(value, "city", {
-      required: true,
-      minLength: 2,
-      maxLength: 120,
-    }),
-    region: readString(value, "region", {
-      required: true,
-      minLength: 2,
-      maxLength: 120,
-    }),
-    postalCode: readString(value, "postalCode", {
-      required: true,
-      minLength: 3,
-      maxLength: 24,
-    }),
-    country: readString(value, "country", {
-      required: true,
-      minLength: 2,
-      maxLength: 120,
-    }),
-    companyName: readString(value, "companyName", {
-      maxLength: 180,
-    }),
-    agencyName: readString(value, "agencyName", {
-      maxLength: 180,
-    }),
-    campaignName: readString(value, "campaignName", {
-      maxLength: 180,
-    }),
-    purchaseOrderNumber: readString(value, "purchaseOrderNumber", {
-      maxLength: 100,
-    }),
-    smsTransactionalConsent:
-      value.smsTransactionalConsent === true,
-  };
-}
-
-function parseCartItem(value: unknown, index: number): ContractCartItem {
-  if (!isRecord(value)) {
-    throw new Error(`Cart item ${index + 1} is invalid.`);
-  }
-
-  const id = readString(value, "id", {
-    required: true,
-    maxLength: 160,
-  });
-  const sku = readString(value, "sku", {
-    required: true,
-    maxLength: 120,
-  });
-  const startDate = readString(value, "startDate", {
-    required: true,
-    maxLength: 10,
-  });
-  const endDate = readString(value, "endDate", {
-    required: true,
-    maxLength: 10,
-  });
-  const createdAt = readString(value, "createdAt", {
-    required: true,
-    maxLength: 60,
-  });
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
-    throw new Error(`Cart item ${index + 1} has an invalid start date.`);
-  }
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-    throw new Error(`Cart item ${index + 1} has an invalid end date.`);
-  }
-
-  return { id, sku, startDate, endDate, createdAt };
+  return value === true || value === "true" || value === "1";
 }
 
 export function parseDraftCheckoutRequest(
   value: unknown,
 ): DraftCheckoutRequest {
   if (!isRecord(value)) {
-    throw new Error("The checkout request is invalid.");
+    throw new Error("Invalid checkout payload.");
   }
 
-  if (!Array.isArray(value.cartItems) || value.cartItems.length === 0) {
-    throw new Error("At least one contract item is required.");
+  const clientRecord = value.client;
+  const cartItemsRecord = value.cartItems;
+
+  if (!isRecord(clientRecord)) {
+    throw new Error("Missing client information.");
   }
 
-  if (value.cartItems.length > 25) {
-    throw new Error("A contract cannot contain more than 25 combinations.");
+  if (!Array.isArray(cartItemsRecord) || cartItemsRecord.length === 0) {
+    throw new Error("The checkout cart must contain at least one item.");
   }
 
-  const cartItems = value.cartItems.map(parseCartItem);
-  const uniqueIds = new Set(cartItems.map((item) => item.id));
+  const cartItems = cartItemsRecord.map((item) => {
+    if (!isContractCartItem(item)) {
+      throw new Error("Invalid cart item format.");
+    }
 
-  if (uniqueIds.size !== cartItems.length) {
-    throw new Error("The contract contains duplicate cart item IDs.");
-  }
+    return item;
+  });
 
-  return {
-    client: parseClient(value.client),
-    cartItems,
+  const client: ClientInformationInput = {
+    fullName: parseStringField(clientRecord, "fullName"),
+    email: parseStringField(clientRecord, "email"),
+    telephone: parseStringField(clientRecord, "telephone"),
+    addressLine1: parseStringField(clientRecord, "addressLine1"),
+    addressLine2: parseStringField(clientRecord, "addressLine2", false),
+    city: parseStringField(clientRecord, "city"),
+    region: parseStringField(clientRecord, "region"),
+    postalCode: parseStringField(clientRecord, "postalCode"),
+    country: parseStringField(clientRecord, "country"),
+    companyName: parseStringField(clientRecord, "companyName", false),
+    agencyName: parseStringField(clientRecord, "agencyName", false),
+    campaignName: parseStringField(clientRecord, "campaignName", false),
+    purchaseOrderNumber: parseStringField(
+      clientRecord,
+      "purchaseOrderNumber",
+      false,
+    ),
+    smsTransactionalConsent: parseBooleanField(
+      clientRecord,
+      "smsTransactionalConsent",
+    ),
   };
+
+  if (!client.fullName) {
+    throw new Error("Enter the purchaser's full name.");
+  }
+
+  if (!isValidEmail(client.email)) {
+    throw new Error("Enter a valid email address.");
+  }
+
+  if (!client.telephone) {
+    throw new Error("Enter a valid telephone number.");
+  }
+
+  if (!client.addressLine1) {
+    throw new Error("Enter the first address line.");
+  }
+
+  if (!client.city) {
+    throw new Error("Enter a city.");
+  }
+
+  if (!client.region) {
+    throw new Error("Enter a region or state.");
+  }
+
+  if (!client.postalCode) {
+    throw new Error("Enter a postal code.");
+  }
+
+  if (!client.country) {
+    throw new Error("Enter a country.");
+  }
+
+  return { client, cartItems };
 }

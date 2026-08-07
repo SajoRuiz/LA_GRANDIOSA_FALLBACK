@@ -56,13 +56,29 @@ export default function AgencyAdminClient({
         }),
       });
 
-      const result = (await response.json()) as {
-        error?: string;
-        agency?: { account_number: string; display_name: string };
-      };
+      const text = await response.text();
+      let result:
+        | {
+            error?: string;
+            agency?: { account_number: string; display_name: string };
+          }
+        | undefined;
 
-      if (!response.ok || !result.agency) {
-        throw new Error(result.error ?? "Agency account creation failed.");
+      try {
+        result = text
+          ? (JSON.parse(text) as {
+              error?: string;
+              agency?: { account_number: string; display_name: string };
+            })
+          : undefined;
+      } catch {
+        result = undefined;
+      }
+
+      if (!response.ok || !result?.agency) {
+        throw new Error(
+          result?.error ?? text ?? "Agency account creation failed.",
+        );
       }
 
       setAgencyMessage(
@@ -101,18 +117,39 @@ export default function AgencyAdminClient({
         }),
       });
 
-      const result = (await response.json()) as {
-        error?: string;
-        activationCode?: string;
-        invite?: {
-          email: string;
-          agencyName: string;
-          expiresAt: string;
-        };
-      };
+      const text = await response.text();
+      let result:
+        | {
+            error?: string;
+            activationCode?: string;
+            invite?: {
+              email: string;
+              agencyName: string;
+              expiresAt: string;
+            };
+          }
+        | undefined;
 
-      if (!response.ok || !result.activationCode || !result.invite) {
-        throw new Error(result.error ?? "Agency invitation failed.");
+      try {
+        result = text
+          ? (JSON.parse(text) as {
+              error?: string;
+              activationCode?: string;
+              invite?: {
+                email: string;
+                agencyName: string;
+                expiresAt: string;
+              };
+            })
+          : undefined;
+      } catch {
+        result = undefined;
+      }
+
+      if (!response.ok || !result?.activationCode || !result?.invite) {
+        throw new Error(
+          result?.error ?? text ?? "Agency invitation failed.",
+        );
       }
 
       setActivationCode(result.activationCode);

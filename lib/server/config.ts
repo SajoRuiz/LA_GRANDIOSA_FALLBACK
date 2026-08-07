@@ -5,44 +5,39 @@ export class CommerceConfigurationError extends Error {
   }
 }
 
-function requireServerEnvironment(name: string): string {
-  const value = process.env[name]?.trim();
-
-  if (!value) {
-    throw new CommerceConfigurationError(
-      `Missing required server environment variable: ${name}`,
-    );
-  }
-
-  return value;
-}
-
 export interface CommerceServerConfig {
-  appBaseUrl: string;
   supabaseUrl: string;
   supabaseServiceRoleKey: string;
+  appBaseUrl: string;
   internalProcessingEmail: string;
   salesReplyToEmail: string;
   transactionalFromEmail: string;
 }
 
+function requiredEnvironmentValue(name: string): string {
+  const value = process.env[name];
+
+  if (!value || value.trim() === "") {
+    throw new CommerceConfigurationError(
+      `Missing required environment variable: ${name}`,
+    );
+  }
+
+  return value.trim();
+}
+
 export function getCommerceServerConfig(): CommerceServerConfig {
   return {
-    appBaseUrl:
-      process.env.APP_BASE_URL?.trim() || "http://localhost:3000",
-    supabaseUrl: requireServerEnvironment(
-      "NEXT_PUBLIC_SUPABASE_URL",
-    ),
-    supabaseServiceRoleKey: requireServerEnvironment(
+    supabaseUrl: requiredEnvironmentValue("NEXT_PUBLIC_SUPABASE_URL"),
+    supabaseServiceRoleKey: requiredEnvironmentValue(
       "SUPABASE_SERVICE_ROLE_KEY",
     ),
-    internalProcessingEmail: requireServerEnvironment(
+    appBaseUrl: requiredEnvironmentValue("APP_BASE_URL"),
+    internalProcessingEmail: requiredEnvironmentValue(
       "INTERNAL_PROCESSING_EMAIL",
     ),
-    salesReplyToEmail: requireServerEnvironment(
-      "SALES_REPLY_TO_EMAIL",
-    ),
-    transactionalFromEmail: requireServerEnvironment(
+    salesReplyToEmail: requiredEnvironmentValue("SALES_REPLY_TO_EMAIL"),
+    transactionalFromEmail: requiredEnvironmentValue(
       "TRANSACTIONAL_FROM_EMAIL",
     ),
   };

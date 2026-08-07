@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAgencyPurchaseAccess } from "@/lib/auth/access";
+import { getAgencyCreditSummary } from "@/lib/server/agency-credit";
 import styles from "./portal.module.css";
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -16,6 +17,7 @@ function percentage(basisPoints: number): string {
 
 export default async function AgencyPortalPage() {
   const access = await requireAgencyPurchaseAccess("/portal");
+  const credit = await getAgencyCreditSummary(access.agency.id);
 
   return (
     <main className={styles.page}>
@@ -43,8 +45,8 @@ export default async function AgencyPortalPage() {
         <h1>Welcome, {access.profile.full_name}.</h1>
         <p>
           Your authenticated session is connected to {access.agency.display_name}.
-          Purchasing requires this account, an active agency membership, and
-          current authenticator verification.
+          Negotiated pricing and credit availability are now active for every
+          protected order.
         </p>
       </section>
 
@@ -54,7 +56,7 @@ export default async function AgencyPortalPage() {
           <h2>Build a new campaign contract.</h2>
           <p className={styles.note}>
             Select campaign dates, add multiple advertising combinations, and
-            continue into the protected purchase-order workflow.
+            review negotiated pricing before submitting client information.
           </p>
           <Link className={styles.primaryButton} href="/order">
             Place order
@@ -74,14 +76,6 @@ export default async function AgencyPortalPage() {
               <dd>{percentage(access.agency.discount_basis_points)}</dd>
             </div>
             <div>
-              <dt>Approved credit limit</dt>
-              <dd>
-                {currency.format(
-                  access.agency.approved_credit_limit_cents / 100,
-                )}
-              </dd>
-            </div>
-            <div>
               <dt>Payment terms</dt>
               <dd>Net {access.agency.payment_terms_days}</dd>
             </div>
@@ -90,9 +84,32 @@ export default async function AgencyPortalPage() {
               <dd>{access.agency.po_required ? "Yes" : "No"}</dd>
             </div>
           </dl>
+        </article>
+
+        <article className={`${styles.card} ${styles.creditCard}`}>
+          <p className={styles.eyebrow}>CREDIT POSITION</p>
+          <h2>{currency.format(credit.availableCreditCents / 100)} available</h2>
+          <dl className={styles.details}>
+            <div>
+              <dt>Approved credit</dt>
+              <dd>{currency.format(credit.approvedCreditLimitCents / 100)}</dd>
+            </div>
+            <div>
+              <dt>Ledger exposure</dt>
+              <dd>{currency.format(credit.ledgerExposureCents / 100)}</dd>
+            </div>
+            <div>
+              <dt>Active order holds</dt>
+              <dd>{currency.format(credit.activeHoldExposureCents / 100)}</dd>
+            </div>
+            <div>
+              <dt>Pending exceptions</dt>
+              <dd>{currency.format(credit.pendingExceptionCents / 100)}</dd>
+            </div>
+          </dl>
           <p className={styles.note}>
-            Discount application, available-credit calculations, PO upload,
-            and invoicing are activated in the next release.
+            Credit holds are created when an order is submitted. A purchase
+            above available credit is routed to finance for review.
           </p>
         </article>
 

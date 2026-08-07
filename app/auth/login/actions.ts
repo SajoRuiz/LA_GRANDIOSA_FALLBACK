@@ -1,9 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+import { sanitizeNextPath, withNext } from "@/lib/auth/paths";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { sanitizeNextPath, withNext } from "@/lib/auth/paths";
 
 function loginError(nextPath: string): never {
   redirect(
@@ -21,6 +23,7 @@ async function resolveEmail(identifier: string): Promise<string | null> {
   }
 
   const admin = createSupabaseAdminClient();
+
   const { data } = await admin
     .from("user_profiles")
     .select("email,status")
@@ -39,7 +42,11 @@ export async function loginAction(formData: FormData) {
     String(formData.get("next") ?? "/portal"),
     "/portal",
   );
-  const identifier = String(formData.get("identifier") ?? "").trim();
+
+  const identifier = String(
+    formData.get("identifier") ?? "",
+  ).trim();
+
   const password = String(formData.get("password") ?? "");
 
   if (!identifier || !password) {
@@ -53,21 +60,40 @@ export async function loginAction(formData: FormData) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
   if (error || !data.user) {
     loginError(nextPath);
   }
 
+  // Refresh server-rendered routes after the session cookie is created.
+  revalidatePath("/", "layout");
+
   const admin = createSupabaseAdminClient();
-  const { data: profile } = await admin
+
+  const { data: profile, error: profileError } = await admin
     .from("user_profiles")
     .select("status")
     .eq("user_id", data.user.id)
     .maybeSingle();
+
+  if (profileError) {
+    // Preserve the session locally so the diagnostic route can show it.
+    if (process.env.NODE_ENV === "production") {
+      await supabase.auth.signOut({ scope: "local" });
+    }
+
+    redirect(
+      `/auth/access-denied?reason=${encodeURIComponent(
+        `profile-query-error:${profileError.message}`,
+      )}`,
+    );
+  }
 
   if (!profile) {
     const { data: invite } = await admin
@@ -81,17 +107,37 @@ export async function loginAction(formData: FormData) {
       redirect("/auth/activate");
     }
 
-    await supabase.auth.signOut();
+    // Keep the session in local development for diagnosis.
+    if (process.env.NODE_ENV === "production") {
+      await supabase.auth.signOut({ scope: "local" });
+    }
+
     redirect("/auth/access-denied?reason=profile-missing");
   }
 
   if (profile.status !== "active") {
-    await supabase.auth.signOut();
-    redirect("/auth/access-denied?reason=account-inactive");
+    // Keep the session in local development for diagnosis.
+    if (process.env.NODE_ENV === "production") {
+      await supabase.auth.signOut({ scope: "local" });
+    }
+
+    redirect(
+      `/auth/access-denied?reason=${encodeURIComponent(
+        `account-${profile.status}`,
+      )}`,
+    );
   }
 
-  const { data: aal } =
+  const { data: aal, error: aalError } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  if (aalError) {
+    redirect(
+      `/auth/access-denied?reason=${encodeURIComponent(
+        `mfa-error:${aalError.message}`,
+      )}`,
+    );
+  }
 
   if (aal?.currentLevel === "aal2") {
     redirect(nextPath);

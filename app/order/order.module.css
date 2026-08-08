@@ -203,7 +203,7 @@
 
 .summaryList > div {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 22px;
   padding: 14px 0;

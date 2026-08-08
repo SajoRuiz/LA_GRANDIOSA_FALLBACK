@@ -551,9 +551,8 @@
 }
 
 .packageCard {
-  display: grid;
-  align-content: start;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
   min-height: 520px;
   padding: 30px 28px 28px;

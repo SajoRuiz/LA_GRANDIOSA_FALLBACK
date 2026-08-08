@@ -71,7 +71,7 @@
 .intro h1 {
   max-width: 1050px;
   margin: 0 0 22px;
-  font-size: clamp(3rem, 7vw, 6.7rem);
+  font-size: clamp(2.6rem, 5.8vw, 5.4rem);
   line-height: 0.9;
   letter-spacing: -0.055em;
   text-transform: uppercase;
@@ -100,7 +100,7 @@
 
 .panel h2 {
   margin: 0 0 26px;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
 }
 
 .summaryGrid,

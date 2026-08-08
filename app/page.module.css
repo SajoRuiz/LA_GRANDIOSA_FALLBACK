@@ -1,0 +1,52 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.hero {
+  max-width: 42rem;
+}
+
+.hero h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2.5rem, 5vw, 4.25rem);
+}
+
+.hero p {
+  margin: 0 0 2rem;
+  color: #444;
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 12rem;
+  padding: 0.95rem 1.5rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.primaryButton {
+  background: #111;
+  color: #fff;
+}
+
+.secondaryButton {
+  background: #f0f0f0;
+  color: #111;
+}

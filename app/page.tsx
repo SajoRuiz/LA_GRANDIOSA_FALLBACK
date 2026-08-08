@@ -91,7 +91,13 @@ export default function HomePage() {
       <section className={styles.hero} id="top">
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>THE NEW MALL OF SAN JUAN DIGITAL AD SPACE IS NOW AVAILABLE.</p>
-          <h1>THE ONLY PREMIER DIGITAL LANDMARK IN PUERTO RICO</h1>
+          <h1>
+            THE ONLY<br />
+            PREMIER<br />
+            DIGITAL<br />
+            LANDMARK<br />
+            <span className={styles.heroLocation}>IN PUERTO RICO</span>
+          </h1>
           <div className={styles.orangeRule} />
           <p className={styles.heroLede}>
             A one-of-a-kind three-screen digital canvas, designed to give premium brands commanding visibility in a premium environment.
@@ -175,8 +181,9 @@ export default function HomePage() {
 
       <section className={`${styles.section} ${styles.ratesSection}`} id="rates">
         <div className={`${styles.sectionHeading} ${styles.narrow}`}>
-          <p className={styles.eyebrow}>HIGH-VALUE COMBINATIONS</p>
-          <h2>Premium formats designed to command attention.</h2>
+          <p className={styles.eyebrow}>PREMIUM FORMATS</p>
+          <h2>Built to command still and silent-video attention.</h2>
+          <p>Choose a format lane, then activate your ideal screen package with clear monthly pacing and premium daypart coverage.</p>
         </div>
         <div className={styles.ratesGrid}>
           <RateTable title="Still Image" rates={stillRates} />

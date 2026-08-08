@@ -552,6 +552,7 @@
   gap: 18px;
   min-height: 520px;
   padding: 30px 28px 28px;
+  color: #0b1638;
   background: var(--white);
   border: 1px solid rgba(210, 214, 226, 1);
   box-shadow: 0 20px 44px rgba(0, 0, 0, 0.12);

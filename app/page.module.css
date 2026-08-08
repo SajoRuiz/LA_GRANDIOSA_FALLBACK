@@ -702,13 +702,21 @@
   max-width: 720px;
 }
 
-.signatureCopy .button {
+.signatureActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
   margin-top: 20px;
+}
+
+.signatureCopy .button {
+  margin-top: 0;
 }
 
 .requestAccess {
   color: #0b1638;
-  margin-top: 12px;
+  margin-top: 0;
   padding-left: 0;
   justify-content: flex-start;
 }

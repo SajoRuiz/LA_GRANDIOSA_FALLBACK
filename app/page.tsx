@@ -234,12 +234,14 @@ export default function HomePage() {
           <p className={styles.eyebrow}>PLACE YOUR ORDER</p>
           <h3>Own the center. Frame the experience. Make the structure unmistakably yours.</h3>
           <p>Premium inventory is intentionally limited. Contact our sales team to place your order and confirm campaign availability.</p>
-          <Link className={`${styles.button} ${styles.primary}`} href={orderPath}>
-            PLACE ORDER
-          </Link>
-          <Link className={styles.requestAccess} href="mailto:ventas@lagrandiosapr.com?subject=Request%20Access%20-%20La%20Grandiosa">
-            Request Access
-          </Link>
+          <div className={styles.signatureActions}>
+            <Link className={`${styles.button} ${styles.primary}`} href={orderPath}>
+              PLACE ORDER
+            </Link>
+            <Link className={styles.requestAccess} href="mailto:ventas@lagrandiosapr.com?subject=Request%20Access%20-%20La%20Grandiosa">
+              Request Access
+            </Link>
+          </div>
         </div>
       </section>
 

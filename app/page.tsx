@@ -232,7 +232,12 @@ export default function HomePage() {
         </div>
         <div className={styles.signatureCopy}>
           <p className={styles.eyebrow}>PLACE YOUR ORDER</p>
-          <h3>Own the center. Frame the experience. Make the structure unmistakably yours.</h3>
+          <h3>
+            Own the center.<br />
+            Frame the experience.<br />
+            Make the structure<br />
+            unmistakably yours.
+          </h3>
           <p>Premium inventory is intentionally limited. Contact our sales team to place your order and confirm campaign availability.</p>
           <div className={styles.signatureActions}>
             <Link className={`${styles.button} ${styles.primary}`} href={orderPath}>

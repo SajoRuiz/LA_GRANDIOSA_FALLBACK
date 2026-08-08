@@ -1,0 +1,131 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(1.25rem, 3vw, 3rem);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(210, 38, 38, 0.15), transparent 42%),
+    radial-gradient(circle at 90% 20%, rgba(20, 90, 180, 0.2), transparent 38%),
+    linear-gradient(155deg, #f8fafc 0%, #eef2f7 42%, #f9f5f2 100%);
+  color: #0f172a;
+}
+
+.hero {
+  max-width: 960px;
+  margin: 0 auto;
+  border-radius: 24px;
+  padding: clamp(1.2rem, 3vw, 2.4rem);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+}
+
+.badge {
+  margin: 0 0 0.75rem;
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: #111827;
+  color: #f8fafc;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 5vw, 3rem);
+  line-height: 1.08;
+  max-width: 20ch;
+}
+
+.lead {
+  margin: 1rem 0 0;
+  max-width: 65ch;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.actions {
+  margin-top: 1.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.primaryButton,
+.secondaryButton,
+.inlineButton {
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.primaryButton {
+  background: #dc2626;
+  color: #fff;
+  padding: 0.85rem 1.15rem;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.28);
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  background: #b91c1c;
+}
+
+.secondaryButton {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.17);
+  padding: 0.85rem 1.15rem;
+}
+
+.secondaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.grid {
+  max-width: 960px;
+  margin: 1rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.card {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  padding: 1rem;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 1.03rem;
+}
+
+.card p {
+  margin: 0.7rem 0 0;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.flow {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.inlineButton {
+  margin-top: 0.85rem;
+  display: inline-block;
+  padding: 0.6rem 0.8rem;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  background: #fff;
+}
+
+.inlineButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.07);
+}

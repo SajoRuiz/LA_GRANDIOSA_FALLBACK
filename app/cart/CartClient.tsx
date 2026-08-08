@@ -40,8 +40,20 @@ export default function CartClient() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setItems(readContractCart());
-    setHydrated(true);
+    let isMounted = true;
+
+    queueMicrotask(() => {
+      if (!isMounted) {
+        return;
+      }
+
+      setItems(readContractCart());
+      setHydrated(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const lines = useMemo<ResolvedCartLine[]>(() => {

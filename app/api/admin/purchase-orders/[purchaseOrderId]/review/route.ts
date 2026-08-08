@@ -44,11 +44,17 @@ export async function POST(
     }
 
     const result = Array.isArray(data) ? data[0] : data;
-    const { data: order } = await admin
+    const orderId = result?.order_id;
+    if (!orderId) throw new Error("Purchase-order review did not return an order identifier.");
+
+    const { data: order, error: orderError } = await admin
       .from("orders")
       .select("client_snapshot,agency_accounts(display_name)")
-      .eq("id", result.order_id)
+      .eq("id", orderId)
       .single();
+    if (orderError || !order) {
+      throw new Error(orderError?.message ?? "Order snapshot was not found.");
+    }
 
     const client = (order.client_snapshot ?? {}) as Record<
       string,

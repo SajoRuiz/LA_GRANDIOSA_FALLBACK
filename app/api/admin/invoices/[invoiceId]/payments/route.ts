@@ -68,9 +68,8 @@ export async function POST(
       .select("order_id,client_snapshot,agency_snapshot")
       .eq("id", context.params.invoiceId)
       .single();
-
     if (invoiceError || !invoice) {
-      throw new Error(invoiceError?.message ?? "Invoice not found.");
+      throw new Error(invoiceError?.message ?? "Invoice snapshot was not found.");
     }
 
     const client = (invoice.client_snapshot ?? {}) as Record<

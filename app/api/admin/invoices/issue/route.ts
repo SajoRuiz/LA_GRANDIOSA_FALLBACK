@@ -40,11 +40,15 @@ export async function POST(request: NextRequest) {
     }
 
     const result = Array.isArray(data) ? data[0] : data;
-    const { data: order } = await admin
+    const { data: order, error: orderError } = await admin
       .from("orders")
       .select("client_snapshot,agency_accounts(display_name)")
       .eq("id", orderId)
       .single();
+    if (orderError || !order) {
+      throw new Error(orderError?.message ?? "Order snapshot was not found.");
+    }
+
     const client = (order.client_snapshot ?? {}) as Record<
       string,
       unknown

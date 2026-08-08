@@ -8,6 +8,12 @@ function getSupabaseRuntimeConfig() {
   return { url, key };
 }
 
+type SupabaseCookieMutation = {
+  name: string;
+  value: string;
+  options?: any;
+};
+
 export async function updateSupabaseSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -19,7 +25,7 @@ export async function updateSupabaseSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: SupabaseCookieMutation[]) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });

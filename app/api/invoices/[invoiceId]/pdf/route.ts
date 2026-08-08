@@ -14,11 +14,14 @@ export async function GET(
   try {
     await requireInvoiceViewerForApi(context.params.invoiceId);
     const admin = createSupabaseAdminClient();
-    const { data: invoice } = await admin
+    const { data: invoice, error: invoiceError } = await admin
       .from("invoices")
       .select("invoice_number")
       .eq("id", context.params.invoiceId)
       .single();
+    if (invoiceError || !invoice) {
+      throw new Error(invoiceError?.message ?? "Invoice was not found.");
+    }
 
     const bytes = await buildInvoicePdf(context.params.invoiceId);
 

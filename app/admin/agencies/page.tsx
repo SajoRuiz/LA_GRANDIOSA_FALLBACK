@@ -40,7 +40,10 @@ export default async function AgencyAdministrationPage() {
           />
         </Link>
         <div className={styles.headerNav}>
-          <Link href="/admin/credit">Credit administration</Link>
+          <Link href="/admin/credit">Credit</Link>
+          <Link href="/admin/purchase-orders">PO review</Link>
+          <Link href="/admin/invoices">Invoices</Link>
+          <Link href="/admin/remittance">Remittance</Link>
           <span className={styles.headerMeta}>
             {staff.profile.full_name} · {staff.staff.role.replaceAll("_", " ")}
           </span>

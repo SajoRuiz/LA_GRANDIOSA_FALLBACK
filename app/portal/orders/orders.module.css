@@ -1,0 +1,118 @@
+.page {
+  min-height: 100vh;
+  color: var(--white);
+  background:
+    radial-gradient(circle at 80% 4%, rgba(38, 60, 255, 0.2), transparent 34%),
+    var(--deep);
+}
+.header {
+  display: flex;
+  min-height: 84px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px clamp(20px, 5vw, 82px);
+  border-bottom: 1px solid rgba(183, 192, 255, 0.25);
+}
+.logo {
+  width: 230px;
+  height: 64px;
+  object-fit: cover;
+  object-position: center 45%;
+  mix-blend-mode: screen;
+}
+.header > a:last-child {
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.hero {
+  padding: 70px clamp(20px, 5vw, 82px) 38px;
+}
+.hero p {
+  margin: 0 0 12px;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+.hero h1 {
+  max-width: 900px;
+  margin: 0;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+.list {
+  display: grid;
+  gap: 20px;
+  padding: 0 clamp(20px, 5vw, 82px) 100px;
+}
+.card {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr auto;
+  gap: 28px;
+  align-items: center;
+  padding: 28px;
+  background: rgba(13, 24, 94, 0.94);
+  border: 1px solid rgba(88, 104, 217, 0.75);
+}
+.card p {
+  margin: 0 0 8px;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 900;
+}
+.card h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+.card dl {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 0;
+}
+.card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border-top: 1px solid rgba(183, 192, 255, 0.2);
+}
+.card dt {
+  color: var(--soft);
+}
+.card dd {
+  margin: 0;
+  text-transform: capitalize;
+  font-weight: 800;
+}
+.actions {
+  display: grid;
+  gap: 10px;
+}
+.actions a {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  color: var(--deep);
+  background: var(--orange);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+@media (max-width: 900px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+  .card dl {
+    grid-template-columns: 1fr;
+  }
+  .logo {
+    width: 165px;
+    height: 48px;
+  }
+}

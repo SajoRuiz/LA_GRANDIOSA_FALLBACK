@@ -2,10 +2,10 @@ import Link from "next/link";
 import { requireStaffAccess } from "@/lib/auth/access";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAgencyCreditSummary } from "@/lib/server/agency-credit";
-import CreditAdminClient from "../agencies/credit/CreditAdminClient";
-import styles from "../agencies/credit/credit.module.css";
+import CreditAdminClient from "./CreditAdminClient";
+import styles from "./credit.module.css";
 
-export default async function AdminCreditPage() {
+export default async function CreditAdministrationPage() {
   const staff = await requireStaffAccess("/admin/credit", [
     "finance",
     "system_admin",
@@ -48,6 +48,9 @@ export default async function AdminCreditPage() {
         </Link>
         <div className={styles.headerActions}>
           <Link href="/admin/agencies">Agency accounts</Link>
+          <Link href="/admin/purchase-orders">PO review</Link>
+          <Link href="/admin/invoices">Invoices</Link>
+          <Link href="/admin/remittance">Remittance</Link>
           <span>
             {staff.profile.full_name} · {staff.staff.role.replaceAll("_", " ")}
           </span>

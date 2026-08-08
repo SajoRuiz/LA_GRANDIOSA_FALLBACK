@@ -514,18 +514,26 @@
 }
 
 .packageSection {
-  background: #f6f1ea;
-  color: #0b1638;
+  padding-top: clamp(72px, 8vw, 112px);
+  padding-bottom: clamp(92px, 10vw, 136px);
+  background: var(--deep);
+  color: var(--white);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .packageSection .sectionHeading {
-  margin-bottom: 42px;
+  margin-bottom: 52px;
 }
 
 .packageSection .sectionHeading h2 {
   max-width: none;
   font-size: clamp(2.8rem, 4.9vw, 5.4rem);
   line-height: 0.94;
+  color: var(--white);
+}
+
+.packageSection .sectionHeading > p:last-child {
+  color: rgba(232, 236, 255, 0.72);
 }
 
 .packagesTitle {
@@ -536,21 +544,21 @@
 .packageGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 20px;
 }
 
 .packageCard {
   display: grid;
-  gap: 14px;
-  min-height: 480px;
-  padding: 24px 24px 26px;
+  gap: 18px;
+  min-height: 520px;
+  padding: 30px 28px 28px;
   background: var(--white);
   border: 1px solid rgba(210, 214, 226, 1);
-  box-shadow: 0 16px 38px rgba(10, 16, 52, 0.08);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.12);
 }
 
 .featured {
-  background: #101c82;
+  background: #20288e;
   color: var(--white);
   border-color: var(--orange);
 }
@@ -572,26 +580,26 @@
 
 .packageCard h3 {
   margin: 0;
-  font-size: 22px;
-  line-height: 1.05;
+  font-size: clamp(2rem, 2vw, 2.45rem);
+  line-height: 1.08;
 }
 
 .packageItem + .packageItem {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .packageItem h4 {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   color: #0b1638;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
 }
 
 .packageItem p {
   margin: 0;
   color: rgba(11, 22, 56, 0.72);
-  font-size: 12px;
-  letter-spacing: 0.06em;
+  font-size: 13px;
+  letter-spacing: 0.02em;
   text-transform: none;
 }
 
@@ -600,19 +608,19 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 14px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .packageItem span {
   color: rgba(11, 22, 56, 0.55);
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0;
   text-transform: none;
 }
 
 .packageItem strong {
   color: #0b1638;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .packageButton {
@@ -626,6 +634,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 8vw;
   align-items: center;
+  padding-top: clamp(54px, 7vw, 92px);
+  padding-bottom: clamp(40px, 5vw, 72px);
   background: #f6f1ea;
   color: #0b1638;
   scroll-margin-top: 92px;

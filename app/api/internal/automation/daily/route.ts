@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { automationRequestIsAuthorized } from "@/lib/server/cron-auth";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { processNotificationOutbox } from "@/lib/server/notification-delivery";
+import { queueOperationalReminders } from "@/lib/server/reminder-automation";
 import { withAutomationLock } from "@/lib/server/automation-lock";
 
 export const runtime = "nodejs";
@@ -11,57 +12,51 @@ export const dynamic = "force-dynamic";
 async function run(request: NextRequest) {
   if (!(await automationRequestIsAuthorized(request))) {
     return NextResponse.json(
-      { error: "Notification-worker authorization required." },
+      { error: "Automation authorization required." },
       { status: 401 },
     );
   }
 
-  const config = getCommerceServerConfig();
-  const body = (await request.json().catch(() => ({}))) as Record<
-    string,
-    unknown
-  >;
-  const requestedLimit = Number(
-    body.limit ?? config.notificationBatchSize,
-  );
-  const limit = Math.max(1, Math.min(requestedLimit, 100));
-
   try {
-    const locked = await withAutomationLock(
-      "notification-delivery",
-      90,
-      () => processNotificationOutbox(limit),
+    const result = await withAutomationLock(
+      "daily-commerce-automation",
+      240,
+      async () => {
+        const queued = await queueOperationalReminders();
+        const config = getCommerceServerConfig();
+        const delivered = await processNotificationOutbox(
+          config.notificationBatchSize,
+        );
+        return { queued, delivered };
+      },
     );
 
-    if (!locked.acquired) {
+    if (!result.acquired) {
       return NextResponse.json({
         ok: true,
         skipped: true,
-        reason: "Another notification worker is active.",
+        reason: "Another daily automation worker is active.",
       });
     }
 
-    return NextResponse.json({
-      ok: true,
-      ...locked.result,
-    });
+    return NextResponse.json({ ok: true, ...result.result });
   } catch (error) {
     return NextResponse.json(
       {
         error:
           error instanceof Error
             ? error.message
-            : "Notification processing failed.",
+            : "Daily automation failed.",
       },
       { status: 500 },
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   return run(request);
 }
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   return run(request);
 }

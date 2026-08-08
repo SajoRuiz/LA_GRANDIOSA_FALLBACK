@@ -81,7 +81,7 @@ function uploadTus(file: File, tokenInfo: { endpoint: string; bucket: string; pa
   });
 }
 
-export default function AssetUploadClient({ orderId, orderNumber, orderStatus, slots }: { orderId: string; orderNumber: string; orderStatus: string; slots: Slot[] }) {
+export default function AssetUploadClient({ orderId, orderNumber, orderStatus, assetDueAt, assetDueNote, slots }: { orderId: string; orderNumber: string; orderStatus: string; assetDueAt: string; assetDueNote: string; slots: Slot[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Record<string, File | undefined>>({});
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
@@ -136,6 +136,10 @@ export default function AssetUploadClient({ orderId, orderNumber, orderStatus, s
   }
 
   return <div className={styles.workspace}>
+    {assetDueAt ? <aside className={styles.deadline}>
+      <div><p>FINAL ASSET DEADLINE</p><strong>{new Date(assetDueAt).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}</strong></div>
+      {assetDueNote ? <span>{assetDueNote}</span> : null}
+    </aside> : <aside className={styles.deadlineMissing}>The processing team has not assigned a final asset deadline yet.</aside>}
     {error ? <p className={styles.error}>{error}</p> : null}
     {message ? <p className={styles.success}>{message}</p> : null}
     <section className={styles.slots}>

@@ -3,21 +3,18 @@ import { Webhook } from "svix";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-type ResendWebhookEvent = {
-  type?: string;
-  data?: {
-    email_id?: string;
-    id?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-};
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
     const config = getCommerceServerConfig();
-    if (!config.resendApiKey || !config.resendWebhookSecret) {
-      return NextResponse.json({ error: "Resend webhook is not configured." }, { status: 503 });
+
+    if (!config.resendWebhookSecret) {
+      return NextResponse.json(
+        { error: "Resend webhook is not configured." },
+        { status: 503 },
+      );
     }
 
     const payload = await request.text();
@@ -26,29 +23,59 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("svix-signature");
 
     if (!id || !timestamp || !signature) {
-      return new NextResponse("Missing webhook headers", { status: 400 });
+      return new NextResponse("Missing webhook headers", {
+        status: 400,
+      });
     }
 
-    const webhook = new Webhook(config.resendWebhookSecret);
-    const event = webhook.verify(payload, {
+    const verifier = new Webhook(config.resendWebhookSecret);
+    const event = verifier.verify(payload, {
       "svix-id": id,
       "svix-timestamp": timestamp,
       "svix-signature": signature,
-    }) as ResendWebhookEvent;
+    }) as Record<string, any>;
 
-    const messageId = event.data?.email_id ?? event.data?.id;
-    if (messageId) {
-      const admin = createSupabaseAdminClient();
-      await admin.from("notification_outbox").update({
-        provider_status: String(event.type ?? "unknown"),
-        provider_payload: event,
-        delivered_at: event.type === "email.delivered" ? new Date().toISOString() : undefined,
-        last_error: ["email.bounced", "email.failed", "email.complained"].includes(event.type ?? "") ? String(event.type) : null,
-      }).eq("provider", "resend").eq("provider_message_id", String(messageId));
+    const messageId = String(
+      event?.data?.email_id ?? event?.data?.id ?? "",
+    );
+    const eventType = String(event?.type ?? "unknown");
+    const errorCode = String(
+      event?.data?.bounce?.message ??
+        event?.data?.error?.message ??
+        event?.data?.reason ??
+        "",
+    );
+
+    const admin = createSupabaseAdminClient();
+    const { error } = await admin.rpc(
+      "record_notification_provider_event",
+      {
+        p_provider: "resend",
+        p_provider_event_id: id,
+        p_provider_message_id: messageId,
+        p_event_type: eventType,
+        p_error_code: errorCode,
+        p_payload: event,
+        p_occurred_at: event?.created_at
+          ? new Date(event.created_at).toISOString()
+          : null,
+      },
+    );
+
+    if (error) {
+      throw new Error(error.message);
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid Resend webhook." }, { status: 400 });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Invalid Resend webhook.",
+      },
+      { status: 400 },
+    );
   }
 }

@@ -61,6 +61,7 @@
   font-size: clamp(2.6rem, 5.8vw, 5.4rem);
   line-height: 0.92;
   letter-spacing: -0.055em;
+  white-space: nowrap;
   text-transform: uppercase;
 }
 

@@ -502,7 +502,7 @@
   font-size: 11px;
 }
 
-.accentPrice {
+.rateRow .accentPrice {
   color: var(--orange);
 }
 

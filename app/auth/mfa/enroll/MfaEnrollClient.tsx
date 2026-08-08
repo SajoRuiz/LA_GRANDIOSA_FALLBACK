@@ -49,7 +49,7 @@ export default function MfaEnrollClient({
       }
 
       const unverifiedFactors = factors.totp.filter(
-        (factor) => factor.status === "unverified",
+        (factor) => String(factor.status) === "unverified",
       );
 
       for (const factor of unverifiedFactors) {

@@ -98,20 +98,37 @@
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   overflow: hidden;
-  background: var(--deep);
+  position: relative;
+  background: url("/la-grandiosa-hero.png") center / cover no-repeat;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(3, 10, 63, 0.9) 0%,
+    rgba(3, 10, 63, 0.78) 34%,
+    rgba(3, 10, 63, 0.54) 58%,
+    rgba(3, 10, 63, 0.18) 78%,
+    rgba(3, 10, 63, 0.02) 100%
+  );
+  pointer-events: none;
 }
 
 .heroCopy {
   position: relative;
   padding: clamp(64px, 7vw, 112px) clamp(24px, 4vw, 56px) clamp(56px, 6vw, 86px);
-  background: linear-gradient(90deg, rgba(3, 10, 63, 0.96), rgba(3, 10, 63, 0.86) 72%, rgba(3, 10, 63, 0.26));
+  background: transparent;
+  z-index: 1;
 }
 
 .heroCopy::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(3, 10, 63, 0.18), rgba(3, 10, 63, 0.66));
+  background: linear-gradient(180deg, rgba(3, 10, 63, 0.08), rgba(3, 10, 63, 0.5));
 }
 
 .heroCopy > * {
@@ -175,7 +192,8 @@
 
 .heroImage {
   min-height: 100%;
-  background: linear-gradient(90deg, rgba(3, 10, 63, 0.28), rgba(3, 10, 63, 0.04)), url("/la-grandiosa-hero.png") center / cover no-repeat;
+  background: transparent;
+  z-index: 1;
 }
 
 .section {

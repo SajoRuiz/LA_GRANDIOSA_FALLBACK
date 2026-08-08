@@ -116,8 +116,8 @@ export default function HomePage() {
         </div>
         <div className={styles.videoGrid}>
           <article className={styles.videoCard}>
-            <video controls playsInline preload="metadata" poster="/la-grandiosa-experience-poster.jpg" aria-label="La Grandiosa arrival experience video">
-              <source src="/la-grandiosa-experience.mp4" type="video/mp4" />
+            <video controls playsInline preload="metadata" poster="/la-grandiosa-tour-poster.jpg" aria-label="La Grandiosa arrival experience video">
+              <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
               Your browser does not support embedded video.
             </video>
             <div className={styles.videoCaption}>
@@ -129,8 +129,8 @@ export default function HomePage() {
             </div>
           </article>
           <article className={styles.videoCard}>
-            <video controls playsInline preload="metadata" poster="/la-grandiosa-tour-poster.jpg" aria-label="La Grandiosa location tour video">
-              <source src="/la-grandiosa-tour.mp4" type="video/mp4" />
+            <video controls playsInline preload="metadata" poster="/la-grandiosa-experience-poster.jpg" aria-label="La Grandiosa location tour video">
+              <source src="/la-grandiosa-experience.mp4" type="video/mp4" />
               Your browser does not support embedded video.
             </video>
             <div className={styles.videoCaption}>

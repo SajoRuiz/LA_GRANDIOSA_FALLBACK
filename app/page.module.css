@@ -104,9 +104,7 @@
 .heroCopy {
   position: relative;
   padding: clamp(64px, 7vw, 112px) clamp(24px, 4vw, 56px) clamp(56px, 6vw, 86px);
-  background:
-    linear-gradient(90deg, rgba(3, 10, 63, 0.96), rgba(3, 10, 63, 0.78) 75%, rgba(3, 10, 63, 0.12)),
-    url("/la-grandiosa.jpg") center / cover no-repeat;
+  background: linear-gradient(90deg, rgba(3, 10, 63, 0.96), rgba(3, 10, 63, 0.86) 72%, rgba(3, 10, 63, 0.26));
 }
 
 .heroCopy::after {

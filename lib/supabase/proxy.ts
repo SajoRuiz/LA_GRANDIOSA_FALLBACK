@@ -11,7 +11,7 @@ function getSupabaseRuntimeConfig() {
 type SupabaseCookieMutation = {
   name: string;
   value: string;
-  options?: any;
+  options?: Record<string, unknown>;
 };
 
 export async function updateSupabaseSession(request: NextRequest) {

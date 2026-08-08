@@ -11,7 +11,7 @@ function getSupabaseRuntimeConfig() {
 type SupabaseCookieMutation = {
   name: string;
   value: string;
-  options?: any;
+  options?: Record<string, unknown>;
 };
 
 export async function createSupabaseServerClient() {
@@ -25,14 +25,9 @@ export async function createSupabaseServerClient() {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet: SupabaseCookieMutation[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch {
-            // Server Components cannot always write cookies. The root Proxy
-            // refreshes the session and persists refreshed cookies instead.
-          }
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options as never);
+          });
         },
       },
     });

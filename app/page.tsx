@@ -194,7 +194,7 @@ export default function HomePage() {
       <section className={`${styles.section} ${styles.packageSection}`} id="packages">
         <div className={styles.sectionHeading}>
           <p className={styles.eyebrow}>A CLEAR PATH TO OWNERSHIP</p>
-          <h2>Seven packages. Three levels of impact.</h2>
+          <h2 className={styles.packagesTitle}>Seven packages. Three<br />levels of impact.</h2>
           <p>Move from a strong architectural frame to complete three-screen ownership.</p>
         </div>
         <div className={styles.packageGrid}>

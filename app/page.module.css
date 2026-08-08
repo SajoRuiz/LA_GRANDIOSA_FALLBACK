@@ -58,6 +58,10 @@
   text-transform: uppercase;
 }
 
+.mainNav .navCta {
+  color: #000000;
+}
+
 .navCta,
 .button,
 .requestAccess {
@@ -430,7 +434,11 @@
 }
 
 .ratesTitle {
-  max-width: 12ch;
+  display: inline-block;
+  max-width: none;
+  white-space: nowrap;
+  font-size: clamp(2.8rem, 4.7vw, 5.2rem);
+  line-height: 0.94;
 }
 
 .rateCard {
@@ -515,9 +523,14 @@
 }
 
 .packageSection .sectionHeading h2 {
-  max-width: 11ch;
-  font-size: clamp(2.8rem, 4.6vw, 5.2rem);
-  line-height: 0.95;
+  max-width: none;
+  font-size: clamp(2.8rem, 4.9vw, 5.4rem);
+  line-height: 0.94;
+}
+
+.packagesTitle {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .packageGrid {
@@ -757,6 +770,11 @@
 
   .ratesTitle {
     max-width: none;
+    white-space: normal;
+  }
+
+  .packagesTitle {
+    white-space: normal;
   }
 }
 

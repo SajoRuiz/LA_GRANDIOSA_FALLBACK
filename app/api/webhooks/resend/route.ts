@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Webhook } from "svix";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -28,14 +29,14 @@ export async function POST(request: NextRequest) {
       return new NextResponse("Missing webhook headers", { status: 400 });
     }
 
-    let event: ResendWebhookEvent = {};
-    try {
-      event = JSON.parse(payload) as ResendWebhookEvent;
-    } catch {
-      return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
-    }
+    const webhook = new Webhook(config.resendWebhookSecret);
+    const event = webhook.verify(payload, {
+      "svix-id": id,
+      "svix-timestamp": timestamp,
+      "svix-signature": signature,
+    }) as ResendWebhookEvent;
 
-    const messageId = event?.data?.email_id ?? event?.data?.id;
+    const messageId = event.data?.email_id ?? event.data?.id;
     if (messageId) {
       const admin = createSupabaseAdminClient();
       await admin.from("notification_outbox").update({

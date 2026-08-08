@@ -63,11 +63,16 @@ export async function POST(
     }
 
     const result = Array.isArray(data) ? data[0] : data;
-    const { data: invoice } = await admin
+    const { data: invoice, error: invoiceError } = await admin
       .from("invoices")
       .select("order_id,client_snapshot,agency_snapshot")
       .eq("id", context.params.invoiceId)
       .single();
+
+    if (invoiceError || !invoice) {
+      throw new Error(invoiceError?.message ?? "Invoice not found.");
+    }
+
     const client = (invoice.client_snapshot ?? {}) as Record<
       string,
       unknown

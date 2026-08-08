@@ -228,9 +228,9 @@ export async function POST(request: NextRequest) {
     if (error instanceof CommerceConfigurationError) {
       return NextResponse.json(
         {
-          error:
-            "Commerce storage is not configured. Add the Supabase environment variables before submitting an order.",
+          error: `Commerce storage is not configured. ${error.message}`,
           code: "COMMERCE_NOT_CONFIGURED",
+          detail: error.message,
         },
         { status: 503 },
       );

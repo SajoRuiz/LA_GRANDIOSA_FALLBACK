@@ -45,8 +45,20 @@ export default function ClientInformationForm() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setItems(readContractCart());
-    setHydrated(true);
+    let isMounted = true;
+
+    queueMicrotask(() => {
+      if (!isMounted) {
+        return;
+      }
+
+      setItems(readContractCart());
+      setHydrated(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const lines = useMemo<ResolvedLine[]>(() => {

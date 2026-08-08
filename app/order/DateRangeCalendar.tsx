@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import styles from "./order.module.css";
 
-const DAY_MS = 86_400_000;
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 interface DateRangeCalendarProps {
@@ -41,10 +40,6 @@ function addMonths(date: Date, months: number): Date {
       1,
     ),
   );
-}
-
-function addDays(date: Date, days: number): Date {
-  return new Date(date.getTime() + days * DAY_MS);
 }
 
 function monthLabel(date: Date): string {

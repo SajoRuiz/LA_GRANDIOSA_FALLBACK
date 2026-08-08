@@ -139,7 +139,7 @@
 .heroCopy h1 {
   margin: 0;
   max-width: 8ch;
-  font-size: clamp(3.4rem, 8vw, 7.4rem);
+  font-size: clamp(2.72rem, 6.4vw, 5.92rem);
   line-height: 0.88;
   letter-spacing: -0.07em;
   text-transform: uppercase;
@@ -229,7 +229,7 @@
 .signatureCopy h3,
 .signaturePanel h2 {
   margin: 0;
-  font-size: clamp(2.8rem, 4.4vw, 5.4rem);
+  font-size: clamp(2.24rem, 3.52vw, 4.32rem);
   line-height: 0.96;
   letter-spacing: -0.06em;
 }
@@ -289,7 +289,7 @@
 .videoCaption h3 {
   margin: 0 0 6px;
   color: #0b1638;
-  font-size: 21px;
+  font-size: 17px;
 }
 
 .canvasSection,
@@ -441,7 +441,7 @@
 
 .rateTitleRow h3 {
   margin: 0;
-  font-size: 28px;
+  font-size: 22px;
 }
 
 .rateTitleRow span {
@@ -536,7 +536,7 @@
 
 .packageCard h3 {
   margin: 0;
-  font-size: 28px;
+  font-size: 22px;
   line-height: 1.05;
 }
 
@@ -547,7 +547,7 @@
 .packageItem h4 {
   margin: 0 0 6px;
   color: #0b1638;
-  font-size: 15px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -654,9 +654,10 @@
 }
 
 .footerInner {
-  width: min(1440px, calc(100% - 44px));
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
-  padding: 34px 0 38px;
+  padding: 34px clamp(24px, 4vw, 72px) 38px;
   display: grid;
   grid-template-columns: 1.25fr 1fr 1fr;
   gap: clamp(20px, 4vw, 54px);
@@ -770,9 +771,14 @@
   .screenDiagram,
   .ratesGrid,
   .packageGrid,
-  .signature,
-  .footerInner {
+  .signature {
     width: min(1440px, calc(100% - 24px));
+  }
+
+  .footerInner {
+    width: 100%;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .rateRow {

@@ -111,7 +111,7 @@
 .intro h1,
 .card h1 {
   margin: 0 0 24px;
-  font-size: clamp(3rem, 6.4vw, 7rem);
+  font-size: clamp(2.4rem, 5.12vw, 5.6rem);
   line-height: 0.9;
   letter-spacing: -0.055em;
   text-transform: uppercase;
@@ -123,6 +123,16 @@
   color: var(--lg-mist);
   font-size: clamp(1rem, 1.3vw, 1.12rem);
   line-height: 1.68;
+}
+
+.helper a {
+  color: var(--lg-white);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.helper a:hover {
+  color: var(--lg-orange);
 }
 
 .card {

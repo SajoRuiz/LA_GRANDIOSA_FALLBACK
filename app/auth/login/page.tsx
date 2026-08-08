@@ -82,7 +82,7 @@ export default async function LoginPage({
           </form>
 
           <p className={styles.helper}>
-            Accounts are invite-only. Contact ventas@lagrandiosapr.com if your
+            Accounts are invite-only. Contact <a href="mailto:ventas@lagrandiosapr.com">ventas@lagrandiosapr.com</a> if your
             agency needs access or account recovery assistance.
           </p>
         </section>

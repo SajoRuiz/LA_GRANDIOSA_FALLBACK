@@ -124,29 +124,17 @@ export default function ClientInformationForm() {
         body: JSON.stringify({ client, cartItems: items }),
       });
 
-      const text = await response.text();
-      let result: DraftOrderResponse | undefined;
-
-      try {
-        result = text ? (JSON.parse(text) as DraftOrderResponse) : undefined;
-      } catch {
-        result = undefined;
-      }
+      const result = (await response.json()) as DraftOrderResponse;
 
       if (!response.ok) {
         throw new Error(
-          result?.error || text || "The order information could not be saved.",
-        );
-      }
-
-      if (!result) {
-        throw new Error(
-          "The order service returned an unexpected response.",
+          result.error || "The order information could not be saved.",
         );
       }
 
       clearContractCart();
       const query = new URLSearchParams({
+        id: result.orderId,
         order: result.orderNumber,
         credit: result.creditStatus,
         available: String(result.availableCreditAfterCents ?? 0),
@@ -401,9 +389,9 @@ export default function ClientInformationForm() {
         </div>
 
         <p className={styles.notice}>
-          Saving this form creates a secure order record and queues the first
-          customer and processing-team notifications. It does not charge a
-          payment method. Contract acceptance and payment follow in Stage 3B.
+          Saving this form creates a secure agency order and credit hold.
+          The next step is a private purchase-order PDF upload,
+          processing-team approval, and invoice issuance.
         </p>
       </aside>
     </form>

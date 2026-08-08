@@ -1,0 +1,153 @@
+.page {
+  min-height: 100vh;
+  color: var(--white);
+  background:
+    radial-gradient(circle at 80% 4%, rgba(38, 60, 255, 0.2), transparent 34%),
+    var(--deep);
+}
+.header {
+  display: flex;
+  min-height: 84px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px clamp(20px, 5vw, 82px);
+  border-bottom: 1px solid rgba(183, 192, 255, 0.25);
+}
+.logo {
+  width: 230px;
+  height: 64px;
+  object-fit: cover;
+  object-position: center 45%;
+  mix-blend-mode: screen;
+}
+.header nav {
+  display: flex;
+  gap: 12px;
+}
+.header nav a {
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.hero {
+  padding: 70px clamp(20px, 5vw, 82px) 38px;
+}
+.hero p {
+  margin: 0 0 12px;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+.hero h1 {
+  margin: 0;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+.list {
+  display: grid;
+  gap: 20px;
+  padding: 0 clamp(20px, 5vw, 82px) 100px;
+}
+.card {
+  padding: 30px;
+  background: rgba(13, 24, 94, 0.94);
+  border: 1px solid rgba(88, 104, 217, 0.75);
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+.heading p {
+  margin: 0;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 900;
+}
+.heading h2 {
+  margin: 8px 0 0;
+  font-size: 2rem;
+}
+.heading > strong {
+  color: var(--orange);
+  font-size: 2rem;
+}
+.card dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 25px 0;
+}
+.card dl div {
+  padding: 12px;
+  border-top: 1px solid rgba(183, 192, 255, 0.22);
+}
+.card dt {
+  color: var(--soft);
+}
+.card dd {
+  margin: 5px 0 0;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+.card a {
+  color: var(--orange);
+}
+.card label {
+  display: grid;
+  gap: 8px;
+}
+.card label span {
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.card textarea {
+  padding: 12px;
+  color: white;
+  background: #071053;
+  border: 1px solid var(--line);
+  font: inherit;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.actions button {
+  min-height: 46px;
+  padding: 0 17px;
+  color: var(--deep);
+  background: var(--orange);
+  border: 0;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.actions .decline {
+  color: white;
+  background: #8f2037;
+}
+.error {
+  padding: 14px;
+  background: #7d1d32;
+}
+@media (max-width: 800px) {
+  .card dl {
+    grid-template-columns: 1fr;
+  }
+  .heading {
+    display: grid;
+  }
+  .logo {
+    width: 165px;
+    height: 48px;
+  }
+  .header nav {
+    display: none;
+  }
+}

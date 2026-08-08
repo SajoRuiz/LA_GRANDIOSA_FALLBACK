@@ -1,6 +1,8 @@
 import Link from "next/link";
+
 import { requireAgencyPurchaseAccess } from "@/lib/auth/access";
 import { getAgencyCreditSummary } from "@/lib/server/agency-credit";
+
 import styles from "./portal.module.css";
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -22,15 +24,16 @@ export default async function AgencyPortalPage() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link href="/" aria-label="Return to La Grandiosa home">
+        <Link href="/">
           <img
             className={styles.logo}
             src="/la-grandiosa-logo.png"
             alt="La Grandiosa"
           />
         </Link>
-
         <div className={styles.headerActions}>
+          <Link href="/portal/orders">Orders</Link>
+          <Link href="/portal/invoices">Invoices</Link>
           <Link href="/cart">Contract cart</Link>
           <form action="/auth/signout" method="post">
             <button className={styles.signout} type="submit">
@@ -41,39 +44,23 @@ export default async function AgencyPortalPage() {
       </header>
 
       <section className={styles.hero}>
-        <p className={styles.eyebrow}>SECURE AGENCY PORTAL</p>
-        <h1>Welcome, {access.profile.full_name}.</h1>
+        <p className={styles.eyebrow}>PRIVATE AGENCY PORTAL</p>
+        <h1>{access.agency.display_name}</h1>
         <p>
-          Your authenticated session is connected to {access.agency.display_name}.
-          Negotiated pricing and credit availability are now active for every
-          protected order.
+          Account {access.agency.account_number} · Authorized buyer{" "}
+          {access.profile.full_name}
         </p>
       </section>
 
       <section className={styles.grid}>
         <article className={`${styles.card} ${styles.cardFeatured}`}>
-          <p className={styles.eyebrow}>PURCHASE</p>
-          <h2>Build a new campaign contract.</h2>
-          <p className={styles.note}>
-            Select campaign dates, add multiple advertising combinations, and
-            review negotiated pricing before submitting client information.
-          </p>
-          <Link className={styles.primaryButton} href="/order">
-            Place order
-          </Link>
-        </article>
-
-        <article className={styles.card}>
-          <p className={styles.eyebrow}>AGENCY ACCOUNT</p>
-          <h2>{access.agency.display_name}</h2>
+          <h2>Build a campaign</h2>
           <dl className={styles.details}>
             <div>
-              <dt>Account number</dt>
-              <dd>{access.agency.account_number}</dd>
-            </div>
-            <div>
               <dt>Negotiated discount</dt>
-              <dd>{percentage(access.agency.discount_basis_points)}</dd>
+              <dd>
+                {percentage(access.agency.discount_basis_points)}
+              </dd>
             </div>
             <div>
               <dt>Payment terms</dt>
@@ -84,58 +71,68 @@ export default async function AgencyPortalPage() {
               <dd>{access.agency.po_required ? "Yes" : "No"}</dd>
             </div>
           </dl>
+          <Link className={styles.primaryButton} href="/order">
+            Place agency order
+          </Link>
         </article>
 
         <article className={`${styles.card} ${styles.creditCard}`}>
-          <p className={styles.eyebrow}>CREDIT POSITION</p>
-          <h2>{currency.format(credit.availableCreditCents / 100)} available</h2>
+          <h2>Available credit</h2>
           <dl className={styles.details}>
             <div>
-              <dt>Approved credit</dt>
-              <dd>{currency.format(credit.approvedCreditLimitCents / 100)}</dd>
+              <dt>Approved limit</dt>
+              <dd>
+                {currency.format(
+                  credit.approvedCreditLimitCents / 100,
+                )}
+              </dd>
             </div>
             <div>
-              <dt>Ledger exposure</dt>
-              <dd>{currency.format(credit.ledgerExposureCents / 100)}</dd>
+              <dt>Current exposure</dt>
+              <dd>
+                {currency.format(credit.currentExposureCents / 100)}
+              </dd>
             </div>
             <div>
-              <dt>Active order holds</dt>
-              <dd>{currency.format(credit.activeHoldExposureCents / 100)}</dd>
-            </div>
-            <div>
-              <dt>Pending exceptions</dt>
-              <dd>{currency.format(credit.pendingExceptionCents / 100)}</dd>
+              <dt>Available credit</dt>
+              <dd>
+                {currency.format(credit.availableCreditCents / 100)}
+              </dd>
             </div>
           </dl>
-          <p className={styles.note}>
-            Credit holds are created when an order is submitted. A purchase
-            above available credit is routed to finance for review.
-          </p>
+          <Link
+            className={styles.secondaryButton}
+            href="/portal/orders"
+          >
+            View orders and POs
+          </Link>
         </article>
 
         <article className={styles.card}>
-          <p className={styles.eyebrow}>SECURITY</p>
-          <h2>Account protection active.</h2>
-          <dl className={styles.details}>
-            <div>
-              <dt>Username</dt>
-              <dd>{access.profile.username}</dd>
-            </div>
-            <div>
-              <dt>Agency role</dt>
-              <dd>{access.membership.role.replaceAll("_", " ")}</dd>
-            </div>
-            <div>
-              <dt>Authenticator</dt>
-              <dd>Verified</dd>
-            </div>
-            <div>
-              <dt>Purchasing</dt>
-              <dd>{access.membership.can_purchase ? "Enabled" : "Disabled"}</dd>
-            </div>
-          </dl>
-          <Link className={styles.secondaryButton} href="/">
-            View public website
+          <h2>Invoices</h2>
+          <p className={styles.note}>
+            Review invoices, secure bank remittance instructions,
+            due dates, balances, and downloadable PDFs.
+          </p>
+          <Link
+            className={styles.secondaryButton}
+            href="/portal/invoices"
+          >
+            Open invoice center
+          </Link>
+        </article>
+
+        <article className={styles.card}>
+          <h2>Account security</h2>
+          <p className={styles.note}>
+            Purchasing requires an active agency membership and a
+            verified authenticator session.
+          </p>
+          <Link
+            className={styles.secondaryButton}
+            href="/auth/mfa/challenge?next=/portal"
+          >
+            Verify security
           </Link>
         </article>
       </section>

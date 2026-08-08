@@ -1,8 +1,11 @@
 import Link from "next/link";
+
 import { requireAgencyPurchaseAccess } from "@/lib/auth/access";
+
 import styles from "./received.module.css";
 
 type ReceivedSearchParams = {
+  id?: string | string[];
   order?: string | string[];
   credit?: string | string[];
   available?: string | string[];
@@ -24,12 +27,16 @@ export default async function ClientInformationReceivedPage({
 }: {
   searchParams: ReceivedSearchParams;
 }) {
-  const access = await requireAgencyPurchaseAccess("/checkout/received");
-  const params = searchParams;
-  const orderNumber = firstValue(params.order);
-  const creditStatus = firstValue(params.credit);
-  const availableCredit = Number(firstValue(params.available) || 0);
-  const shortfall = Number(firstValue(params.shortfall) || 0);
+  const access = await requireAgencyPurchaseAccess(
+    "/checkout/received",
+  );
+  const orderId = firstValue(searchParams.id);
+  const orderNumber = firstValue(searchParams.order);
+  const creditStatus = firstValue(searchParams.credit);
+  const availableCredit = Number(
+    firstValue(searchParams.available) || 0,
+  );
+  const shortfall = Number(firstValue(searchParams.shortfall) || 0);
   const reviewRequired = creditStatus === "review_required";
 
   return (
@@ -59,33 +66,48 @@ export default async function ClientInformationReceivedPage({
         ) : null}
 
         <p>
-          The order is linked to {access.agency.display_name} and purchaser{" "}
-          {access.profile.full_name}. Negotiated pricing was applied from the
-          approved agency account.
+          The order is linked to {access.agency.display_name} and
+          purchaser {access.profile.full_name}. Negotiated pricing was
+          applied from the approved agency account.
         </p>
 
         <aside className={styles.notice}>
           {reviewRequired ? (
             <>
-              The requested contract exceeds currently available credit by{" "}
-              <strong>{currency.format(shortfall / 100)}</strong>. The request
-              has been sent to processing@lagrandiosapr.com for a manual credit
-              exception decision. No purchase order or invoice has been issued
-              yet.
+              The requested contract exceeds currently available
+              credit by{" "}
+              <strong>{currency.format(shortfall / 100)}</strong>.
+              The finance team will review the exception. You may
+              submit the purchase order while the credit review is
+              pending, but it cannot be approved until credit is
+              authorized.
             </>
           ) : (
             <>
-              The contract is within the approved credit limit. Projected
-              available credit after this hold is{" "}
-              <strong>{currency.format(availableCredit / 100)}</strong>. The
-              purchase-order upload and invoice workflow opens in Stage 3B-C.
+              The contract is within the approved credit limit.
+              Projected available credit after this hold is{" "}
+              <strong>
+                {currency.format(availableCredit / 100)}
+              </strong>
+              . Upload the agency purchase order to continue.
             </>
           )}
         </aside>
 
         <div className={styles.actions}>
-          <Link className={styles.primaryButton} href="/portal">
-            Return to agency portal
+          {orderId ? (
+            <Link
+              className={styles.primaryButton}
+              href={`/portal/orders/${orderId}/purchase-order`}
+            >
+              Upload purchase order
+            </Link>
+          ) : null}
+          <Link
+            className={styles.secondaryButton}
+            href="/portal/orders"
+          >
+            View agency orders
           </Link>
           <Link className={styles.secondaryButton} href="/order">
             Start another order

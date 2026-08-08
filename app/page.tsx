@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./page.module.css";
+import { withNext } from "@/lib/auth/paths";
 
 const videoHighlights = [
   {
@@ -46,9 +47,6 @@ export default function HomePage() {
         <Link href="/" aria-label="La Grandiosa home">
           <img className={styles.logo} src="/la-grandiosa-logo.png" alt="La Grandiosa" />
         </Link>
-        <nav className={styles.headerActions} aria-label="Homepage actions">
-          <Link href="/portal">Agency portal</Link>
-        </nav>
       </header>
 
       <section className={styles.hero}>
@@ -62,7 +60,7 @@ export default function HomePage() {
           </p>
 
           <div className={styles.actions}>
-            <Link className={styles.primaryButton} href="/portal">
+            <Link className={styles.primaryButton} href={withNext("/auth/login", "/portal") }>
               PLACE ORDER
             </Link>
             <Link className={styles.secondaryButton} href="#packages">
@@ -139,10 +137,10 @@ export default function HomePage() {
         <div className={styles.grid}>
           <article className={styles.card}>
             <h2>How it works</h2>
-            <p className={styles.flow}>PLACE ORDER → Private portal → /portal</p>
+            <p className={styles.flow}>PLACE ORDER → Sign in → /portal</p>
             <p>
-              Selecting PLACE ORDER activates the protected agency flow, while the public
-              page stays visible until the visitor chooses to enter.
+              Selecting PLACE ORDER opens agency sign-in first, while the public page stays
+              visible until the visitor chooses to enter.
             </p>
           </article>
 
@@ -157,33 +155,12 @@ export default function HomePage() {
           <article className={styles.card}>
             <h2>Start now</h2>
             <p>
-              If your agency already has credentials, continue directly into the private
-              portal.
+              If your agency already has credentials, continue to the private sign-in.
             </p>
-            <Link className={styles.inlineButton} href="/portal">
+            <Link className={styles.inlineButton} href={withNext("/auth/login", "/portal") }>
               PLACE ORDER
             </Link>
           </article>
-        </div>
-      </section>
-
-      <section className={styles.privatePortalBlock} id="portal-access">
-        <div>
-          <p className={styles.portalEyebrow}>Private portal access</p>
-          <h2>Agency login and portal links appear after the public front page.</h2>
-          <p>
-            This keeps the homepage as a real entry experience with videos and hero
-            packages before the private controls are shown.
-          </p>
-        </div>
-
-        <div className={styles.portalActions}>
-          <Link className={styles.primaryButton} href="/auth/login?next=/portal">
-            Agency login
-          </Link>
-          <Link className={styles.secondaryButton} href="/portal">
-            Agency portal
-          </Link>
         </div>
       </section>
 

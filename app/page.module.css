@@ -425,24 +425,22 @@
   gap: 24px;
 }
 
-.rateCard {
-  position: relative;
-  padding: 24px;
-  background: linear-gradient(165deg, rgba(38, 60, 255, 0.25), rgba(13, 24, 94, 0.96) 46%);
-  border: 1px solid rgba(88, 104, 217, 0.72);
-  box-shadow: 0 20px 56px rgba(2, 8, 40, 0.46);
+.ratesSection .sectionHeading {
+  margin-bottom: 40px;
 }
 
-.rateCard::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 4px;
-  background: var(--orange);
+.ratesTitle {
+  max-width: 12ch;
+}
+
+.rateCard {
+  padding: 24px;
+  background: rgba(13, 24, 94, 0.94);
+  border: 1px solid rgba(88, 104, 217, 0.62);
 }
 
 .rateCardAccent {
-  background: linear-gradient(165deg, rgba(255, 157, 0, 0.16), #101c82 48%);
+  background: #101c82;
   border-color: var(--orange);
 }
 
@@ -451,7 +449,7 @@
   justify-content: space-between;
   gap: 18px;
   align-items: flex-end;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .rateTitleRow h3 {
@@ -468,7 +466,7 @@
   grid-template-columns: 1.45fr 1fr 1fr 1fr;
   gap: 12px;
   padding: 16px 14px;
-  border-top: 1px solid rgba(183, 192, 255, 0.2);
+  border-top: 1px solid rgba(88, 104, 217, 0.45);
   align-items: center;
 }
 
@@ -510,6 +508,16 @@
 .packageSection {
   background: #f6f1ea;
   color: #0b1638;
+}
+
+.packageSection .sectionHeading {
+  margin-bottom: 42px;
+}
+
+.packageSection .sectionHeading h2 {
+  max-width: 11ch;
+  font-size: clamp(2.8rem, 4.6vw, 5.2rem);
+  line-height: 0.95;
 }
 
 .packageGrid {
@@ -597,6 +605,7 @@
 .packageButton {
   margin-top: auto;
   width: 100%;
+  color: #000000;
 }
 
 .signature {
@@ -744,6 +753,10 @@
   .footerInner {
     grid-template-columns: 1fr;
     gap: 26px;
+  }
+
+  .ratesTitle {
+    max-width: none;
   }
 }
 

@@ -181,9 +181,8 @@ export default function HomePage() {
 
       <section className={`${styles.section} ${styles.ratesSection}`} id="rates">
         <div className={`${styles.sectionHeading} ${styles.narrow}`}>
-          <p className={styles.eyebrow}>PREMIUM FORMATS</p>
-          <h2>Built to command still and silent-video attention.</h2>
-          <p>Choose a format lane, then activate your ideal screen package with clear monthly pacing and premium daypart coverage.</p>
+          <p className={styles.eyebrow}>HIGH-VALUE COMBINATIONS</p>
+          <h2 className={styles.ratesTitle}>Premium formats<br />designed to command attention.</h2>
         </div>
         <div className={styles.ratesGrid}>
           <RateTable title="Still Image" rates={stillRates} />

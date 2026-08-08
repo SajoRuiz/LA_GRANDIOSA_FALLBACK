@@ -1,0 +1,41 @@
+sourceRow,sourceSku,sku,durationSeconds,format,formatLabel,sourceFormatLabel,screenPackage,screenLabel,fullDayHours,monthlyRateCents,rateAt80PercentCents,playsPer12HourDay,referencePlaysPer31OpenDays
+6,LG-10-IMG-CTR-PRM,LG-10-IMG-CTR-FD,10,still-image,Still Image,Imagen estática,center,Center,12,450000,360000,720,22320
+8,LG-10-IMG-LFT-PRM,LG-10-IMG-LFT-FD,10,still-image,Still Image,Imagen estática,left,Left,12,112500,90000,720,22320
+10,LG-10-IMG-RGT-PRM,LG-10-IMG-RGT-FD,10,still-image,Still Image,Imagen estática,right,Right,12,112500,90000,720,22320
+12,LG-10-IMG-LR-PRM,LG-10-IMG-LR-FD,10,still-image,Still Image,Imagen estática,left-right,Left + Right,12,202500,162000,720,22320
+14,LG-10-IMG-ALL-PRM,LG-10-IMG-ALL-FD,10,still-image,Still Image,Imagen estática,all-3,All 3 Screens,12,585000,468000,720,22320
+16,LG-10-VID-CTR-PRM,LG-10-VID-CTR-FD,10,silent-video,Silent Video,Video silencioso,center,Center,12,630000,504000,720,22320
+18,LG-10-VID-LFT-PRM,LG-10-VID-LFT-FD,10,silent-video,Silent Video,Video silencioso,left,Left,12,157500,126000,720,22320
+20,LG-10-VID-RGT-PRM,LG-10-VID-RGT-FD,10,silent-video,Silent Video,Video silencioso,right,Right,12,157500,126000,720,22320
+22,LG-10-VID-LR-PRM,LG-10-VID-LR-FD,10,silent-video,Silent Video,Video silencioso,left-right,Left + Right,12,283500,226800,720,22320
+24,LG-10-VID-ALL-PRM,LG-10-VID-ALL-FD,10,silent-video,Silent Video,Video silencioso,all-3,All 3 Screens,12,819000,655200,720,22320
+26,LG-15-IMG-CTR-PRM,LG-15-IMG-CTR-FD,15,still-image,Still Image,Imagen estática,center,Center,12,675000,540000,480,14880
+28,LG-15-IMG-LFT-PRM,LG-15-IMG-LFT-FD,15,still-image,Still Image,Imagen estática,left,Left,12,168800,135040,480,14880
+30,LG-15-IMG-RGT-PRM,LG-15-IMG-RGT-FD,15,still-image,Still Image,Imagen estática,right,Right,12,168800,135040,480,14880
+32,LG-15-IMG-LR-PRM,LG-15-IMG-LR-FD,15,still-image,Still Image,Imagen estática,left-right,Left + Right,12,303800,243040,480,14880
+34,LG-15-IMG-ALL-PRM,LG-15-IMG-ALL-FD,15,still-image,Still Image,Imagen estática,all-3,All 3 Screens,12,877500,702000,480,14880
+36,LG-15-VID-CTR-PRM,LG-15-VID-CTR-FD,15,silent-video,Silent Video,Video silencioso,center,Center,12,945000,756000,480,14880
+38,LG-15-VID-LFT-PRM,LG-15-VID-LFT-FD,15,silent-video,Silent Video,Video silencioso,left,Left,12,236300,189040,480,14880
+40,LG-15-VID-RGT-PRM,LG-15-VID-RGT-FD,15,silent-video,Silent Video,Video silencioso,right,Right,12,236300,189040,480,14880
+42,LG-15-VID-LR-PRM,LG-15-VID-LR-FD,15,silent-video,Silent Video,Video silencioso,left-right,Left + Right,12,425300,340240,480,14880
+44,LG-15-VID-ALL-PRM,LG-15-VID-ALL-FD,15,silent-video,Silent Video,Video silencioso,all-3,All 3 Screens,12,1228500,982800,480,14880
+46,LG-30-IMG-CTR-PRM,LG-30-IMG-CTR-FD,30,still-image,Still Image,Imagen estática,center,Center,12,1350000,1080000,240,7440
+48,LG-30-IMG-LFT-PRM,LG-30-IMG-LFT-FD,30,still-image,Still Image,Imagen estática,left,Left,12,337500,270000,240,7440
+50,LG-30-IMG-RGT-PRM,LG-30-IMG-RGT-FD,30,still-image,Still Image,Imagen estática,right,Right,12,337500,270000,240,7440
+52,LG-30-IMG-LR-PRM,LG-30-IMG-LR-FD,30,still-image,Still Image,Imagen estática,left-right,Left + Right,12,607500,486000,240,7440
+54,LG-30-IMG-ALL-PRM,LG-30-IMG-ALL-FD,30,still-image,Still Image,Imagen estática,all-3,All 3 Screens,12,1755000,1404000,240,7440
+56,LG-30-VID-CTR-PRM,LG-30-VID-CTR-FD,30,silent-video,Silent Video,Video silencioso,center,Center,12,1890000,1512000,240,7440
+58,LG-30-VID-LFT-PRM,LG-30-VID-LFT-FD,30,silent-video,Silent Video,Video silencioso,left,Left,12,472500,378000,240,7440
+60,LG-30-VID-RGT-PRM,LG-30-VID-RGT-FD,30,silent-video,Silent Video,Video silencioso,right,Right,12,472500,378000,240,7440
+62,LG-30-VID-LR-PRM,LG-30-VID-LR-FD,30,silent-video,Silent Video,Video silencioso,left-right,Left + Right,12,850500,680400,240,7440
+64,LG-30-VID-ALL-PRM,LG-30-VID-ALL-FD,30,silent-video,Silent Video,Video silencioso,all-3,All 3 Screens,12,2457000,1965600,240,7440
+66,LG-60-IMG-CTR-PRM,LG-60-IMG-CTR-FD,60,still-image,Still Image,Imagen estática,center,Center,12,2700000,2160000,120,3720
+68,LG-60-IMG-LFT-PRM,LG-60-IMG-LFT-FD,60,still-image,Still Image,Imagen estática,left,Left,12,675000,540000,120,3720
+70,LG-60-IMG-RGT-PRM,LG-60-IMG-RGT-FD,60,still-image,Still Image,Imagen estática,right,Right,12,675000,540000,120,3720
+72,LG-60-IMG-LR-PRM,LG-60-IMG-LR-FD,60,still-image,Still Image,Imagen estática,left-right,Left + Right,12,1215000,972000,120,3720
+74,LG-60-IMG-ALL-PRM,LG-60-IMG-ALL-FD,60,still-image,Still Image,Imagen estática,all-3,All 3 Screens,12,3510000,2808000,120,3720
+76,LG-60-VID-CTR-PRM,LG-60-VID-CTR-FD,60,silent-video,Silent Video,Video silencioso,center,Center,12,3780000,3024000,120,3720
+78,LG-60-VID-LFT-PRM,LG-60-VID-LFT-FD,60,silent-video,Silent Video,Video silencioso,left,Left,12,945000,756000,120,3720
+80,LG-60-VID-RGT-PRM,LG-60-VID-RGT-FD,60,silent-video,Silent Video,Video silencioso,right,Right,12,945000,756000,120,3720
+82,LG-60-VID-LR-PRM,LG-60-VID-LR-FD,60,silent-video,Silent Video,Video silencioso,left-right,Left + Right,12,1701000,1360800,120,3720
+84,LG-60-VID-ALL-PRM,LG-60-VID-ALL-FD,60,silent-video,Silent Video,Video silencioso,all-3,All 3 Screens,12,4914000,3931200,120,3720

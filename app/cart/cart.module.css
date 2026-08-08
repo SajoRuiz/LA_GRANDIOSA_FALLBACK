@@ -96,7 +96,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(330px, 0.42fr);
   gap: 26px;
-  align-items: start;
+  align-items: flex-start;
   padding: 0 clamp(22px, 5vw, 82px);
 }
 
@@ -113,7 +113,7 @@
 
 .lineTop {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 22px;
 }
@@ -150,7 +150,7 @@
 
 .lineDetails > div {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 22px;
   padding: 14px 0;
@@ -178,7 +178,7 @@
 
 .lineTotal {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
   margin-top: 28px;
@@ -231,7 +231,7 @@
 
 .totalList > div {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
   padding: 15px 0;
@@ -355,7 +355,7 @@
 
   .lineTop,
   .lineTotal {
-    align-items: start;
+    align-items: flex-start;
     flex-direction: column;
   }
 

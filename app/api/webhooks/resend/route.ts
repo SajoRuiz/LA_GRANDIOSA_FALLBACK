@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { Webhook } from "svix";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+
+type ResendWebhookEvent = {
+  type?: string;
+  data?: {
+    email_id?: string;
+    id?: string;
+  };
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,9 +20,13 @@ export async function POST(request: NextRequest) {
     const timestamp = request.headers.get("svix-timestamp");
     const signature = request.headers.get("svix-signature");
     if (!id || !timestamp || !signature) return new NextResponse("Missing webhook headers", { status: 400 });
-    const resend = new Resend(config.resendApiKey);
-    const event = resend.webhooks.verify({ payload, headers: { id, timestamp, signature }, webhookSecret: config.resendWebhookSecret }) as any;
-    const messageId = event?.data?.email_id ?? event?.data?.id;
+    const webhook = new Webhook(config.resendWebhookSecret);
+    const event = webhook.verify(payload, {
+      "svix-id": id,
+      "svix-timestamp": timestamp,
+      "svix-signature": signature,
+    }) as ResendWebhookEvent;
+    const messageId = event.data?.email_id ?? event.data?.id;
     if (messageId) {
       const admin = createSupabaseAdminClient();
       await admin.from("notification_outbox").update({

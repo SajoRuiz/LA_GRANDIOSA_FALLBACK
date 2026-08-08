@@ -180,7 +180,7 @@ export default function HomePage() {
       </section>
 
       <section className={`${styles.section} ${styles.ratesSection}`} id="rates">
-        <div className={`${styles.sectionHeading} ${styles.narrow}`}>
+        <div className={`${styles.sectionHeading} ${styles.ratesHeading} ${styles.narrow}`}>
           <p className={styles.eyebrow}>HIGH-VALUE COMBINATIONS</p>
           <h2 className={styles.ratesTitle}>Premium formats<br />designed to command attention.</h2>
         </div>
@@ -192,14 +192,17 @@ export default function HomePage() {
       </section>
 
       <section className={`${styles.section} ${styles.packageSection}`} id="packages">
-        <div className={styles.sectionHeading}>
+        <div className={`${styles.sectionHeading} ${styles.packagesHeading}`}>
           <p className={styles.eyebrow}>A CLEAR PATH TO OWNERSHIP</p>
           <h2 className={styles.packagesTitle}>Seven packages. Three<br />levels of impact.</h2>
           <p>Move from a strong architectural frame to complete three-screen ownership.</p>
         </div>
         <div className={styles.packageGrid}>
           {packages.map((pkg, index) => (
-            <article className={`${styles.packageCard} ${index === 2 ? styles.featured : ""}`} key={pkg.tier}>
+            <article
+              className={`${styles.packageCard} ${index === 2 ? styles.packageCardFeatured : styles.packageCardLight}`}
+              key={pkg.tier}
+            >
               <p className={styles.tier}>{pkg.tier}</p>
               <h3>{pkg.promise}</h3>
               {pkg.items.map(([name, description, plays, price]) => (

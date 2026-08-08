@@ -429,7 +429,7 @@
   gap: 24px;
 }
 
-.ratesSection .sectionHeading {
+.ratesHeading {
   margin-bottom: 40px;
 }
 
@@ -521,18 +521,18 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.packageSection .sectionHeading {
+.packagesHeading {
   margin-bottom: 52px;
 }
 
-.packageSection .sectionHeading h2 {
+.packagesHeading h2 {
   max-width: none;
   font-size: clamp(2.8rem, 4.9vw, 5.4rem);
   line-height: 0.94;
   color: var(--white);
 }
 
-.packageSection .sectionHeading > p:last-child {
+.packagesHeading > p:last-child {
   color: rgba(232, 236, 255, 0.72);
 }
 
@@ -552,31 +552,48 @@
   gap: 18px;
   min-height: 520px;
   padding: 30px 28px 28px;
-  color: #0b1638;
-  background: var(--white);
-  border: 1px solid rgba(210, 214, 226, 1);
   box-shadow: 0 20px 44px rgba(0, 0, 0, 0.12);
 }
 
-.featured {
+.packageCardLight {
+  color: #0b1638;
+  background: var(--white);
+  border: 1px solid rgba(210, 214, 226, 1);
+}
+
+.packageCardFeatured {
   background: #20288e;
   color: var(--white);
   border-color: var(--orange);
 }
 
-.tier,
-.packageLabel {
+.packageCardLight .tier,
+.packageCardLight .packageLabel {
   color: rgba(10, 16, 52, 0.45);
 }
 
-.featured .tier,
-.featured .packageLabel,
-.featured .packageItem h4,
-.featured .packageItem strong,
-.featured .packageItem p,
-.featured .packageItem span,
-.featured h3 {
+.packageCardFeatured .tier,
+.packageCardFeatured .packageLabel,
+.packageCardFeatured .packageItem h4,
+.packageCardFeatured .packageItem strong,
+.packageCardFeatured .packageItem p,
+.packageCardFeatured .packageItem span,
+.packageCardFeatured h3 {
   color: var(--white);
+}
+
+.packageCardLight h3,
+.packageCardLight .packageItem h4,
+.packageCardLight .packageItem strong {
+  color: #0b1638;
+}
+
+.packageCardLight .packageItem p {
+  color: rgba(11, 22, 56, 0.72);
+}
+
+.packageCardLight .packageItem span {
+  color: rgba(11, 22, 56, 0.55);
 }
 
 .packageCard h3 {
@@ -591,14 +608,12 @@
 
 .packageItem h4 {
   margin: 0 0 8px;
-  color: #0b1638;
   font-size: 13px;
   text-transform: uppercase;
 }
 
 .packageItem p {
   margin: 0;
-  color: rgba(11, 22, 56, 0.72);
   font-size: 13px;
   letter-spacing: 0.02em;
   text-transform: none;
@@ -613,14 +628,12 @@
 }
 
 .packageItem span {
-  color: rgba(11, 22, 56, 0.55);
   font-size: 13px;
   letter-spacing: 0;
   text-transform: none;
 }
 
 .packageItem strong {
-  color: #0b1638;
   font-size: 22px;
 }
 

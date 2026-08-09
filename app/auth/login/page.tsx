@@ -79,6 +79,10 @@ export default async function LoginPage({
             <button className={styles.button} type="submit">
               Continue securely
             </button>
+
+            <Link className={styles.requestAccessCommand} href="/#availability">
+              Request access
+            </Link>
           </form>
 
           <p className={styles.helper}>

@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
     const salesRecipient = process.env.SALES_REPLY_TO_EMAIL?.trim() || "ventas@lagrandiosapr.com";
     const transactionalFromEmail = process.env.TRANSACTIONAL_FROM_EMAIL?.trim() || "no-reply@lagrandiosapr.com";
     const appBaseUrl = process.env.APP_BASE_URL?.trim() || "http://localhost:3000";
+    const dedupeBase = normalizeEmail(email).replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
     await admin.from("access_leads").insert({
       requester_name: name || null,
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
         recipient: salesRecipient,
         sender_email: transactionalFromEmail,
         reply_to_email: salesRecipient,
+        dedupe_key: `access-request-internal-${dedupeBase}`,
         payload: {
           requesterName: name,
           requesterEmail: email,
@@ -58,6 +60,7 @@ export async function POST(request: NextRequest) {
         recipient: email,
         sender_email: transactionalFromEmail,
         reply_to_email: salesRecipient,
+        dedupe_key: `access-request-customer-${dedupeBase}`,
         payload: {
           portalUrl: `${appBaseUrl}/auth/login`,
         },

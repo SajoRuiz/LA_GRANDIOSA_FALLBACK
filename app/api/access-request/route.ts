@@ -24,8 +24,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(new URL("/?accessRequest=invalid", request.url));
     }
 
-    const config = getCommerceServerConfig();
     const admin = createSupabaseAdminClient();
+    const salesRecipient = process.env.SALES_REPLY_TO_EMAIL?.trim() || "ventas@lagrandiosapr.com";
+    const transactionalFromEmail = process.env.TRANSACTIONAL_FROM_EMAIL?.trim() || "no-reply@lagrandiosapr.com";
+    const appBaseUrl = process.env.APP_BASE_URL?.trim() || "http://localhost:3000";
 
     await admin.from("access_leads").insert({
       requester_name: name || null,
@@ -39,12 +41,25 @@ export async function POST(request: NextRequest) {
     await admin.from("notification_outbox").insert([
       {
         channel: "email",
+        template_key: "internal_access_request_received",
+        recipient: salesRecipient,
+        sender_email: transactionalFromEmail,
+        reply_to_email: salesRecipient,
+        payload: {
+          requesterName: name,
+          requesterEmail: email,
+          company,
+          message,
+        },
+      },
+      {
+        channel: "email",
         template_key: "customer_access_request_received",
         recipient: email,
-        sender_email: config.transactionalFromEmail,
-        reply_to_email: config.salesReplyToEmail,
+        sender_email: transactionalFromEmail,
+        reply_to_email: salesRecipient,
         payload: {
-          portalUrl: `${config.appBaseUrl}/auth/login`,
+          portalUrl: `${appBaseUrl}/auth/login`,
         },
       },
     ]);

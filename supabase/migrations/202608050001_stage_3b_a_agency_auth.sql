@@ -766,7 +766,8 @@ grant select on public.agency_account_history to authenticated;
 -- ------------------------------------------------------------------
 -- Atomic agency order creation RPC
 -- ------------------------------------------------------------------
-create or replace function public.create_agency_order_draft(
+drop function if exists public.create_agency_order_draft(jsonb, jsonb, jsonb, jsonb);
+create function public.create_agency_order_draft(
   p_client jsonb,
   p_order jsonb,
   p_items jsonb,

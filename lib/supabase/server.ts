@@ -18,33 +18,21 @@ export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
   const { url, key } = getSupabaseRuntimeConfig();
 
-  try {
-    return createServerClient(url, key, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: SupabaseCookieMutation[]) {
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet: SupabaseCookieMutation[]) {
+        try {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options as never);
           });
-        },
+        } catch {
+          // Ignore cookie-store write failures in server components and route handlers.
+          // Middleware will refresh the session and re-emit the auth cookies as needed.
+        }
       },
-    });
-  } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("Supabase server client unavailable:", error);
-    }
-
-    return createServerClient("http://127.0.0.1:54321", "placeholder-key", {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll() {
-          // noop
-        },
-      },
-    });
-  }
+    },
+  });
 }

@@ -3,7 +3,7 @@ import { getCommerceServerConfig } from "@/lib/server/config";
 import { renderNotification } from "@/lib/server/notification-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-interface OutboxRow {
+export interface OutboxRow {
   id: string;
   channel: "email" | "sms";
   template_key: string;
@@ -19,7 +19,7 @@ interface ResendSendResponse {
   name?: string;
 }
 
-async function sendEmail(row: OutboxRow) {
+export async function sendEmail(row: OutboxRow) {
   const config = getCommerceServerConfig();
 
   if (!config.resendApiKey) {

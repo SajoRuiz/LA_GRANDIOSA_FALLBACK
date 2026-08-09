@@ -97,6 +97,41 @@
   box-shadow: 0 16px 36px rgba(255, 157, 0, 0.2);
 }
 
+.requestAccessForm {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 360px);
+  margin-top: 12px;
+}
+
+.requestAccessForm input,
+.requestAccessForm textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--deep);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.requestAccessForm input::placeholder,
+.requestAccessForm textarea::placeholder {
+  color: rgba(3, 10, 63, 0.58);
+}
+
+.requestAccessForm textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.requestAccessStatus {
+  margin-top: 12px;
+  color: var(--mist);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .hero {
   min-height: calc(100vh - 72px);
   display: grid;

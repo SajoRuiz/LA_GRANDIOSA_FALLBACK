@@ -241,6 +241,18 @@ export function renderNotification(
       body: `${orderNumber} has passed its final scheduled date and should be reviewed for completion.`,
       actionLabel: "OPEN RELEASE QUEUE",
     },
+    internal_access_request_received: {
+      subject: "New La Grandiosa access request",
+      heading: "New Access Request",
+      body: `${text(payload.requesterName || payload.requesterEmail || "A client")} requested access for ${text(payload.company || "a new account")}${text(payload.requesterEmail) ? ` (${text(payload.requesterEmail)})` : ""}. ${text(payload.message)}`,
+      actionLabel: "REVIEW ACCESS REQUEST",
+    },
+    customer_access_request_received: {
+      subject: "Your La Grandiosa access request is received",
+      heading: "Access Request Received",
+      body: `Thanks for reaching out. We will review your request and follow up with access instructions shortly. ${text(payload.portalUrl) ? `You can also sign in here: ${text(payload.portalUrl)}` : ""}`,
+      actionLabel: "OPEN SECURE PORTAL",
+    },
   };
 
   const chosen =

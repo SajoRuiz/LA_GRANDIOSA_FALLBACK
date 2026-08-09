@@ -39,8 +39,7 @@ export async function updateSupabaseSession(request: NextRequest) {
       },
     });
 
-    // getClaims verifies the access token and refreshes it when needed.
-    await supabase.auth.getClaims();
+    await supabase.auth.getUser();
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
       console.warn("Supabase session bootstrap skipped:", error);

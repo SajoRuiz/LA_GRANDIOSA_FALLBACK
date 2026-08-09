@@ -68,8 +68,14 @@ function RateTable({ title, rates, accent = false }: { title: string; rates: str
   );
 }
 
-export default function HomePage() {
+export default function HomePage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
   const orderPath = withNext("/auth/login", "/portal");
+  const accessRequestStatus = searchParams?.accessRequest;
+  const accessRequestMessage = accessRequestStatus === "sent"
+    ? "Thanks for your request. We will send access instructions shortly."
+    : accessRequestStatus === "invalid"
+      ? "Please enter a valid email address so we can follow up."
+      : null;
 
   return (
     <main className={styles.page}>
@@ -243,10 +249,15 @@ export default function HomePage() {
             <Link className={`${styles.button} ${styles.primary}`} href={orderPath}>
               PLACE ORDER
             </Link>
-            <Link className={styles.requestAccess} href="mailto:ventas@lagrandiosapr.com?subject=Request%20Access%20-%20La%20Grandiosa">
-              Request Access
-            </Link>
+            <form className={styles.requestAccessForm} action="/api/access-request" method="post">
+              <input name="name" type="text" placeholder="Your name" aria-label="Your name" />
+              <input name="email" type="email" placeholder="Your email" aria-label="Your email" required />
+              <input name="company" type="text" placeholder="Company" aria-label="Company" />
+              <textarea name="message" rows={3} placeholder="Tell us about your interest" aria-label="Tell us about your interest" />
+              <button className={styles.requestAccess} type="submit">Request Access</button>
+            </form>
           </div>
+          {accessRequestMessage ? <p className={styles.requestAccessStatus}>{accessRequestMessage}</p> : null}
         </div>
       </section>
 

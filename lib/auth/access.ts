@@ -80,33 +80,16 @@ export class AgencyAccessError extends Error {
   }
 }
 
-function readClaims(
-  claimsData: unknown,
-): { sub?: string; email?: string } | undefined {
-  if (!claimsData || typeof claimsData !== "object") {
-    return undefined;
-  }
-
-  const record = claimsData as Record<string, unknown>;
-  const claims = record.claims;
-
-  if (!claims || typeof claims !== "object") {
-    return undefined;
-  }
-
-  return claims as { sub?: string; email?: string };
-}
-
 export async function getVerifiedIdentity(): Promise<VerifiedIdentity | null> {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.auth.getClaims();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (error) {
+  if (userError || !userData.user) {
     return null;
   }
 
-  const claims = readClaims(data);
-  const userId = claims?.sub?.trim();
+  const user = userData.user;
+  const userId = user.id?.trim();
 
   if (!userId) {
     return null;
@@ -117,7 +100,7 @@ export async function getVerifiedIdentity(): Promise<VerifiedIdentity | null> {
 
   return {
     userId,
-    email: claims?.email?.trim().toLowerCase() ?? "",
+    email: user.email?.trim().toLowerCase() ?? "",
     currentLevel: (aalData?.currentLevel ?? null) as AssuranceLevel,
     nextLevel: (aalData?.nextLevel ?? null) as AssuranceLevel,
   };

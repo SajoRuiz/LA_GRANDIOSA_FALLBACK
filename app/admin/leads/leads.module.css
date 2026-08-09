@@ -1,0 +1,109 @@
+.page {
+  min-height: 100vh;
+  background: #f7f4ee;
+  color: #1f2937;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  background: #fffdf9;
+  border-bottom: 1px solid #e8dfd3;
+}
+
+.logo {
+  height: 46px;
+  width: auto;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav a {
+  color: #6b4f2f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.section {
+  padding: 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #7a5c2d;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+}
+
+.tableCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.helperText {
+  margin: 0 0 0.75rem;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 0.65rem;
+  border-bottom: 1px solid #f3efe8;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: #6b4f2f;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.statusSelect {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: #fffdf9;
+  font-weight: 600;
+  color: #374151;
+}
+
+.emptyState {
+  padding: 1.25rem 0;
+  color: #6b7280;
+}

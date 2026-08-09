@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { processNotificationOutbox } from "@/lib/server/notification-delivery";
 
 export const runtime = "nodejs";
 
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
         sender_email: transactionalFromEmail,
         reply_to_email: salesRecipient,
         dedupe_key: `access-request-internal-${dedupeBase}`,
+        priority: 10,
         payload: {
           requesterName: name,
           requesterEmail: email,
@@ -61,11 +63,20 @@ export async function POST(request: NextRequest) {
         sender_email: transactionalFromEmail,
         reply_to_email: salesRecipient,
         dedupe_key: `access-request-customer-${dedupeBase}`,
+        priority: 10,
         payload: {
           portalUrl: `${appBaseUrl}/auth/login`,
         },
       },
     ]);
+
+    // Kick the outbox worker immediately so access-request notifications
+    // do not depend solely on cron cadence.
+    try {
+      await processNotificationOutbox(2);
+    } catch (deliveryError) {
+      console.error("Access-request notification processing failed.", deliveryError);
+    }
 
     return NextResponse.redirect(new URL("/?accessRequest=sent", request.url));
   } catch (error) {

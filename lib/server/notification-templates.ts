@@ -23,6 +23,21 @@ function escapeHtml(value: string): string {
   );
 }
 
+function resolveBrandAssetUrl(portalUrl: string, assetPath: string): string {
+  if (portalUrl) {
+    try {
+      return new URL(assetPath, portalUrl).toString();
+    } catch {
+      // Fallback handled below.
+    }
+  }
+
+  const configuredBase =
+    process.env.APP_BASE_URL?.trim() ||
+    "https://www.lagrandiosapr.com";
+  return `${configuredBase.replace(/\/$/, "")}${assetPath}`;
+}
+
 export interface RenderedNotification {
   subject: string;
   text: string;
@@ -270,11 +285,14 @@ export function renderNotification(
   const safeHeading = escapeHtml(chosen.heading);
   const safeBody = escapeHtml(chosen.body);
   const safeUrl = portalUrl ? escapeHtml(portalUrl) : "";
+  const safeSignatureLogoUrl = escapeHtml(
+    resolveBrandAssetUrl(portalUrl, "/la-grandiosa-logo-black.png"),
+  );
   const safeActionLabel = escapeHtml(
     chosen.actionLabel ?? "OPEN SECURE PORTAL",
   );
 
-  const html = `<!doctype html><html><body style="margin:0;background:#030a3f;font-family:Arial,Helvetica,sans-serif;color:#ffffff"><div style="max-width:680px;margin:0 auto;padding:42px 22px"><div style="border-top:7px solid #ff9d00;background:#0d185e;padding:38px"><p style="margin:0 0 14px;color:#ff9d00;font-size:12px;font-weight:800;letter-spacing:.14em">LA GRANDIOSA · THE MALL OF SAN JUAN</p><h1 style="margin:0 0 22px;font-size:34px;line-height:1.05">${safeHeading}</h1><p style="margin:0;color:#e8ecff;font-size:17px;line-height:1.65">${safeBody}</p>${safeUrl ? `<p style="margin:30px 0 0"><a href="${safeUrl}" style="display:inline-block;padding:16px 22px;background:#ff9d00;color:#030a3f;text-decoration:none;font-weight:800">${safeActionLabel}</a></p>` : ""}<p style="margin:32px 0 0;color:#b7c0ff;font-size:13px;line-height:1.5">Reply to ventas@lagrandiosapr.com for assistance.<br>Transactional notice for your La Grandiosa account.</p></div></div></body></html>`;
+  const html = `<!doctype html><html><body style="margin:0;background:#030a3f;font-family:Arial,Helvetica,sans-serif;color:#ffffff"><div style="max-width:680px;margin:0 auto;padding:42px 22px"><div style="border-top:7px solid #ff9d00;background:#0d185e;padding:38px"><p style="margin:0 0 14px;color:#ff9d00;font-size:12px;font-weight:800;letter-spacing:.14em">LA GRANDIOSA · THE MALL OF SAN JUAN</p><h1 style="margin:0 0 22px;font-size:34px;line-height:1.05">${safeHeading}</h1><p style="margin:0;color:#e8ecff;font-size:17px;line-height:1.65">${safeBody}</p>${safeUrl ? `<p style="margin:30px 0 0"><a href="${safeUrl}" style="display:inline-block;padding:16px 22px;background:#ff9d00;color:#030a3f;text-decoration:none;font-weight:800">${safeActionLabel}</a></p>` : ""}<p style="margin:32px 0 0;color:#b7c0ff;font-size:13px;line-height:1.5">Reply to ventas@lagrandiosapr.com for assistance.<br>Transactional notice for your La Grandiosa account.</p><div style="margin:24px 0 0;padding-top:18px;border-top:1px solid rgba(183,192,255,.35);text-align:center"><div style="display:inline-block;background:#ffffff;padding:10px 16px"><img src="${safeSignatureLogoUrl}" alt="La Grandiosa" width="220" style="display:block;width:220px;max-width:100%;height:auto;margin:0 auto"></div></div></div></div></body></html>`;
 
   const sms = `${chosen.heading}: ${chosen.body}${portalUrl ? ` ${portalUrl}` : ""}`.slice(
     0,

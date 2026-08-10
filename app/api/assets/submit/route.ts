@@ -40,18 +40,6 @@ export async function POST(request: NextRequest) {
       dedupe_key: `assets-review-internal-${result.asset_submission_id}`,
       payload: { orderNumber: order.order_number, agencyName: access.agency.display_name, submissionNumber: result.submission_number, portalUrl: `${config.appBaseUrl}/admin/assets/${result.asset_submission_id}` },
     });
-    if (client.sms_transactional_consent && client.telephone) {
-      notifications.push({
-        order_id: orderId,
-        channel: "sms",
-        template_key: "customer_assets_submission_received",
-        recipient: String(client.telephone),
-        sender_email: "",
-        reply_to_email: "",
-        dedupe_key: `assets-submission-sms-${result.asset_submission_id}`,
-        payload: { orderNumber: order.order_number, submissionNumber: result.submission_number, assetPortalUrl: `${config.appBaseUrl}/portal/orders/${orderId}/assets` },
-      });
-    }
     await admin.from("notification_outbox").insert(notifications);
     return NextResponse.json({ ok: true, submissionId: result.asset_submission_id, submissionNumber: result.submission_number });
   } catch (error) {

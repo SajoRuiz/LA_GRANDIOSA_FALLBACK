@@ -88,22 +88,6 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    if (input.client.smsTransactionalConsent) {
-      notifications.push({
-        channel: "sms",
-        template_key: "customer_order_received_sms",
-        recipient: input.client.telephone,
-        sender_email: "",
-        reply_to_email: "",
-        dedupe_key: `customer-order-sms-${access.identity.userId}-${timestamp}`,
-        payload: {
-          clientName: input.client.fullName,
-          agencyName: access.agency.display_name,
-          nextStep: "purchase_order_and_credit_review",
-        },
-      });
-    }
-
     const orderPayload = {
       ...built.orderPayload,
       agency_id: access.agency.id,

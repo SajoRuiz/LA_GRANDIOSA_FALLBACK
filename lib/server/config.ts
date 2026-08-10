@@ -35,11 +35,6 @@ export interface CommerceServerConfig {
   transactionalFromEmail: string;
   resendApiKey: string;
   resendWebhookSecret: string;
-  twilioAccountSid: string;
-  twilioAuthToken: string;
-  twilioFromNumber: string;
-  twilioMessagingServiceSid: string;
-  twilioStatusCallbackUrl: string;
   cronSecret: string;
   /** Backward-compatible alias used by the Stage 4 worker. */
   notificationCronSecret: string;
@@ -71,15 +66,6 @@ export function getCommerceServerConfig(): CommerceServerConfig {
     resendWebhookSecret: optionalServerEnvironment(
       "RESEND_WEBHOOK_SECRET",
     ),
-    twilioAccountSid: optionalServerEnvironment("TWILIO_ACCOUNT_SID"),
-    twilioAuthToken: optionalServerEnvironment("TWILIO_AUTH_TOKEN"),
-    twilioFromNumber: optionalServerEnvironment("TWILIO_FROM_NUMBER"),
-    twilioMessagingServiceSid: optionalServerEnvironment(
-      "TWILIO_MESSAGING_SERVICE_SID",
-    ),
-    twilioStatusCallbackUrl:
-      optionalServerEnvironment("TWILIO_STATUS_CALLBACK_URL") ||
-      `${appBaseUrl}/api/webhooks/twilio/status`,
     cronSecret,
     notificationCronSecret: cronSecret,
     businessTimeZone:

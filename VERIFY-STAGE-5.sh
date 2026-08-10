@@ -21,9 +21,9 @@ for file in "${required[@]}"; do
   fi
 done
 
-if ! npm ls resend twilio >/dev/null 2>&1; then
-  echo "Missing dependency: resend and/or twilio"
-  echo "Run: npm install resend twilio"
+if ! npm ls resend >/dev/null 2>&1; then
+  echo "Missing dependency: resend"
+  echo "Run: npm install resend"
   exit 1
 fi
 

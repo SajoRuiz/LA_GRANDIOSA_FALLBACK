@@ -1,4 +1,3 @@
-import twilio from "twilio";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { renderNotification } from "@/lib/server/notification-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -77,58 +76,6 @@ export async function sendEmail(row: OutboxRow) {
   };
 }
 
-async function sendSms(row: OutboxRow) {
-  const config = getCommerceServerConfig();
-
-  if (!config.twilioAccountSid || !config.twilioAuthToken) {
-    return {
-      skipped: true as const,
-      reason: "Twilio account credentials are not configured.",
-    };
-  }
-
-  if (!config.twilioMessagingServiceSid && !config.twilioFromNumber) {
-    return {
-      skipped: true as const,
-      reason:
-        "Configure TWILIO_MESSAGING_SERVICE_SID or TWILIO_FROM_NUMBER.",
-    };
-  }
-
-  const rendered = renderNotification(
-    row.template_key,
-    row.payload ?? {},
-  );
-  const client = twilio(
-    config.twilioAccountSid,
-    config.twilioAuthToken,
-  );
-
-  const message = await client.messages.create({
-    body: rendered.sms,
-    to: row.recipient,
-    statusCallback: config.twilioStatusCallbackUrl,
-    validityPeriod: 3600,
-    ...(config.twilioMessagingServiceSid
-      ? { messagingServiceSid: config.twilioMessagingServiceSid }
-      : { from: config.twilioFromNumber }),
-  });
-
-  return {
-    skipped: false as const,
-    provider: "twilio",
-    messageId: message.sid,
-    providerStatus: message.status,
-    providerPayload: {
-      sid: message.sid,
-      status: message.status,
-      messagingServiceSid: message.messagingServiceSid,
-      from: message.from,
-      to: message.to,
-    },
-  };
-}
-
 export async function processNotificationOutbox(limit = 20) {
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin.rpc(
@@ -145,10 +92,20 @@ export async function processNotificationOutbox(limit = 20) {
 
   for (const row of rows) {
     try {
-      const delivery =
-        row.channel === "email"
-          ? await sendEmail(row)
-          : await sendSms(row);
+      if (row.channel !== "email") {
+        await admin.rpc("cancel_notification", {
+          p_notification_id: row.id,
+          p_reason: "SMS delivery is disabled in this environment.",
+        });
+        results.push({
+          id: row.id,
+          status: "cancelled",
+          reason: "SMS delivery is disabled in this environment.",
+        });
+        continue;
+      }
+
+      const delivery = await sendEmail(row);
 
       if (delivery.skipped) {
         await admin.rpc("defer_notification", {

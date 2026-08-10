@@ -111,8 +111,6 @@ export default function ClientInformationForm() {
       purchaseOrderNumber: String(
         formData.get("purchaseOrderNumber") ?? "",
       ),
-      smsTransactionalConsent:
-        formData.get("smsTransactionalConsent") === "on",
     };
 
     setSubmitting(true);
@@ -336,14 +334,6 @@ export default function ClientInformationForm() {
             />
           </label>
         </div>
-
-        <label className={styles.consent}>
-          <input name="smsTransactionalConsent" type="checkbox" />
-          <span>
-            I agree to receive transactional SMS updates related to this
-            order. This does not authorize promotional messages.
-          </span>
-        </label>
 
         {error ? (
           <p className={styles.error} role="alert">

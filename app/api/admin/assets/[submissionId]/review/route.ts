@@ -59,18 +59,6 @@ export async function POST(request: NextRequest, context: { params: { submission
         payload: { orderNumber: result.order_number, agencyName: agency?.display_name ?? "", portalUrl: `${config.appBaseUrl}/admin/releases` },
       });
     }
-    if (client.sms_transactional_consent && client.telephone) {
-      notifications.push({
-        order_id: result.order_id,
-        channel: "sms",
-        template_key: decision === "approve" ? "customer_assets_approved" : "customer_assets_revision_requested",
-        recipient: String(client.telephone),
-        sender_email: "",
-        reply_to_email: "",
-        dedupe_key: `asset-review-sms-${context.params.submissionId}-${decision}`,
-        payload: { orderNumber: result.order_number, reviewerNote: reviewNote, assetPortalUrl: `${config.appBaseUrl}/portal/orders/${result.order_id}/assets` },
-      });
-    }
     if (notifications.length) await admin.from("notification_outbox").insert(notifications);
     return NextResponse.json({ ok: true, orderId: result.order_id, orderNumber: result.order_number, status: result.submission_status, releaseQueueId: result.release_queue_id });
   } catch (error) {

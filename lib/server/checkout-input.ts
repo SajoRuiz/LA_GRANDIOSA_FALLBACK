@@ -14,7 +14,7 @@ export interface ClientInformationInput {
   agencyName: string;
   campaignName: string;
   purchaseOrderNumber: string;
-  smsTransactionalConsent: boolean;
+  smsTransactionalConsent: false;
 }
 
 export interface DraftCheckoutRequest {
@@ -121,8 +121,7 @@ function parseClient(value: unknown): ClientInformationInput {
     purchaseOrderNumber: readString(value, "purchaseOrderNumber", {
       maxLength: 100,
     }),
-    smsTransactionalConsent:
-      value.smsTransactionalConsent === true,
+    smsTransactionalConsent: false,
   };
 }
 

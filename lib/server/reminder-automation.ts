@@ -3,7 +3,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 interface NotificationInsert {
   order_id: string | null;
-  channel: "email" | "sms";
+  channel: "email";
   template_key: string;
   recipient: string;
   sender_email: string;
@@ -52,21 +52,6 @@ function clientEmail(order: any): string {
   return String(clientSnapshot(order).email ?? "").trim().toLowerCase();
 }
 
-function clientPhone(order: any): string {
-  const relation = relationOne<any>(order?.client_contacts);
-  return String(
-    relation?.telephone ?? clientSnapshot(order).telephone ?? "",
-  ).trim();
-}
-
-function smsAllowed(order: any): boolean {
-  const relation = relationOne<any>(order?.client_contacts);
-  return Boolean(
-    relation?.sms_transactional_consent ??
-      clientSnapshot(order).sms_transactional_consent,
-  );
-}
-
 function agencyName(order: any): string {
   const agency = relationOne<any>(order?.agency_accounts);
   return String(agency?.display_name ?? "");
@@ -100,7 +85,7 @@ function notification(
   };
 }
 
-function addCustomerChannels(
+function addCustomerEmail(
   target: NotificationInsert[],
   order: any,
   input: {
@@ -112,7 +97,6 @@ function addCustomerChannels(
   },
 ) {
   const email = clientEmail(order);
-  const phone = clientPhone(order);
   const orderId = String(order.id);
 
   if (email) {
@@ -124,21 +108,6 @@ function addCustomerChannels(
         recipient: email,
         payload: input.payload,
         dedupe_key: `${input.dedupeSuffix}-email-${orderId}`,
-        category: input.category,
-        priority: input.priority,
-      }),
-    );
-  }
-
-  if (phone && smsAllowed(order)) {
-    target.push(
-      notification({
-        order_id: orderId,
-        channel: "sms",
-        template_key: input.templateKey,
-        recipient: phone,
-        payload: input.payload,
-        dedupe_key: `${input.dedupeSuffix}-sms-${orderId}`,
         category: input.category,
         priority: input.priority,
       }),
@@ -216,7 +185,7 @@ export async function queueOperationalReminders() {
     const delta = daysFromToday(today, dueDate);
 
     if ([7, 3, 1, 0].includes(delta)) {
-      addCustomerChannels(rows, order, {
+      addCustomerEmail(rows, order, {
         templateKey: "customer_asset_due_reminder",
         dedupeSuffix: `asset-due-${delta}-${dueDate}`,
         payload: {
@@ -233,7 +202,7 @@ export async function queueOperationalReminders() {
 
     if ([-1, -3, -7].includes(delta)) {
       const daysOverdue = Math.abs(delta);
-      addCustomerChannels(rows, order, {
+      addCustomerEmail(rows, order, {
         templateKey: "customer_assets_overdue",
         dedupeSuffix: `asset-overdue-${daysOverdue}-${dueDate}`,
         payload: {
@@ -299,7 +268,7 @@ export async function queueOperationalReminders() {
     };
 
     if ([7, 3, 1, 0].includes(delta)) {
-      addCustomerChannels(rows, order, {
+      addCustomerEmail(rows, order, {
         templateKey: "customer_invoice_due_reminder",
         dedupeSuffix: `invoice-due-${delta}-${invoice.id}-${invoice.due_date}`,
         payload: { ...payload, daysUntilDue: delta },
@@ -326,7 +295,7 @@ export async function queueOperationalReminders() {
 
     if ([-1, -7, -15].includes(delta)) {
       const daysOverdue = Math.abs(delta);
-      addCustomerChannels(rows, order, {
+      addCustomerEmail(rows, order, {
         templateKey: "customer_invoice_overdue",
         dedupeSuffix: `invoice-overdue-${daysOverdue}-${invoice.id}-${invoice.due_date}`,
         payload: { ...payload, daysOverdue },
@@ -371,7 +340,7 @@ export async function queueOperationalReminders() {
     const portalUrl = `${config.appBaseUrl}/portal/orders`;
 
     if (startDelta === 1) {
-      addCustomerChannels(rows, order, {
+      addCustomerEmail(rows, order, {
         templateKey: "customer_campaign_starting_tomorrow",
         dedupeSuffix: `campaign-start-tomorrow-${range.startDate}`,
         payload: {

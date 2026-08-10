@@ -72,9 +72,6 @@ export async function POST(
       };
       const notifications: Array<Record<string, unknown>> = [];
       const email = String(client.email ?? "").trim().toLowerCase();
-      const phone = String(
-        contact?.telephone ?? client.telephone ?? "",
-      ).trim();
 
       if (email) {
         notifications.push({
@@ -86,27 +83,6 @@ export async function POST(
           reply_to_email: config.salesReplyToEmail,
           payload,
           dedupe_key: `asset-deadline-set-email-${order.id}-${dueDate}`,
-          category: "asset_deadline",
-          priority: 30,
-        });
-      }
-
-      if (
-        phone &&
-        Boolean(
-          contact?.sms_transactional_consent ??
-            client.sms_transactional_consent,
-        )
-      ) {
-        notifications.push({
-          order_id: order.id,
-          channel: "sms",
-          template_key: "customer_asset_deadline_set",
-          recipient: phone,
-          sender_email: config.transactionalFromEmail,
-          reply_to_email: config.salesReplyToEmail,
-          payload,
-          dedupe_key: `asset-deadline-set-sms-${order.id}-${dueDate}`,
           category: "asset_deadline",
           priority: 30,
         });

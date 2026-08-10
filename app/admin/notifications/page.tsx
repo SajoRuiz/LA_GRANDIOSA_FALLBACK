@@ -42,11 +42,6 @@ export default async function NotificationsPage() {
   }));
 
   const emailConfigured = Boolean(config.resendApiKey);
-  const smsConfigured = Boolean(
-    config.twilioAccountSid &&
-      config.twilioAuthToken &&
-      (config.twilioMessagingServiceSid || config.twilioFromNumber),
-  );
 
   return (
     <main className={styles.page}>
@@ -70,8 +65,8 @@ export default async function NotificationsPage() {
         <h1>Notification control center.</h1>
         <p>
           Email delivery: {emailConfigured ? "configured" : "queue only"}. SMS
-          delivery: {smsConfigured ? "configured" : "queue only"}. Automated
-          reminders use {config.businessTimeZone} business dates.
+          delivery: disabled. Automated reminders use {config.businessTimeZone}
+          business dates.
         </p>
       </section>
 

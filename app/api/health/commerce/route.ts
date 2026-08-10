@@ -44,12 +44,6 @@ export async function GET() {
     const emailConfigured = Boolean(
       config.resendApiKey && config.resendWebhookSecret,
     );
-    const smsConfigured = Boolean(
-      config.twilioAccountSid &&
-        config.twilioAuthToken &&
-        (config.twilioMessagingServiceSid || config.twilioFromNumber),
-    );
-
     return NextResponse.json({
       ok: true,
       stage: "5",
@@ -64,7 +58,7 @@ export async function GET() {
       releaseQueue: "manual pending LED API",
       campaignAssetStorage: campaignStorageReady ? "ready" : "missing",
       emailDelivery: emailConfigured ? "configured" : "queue only",
-      smsDelivery: smsConfigured ? "configured" : "queue only",
+      smsDelivery: "disabled",
       reminders: "active",
       automationSecurity: config.cronSecret ? "configured" : "manual staff only",
       businessTimeZone: config.businessTimeZone,

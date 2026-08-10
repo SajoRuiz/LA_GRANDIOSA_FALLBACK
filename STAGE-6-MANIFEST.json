@@ -1,0 +1,257 @@
+{
+  "release": "Stage 6 \u2014 Production Launch and Security Certification",
+  "base": "Stage 5 Full",
+  "migration": "202608110001_stage_6_production_security.sql",
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 1193,
+      "sha256": "be1af16da8fe181565f51ebf5e87e1db2c1f8ede0c41b58fbcade79f5c303128"
+    },
+    {
+      "path": "BACKUP-RECOVERY-RUNBOOK.md",
+      "bytes": 1420,
+      "sha256": "27ccd47af0a175b675cef79c89ffbd1418e39f5302efb03988abd079b887d564"
+    },
+    {
+      "path": "INCIDENT-RESPONSE-RUNBOOK.md",
+      "bytes": 1389,
+      "sha256": "764a5c96f4cdf974e14f5b1f3d3bb0dbe8536f3cd9bb7d88537c0154d0b3089a"
+    },
+    {
+      "path": "LED-API-ADAPTER-SPEC.md",
+      "bytes": 1584,
+      "sha256": "c3488f57a59aa92749a615f3b09ad1a710c9c959a38973bcfd33e1d3a362fadf"
+    },
+    {
+      "path": "PACKAGE-CHANGES-STAGE-6.md",
+      "bytes": 825,
+      "sha256": "13072ed8d5426ae96375b788274ea90ea11eddd7aa180083eb0259fec6b23514"
+    },
+    {
+      "path": "PRODUCTION-LAUNCH-CHECKLIST.md",
+      "bytes": 1381,
+      "sha256": "d4e4917d1a3b23a646771eee50de8789b695f5124f7508198458afa03cb52ffd"
+    },
+    {
+      "path": "README-STAGE-6.md",
+      "bytes": 1670,
+      "sha256": "091296ad6e47a806fb18f3a836d0e31bba19e10eee6f8e2a147cc4e15f668c99"
+    },
+    {
+      "path": "ROLE-ACCESS-MATRIX.md",
+      "bytes": 942,
+      "sha256": "e0714afd46d41f53c47f688c2952a36f27e9356c3b46c4e21c34620aaa1b6dda"
+    },
+    {
+      "path": "SECURITY-OPERATIONS-MANUAL.md",
+      "bytes": 1462,
+      "sha256": "c35640bfc6501e2d0041b765fda1575ae574de113e8d0c86f6fccec1d576e74b"
+    },
+    {
+      "path": "STAGE-6-SETUP.md",
+      "bytes": 1640,
+      "sha256": "60fd3ff1faf1616885e0237c1d92e18efa051c821274c0b70d08e7381b784464"
+    },
+    {
+      "path": "STAGE-6-TEST-MATRIX.md",
+      "bytes": 2373,
+      "sha256": "1bd2f9de9421d76e7e2de298ad402e314e434b473ab49f9721aa589d1371dbce"
+    },
+    {
+      "path": "VERCEL-PRODUCTION-SETUP.md",
+      "bytes": 1200,
+      "sha256": "16a90bb1ce56a5b0a4567155959f598a3aaf157704790f34782c22cfd383b0d8"
+    },
+    {
+      "path": "VERIFY-STAGE-6.sh",
+      "bytes": 1124,
+      "sha256": "67e61fb0cd4463b69012e9bcaf40e5e5efbf68f9e0add82e370ba230aeda9a93"
+    },
+    {
+      "path": "app/admin/agencies/admin.module.css",
+      "bytes": 5766,
+      "sha256": "44e12cec83bdd30c4a7d75fd2c313cee62d4f6d2c09556ece769cbda99459373"
+    },
+    {
+      "path": "app/admin/agencies/page.tsx",
+      "bytes": 3451,
+      "sha256": "4b1f81d39158bc6492d6dd692c0278e0b225df55c9f4b0ba7b9bab88c7598f13"
+    },
+    {
+      "path": "app/admin/launch/LaunchChecklistClient.tsx",
+      "bytes": 6476,
+      "sha256": "c6c587926a8c12274c4366ba1cfd53cdfbf14b1cb9e3a72e8b8d902079196781"
+    },
+    {
+      "path": "app/admin/launch/launch.module.css",
+      "bytes": 3251,
+      "sha256": "3256f0d26609ca5a46979f7fbfc97bd4eaadd86e6b2078b34de35ee40aa4e68d"
+    },
+    {
+      "path": "app/admin/launch/page.tsx",
+      "bytes": 3186,
+      "sha256": "e2143183f997b0f74d542192931fe55a4cb60a75ff4190a5712814e8a6170a1c"
+    },
+    {
+      "path": "app/admin/notifications/page.tsx",
+      "bytes": 2868,
+      "sha256": "f84cfbfa367907d89dbfa12e788c58d39704aef9f736e8e3728226a934232443"
+    },
+    {
+      "path": "app/admin/releases/page.tsx",
+      "bytes": 1828,
+      "sha256": "6b4a39084bcac99e3f572b51b0153d8d322a1f05aeef8c52e5c8f87153e86bc2"
+    },
+    {
+      "path": "app/admin/security/SecurityAdminClient.tsx",
+      "bytes": 2190,
+      "sha256": "bc92e5a906d05a86e93ed34028ffd9b73bca8f0a4591a4c887528217f0a1bb11"
+    },
+    {
+      "path": "app/admin/security/page.tsx",
+      "bytes": 9644,
+      "sha256": "81d85a398822003c5050155e690ec9ecac087846ac502da17c0118a8c5c4b804"
+    },
+    {
+      "path": "app/admin/security/security.module.css",
+      "bytes": 2481,
+      "sha256": "7fa7b6ed88d3e2fe6880fd5976009badfe0d59d183e3a26c785270a34e6684c5"
+    },
+    {
+      "path": "app/api/admin/launch-checklist/[itemId]/route.ts",
+      "bytes": 1602,
+      "sha256": "baf19af020dc8ee242114045781ee23d87f47072994507a8bfbdcbbbeac34f82"
+    },
+    {
+      "path": "app/api/admin/production-releases/route.ts",
+      "bytes": 2369,
+      "sha256": "ec8674a0fbbcb6cf1bfa5784f70ead3473270094e13f599dfe9ac79d5743ce15"
+    },
+    {
+      "path": "app/api/admin/security/audit/route.ts",
+      "bytes": 2839,
+      "sha256": "a856eccc504019cca255ecfd263d88ab90e9b4f31f0df159af0915ea932910e9"
+    },
+    {
+      "path": "app/api/assets/upload-token/route.ts",
+      "bytes": 3425,
+      "sha256": "12c00b4bc2420b9547217edd67dc0520cf674004487ec415c3f517f661b4b074"
+    },
+    {
+      "path": "app/api/health/commerce/route.ts",
+      "bytes": 3923,
+      "sha256": "2989131c972d72c63d373a022c686e6246aac1c6f025b9c68b439a292eb3638d"
+    },
+    {
+      "path": "app/api/health/production/route.ts",
+      "bytes": 3925,
+      "sha256": "2b01cf0d8f931995ffd5e111ac6e9804e5070ed1fb79f17bba7a46d3e36a86f7"
+    },
+    {
+      "path": "app/api/internal/automation/daily/route.ts",
+      "bytes": 1895,
+      "sha256": "0e34de07a11ffd81dd3b5c3634df616f55769a0b968915b01b67202aa0f23322"
+    },
+    {
+      "path": "app/api/internal/security/maintenance/route.ts",
+      "bytes": 985,
+      "sha256": "11f0985dee8d67e550c435c3c368ce2b490cd996aa79aa08d495736124445889"
+    },
+    {
+      "path": "app/api/orders/draft/route.ts",
+      "bytes": 10362,
+      "sha256": "4d9f9693fc9341917167dcd24ac6907b09331c7db2d82a2978f5927b41e15e64"
+    },
+    {
+      "path": "app/api/purchase-orders/upload-url/route.ts",
+      "bytes": 3631,
+      "sha256": "d709ce17a2563a7093bff5f1c61a9a93fae4b455897209e17876d68a3dabd695"
+    },
+    {
+      "path": "app/auth/login/actions.ts",
+      "bytes": 5600,
+      "sha256": "1aa3d4435ff196c2c02c22deeed0cb634621f3d4e25c9089b286447db6f32766"
+    },
+    {
+      "path": "deployment/github-actions-production-readiness.example.yml",
+      "bytes": 1427,
+      "sha256": "9510be7acc6be6db426990a5e60d4c7cf707b445602894d6893070dc435ff11a"
+    },
+    {
+      "path": "deployment/vercel-pro.example.json",
+      "bytes": 309,
+      "sha256": "942b9dff9a18a42bd4293da01c45273f9f458ad1b9d5938b6d2fbca1547e15ee"
+    },
+    {
+      "path": "deployment/vercel-stage-6-environment.example.txt",
+      "bytes": 676,
+      "sha256": "c911cf4689edfa745eee6f849c6a40b20586990f1c86d780c22dc4fb240343aa"
+    },
+    {
+      "path": "lib/led/http-provider.ts",
+      "bytes": 2123,
+      "sha256": "15ba7b46a26c0dccf062ec1a5e0e62e0355817ab7da87a5eaa2295a72eb20718"
+    },
+    {
+      "path": "lib/led/manual-provider.ts",
+      "bytes": 1073,
+      "sha256": "f262d7c3512d3e5913ecac6e563d3ada6b6740ed5dae699709be181e8ce7b4ee"
+    },
+    {
+      "path": "lib/led/provider.ts",
+      "bytes": 558,
+      "sha256": "33b80a48fd4ffc36b2dd4bf245d48a380f4b8d0c47ff5578a4aa16b621cd4cbe"
+    },
+    {
+      "path": "lib/led/types.ts",
+      "bytes": 1231,
+      "sha256": "1edbf037eb60880bc7d64e29f48a1208af0da1136459709499b51f6c15e7282c"
+    },
+    {
+      "path": "lib/server/config.ts",
+      "bytes": 3618,
+      "sha256": "157a49d3dcc0229ef1660fe7a962630d0836e8d978f888bde493aeab4a2b7341"
+    },
+    {
+      "path": "lib/server/request-context.ts",
+      "bytes": 1352,
+      "sha256": "92d8f1c9d0cb301de010ddcd95da422186e4e30f946faa79434f65c1b7b915a5"
+    },
+    {
+      "path": "lib/server/security-maintenance.ts",
+      "bytes": 982,
+      "sha256": "3444b3c0090c3875705de867fe1a0f6b83372f786206703c43e482764deb6291"
+    },
+    {
+      "path": "lib/server/security.ts",
+      "bytes": 5082,
+      "sha256": "4dbe49731ff5eaa015c0f33ba0c7a3d8f24ff42268051b17859bb0bf1c5627e1"
+    },
+    {
+      "path": "middleware.ts",
+      "bytes": 3123,
+      "sha256": "1d5b091483bf7f54fecf4a77ea827faecb0b4a53ba4b303a36732fb410b8b7ca"
+    },
+    {
+      "path": "scripts/check-for-secrets.mjs",
+      "bytes": 2433,
+      "sha256": "2bfd142c1ec1c8000177fa5a0c44c491cf9ef2d0677571941a4810fbe28d2d9c"
+    },
+    {
+      "path": "scripts/smoke-test.mjs",
+      "bytes": 2923,
+      "sha256": "1fbb54691e66ec0934c337ace54395de6b1c0868f9a1d73e89565bca707aa6a5"
+    },
+    {
+      "path": "scripts/verify-production-env.mjs",
+      "bytes": 2889,
+      "sha256": "aa1ea96b35cf038dc6dd5269697ab84ab41eaab0ef4925f209b2097de3f0bfb0"
+    },
+    {
+      "path": "supabase/migrations/202608110001_stage_6_production_security.sql",
+      "bytes": 23216,
+      "sha256": "16ca28960f711199974acf96e8fb602c44fba8b04df7b8ed45408dee510989a3"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { getCommerceServerConfig } from "@/lib/server/config";
 import { processNotificationOutbox } from "@/lib/server/notification-delivery";
 import { queueOperationalReminders } from "@/lib/server/reminder-automation";
 import { withAutomationLock } from "@/lib/server/automation-lock";
+import { runSecurityMaintenance } from "@/lib/server/security-maintenance";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -27,7 +28,8 @@ async function run(request: NextRequest) {
         const delivered = await processNotificationOutbox(
           config.notificationBatchSize,
         );
-        return { queued, delivered };
+        const security = await runSecurityMaintenance();
+        return { queued, delivered, security };
       },
     );
 

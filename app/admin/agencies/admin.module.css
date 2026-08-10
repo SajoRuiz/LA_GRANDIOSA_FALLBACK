@@ -21,11 +21,11 @@
   top: 0;
   z-index: 30;
   display: flex;
-  min-height: var(--lg-chrome-height);
+  min-height: 88px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 8px var(--lg-chrome-padding-x);
+  padding: 12px clamp(22px, 5vw, 82px);
   background: rgba(3, 10, 63, 0.9);
   border-bottom: 1px solid rgba(183, 192, 255, 0.22);
   backdrop-filter: blur(18px);
@@ -274,7 +274,7 @@
 
 @media (max-width: 680px) {
   .header {
-    min-height: var(--lg-chrome-height-mobile);
+    min-height: 76px;
     padding: 8px 18px;
   }
 
@@ -306,7 +306,9 @@
 
 .headerNav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 18px;
 }
 

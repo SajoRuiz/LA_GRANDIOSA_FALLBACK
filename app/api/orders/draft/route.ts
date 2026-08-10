@@ -8,9 +8,14 @@ import {
   CommerceConfigurationError,
   getCommerceServerConfig,
 } from "@/lib/server/config";
-import { processNotificationOutbox } from "@/lib/server/notification-delivery";
 import { parseDraftCheckoutRequest } from "@/lib/server/checkout-input";
 import { buildDraftOrder } from "@/lib/server/order-draft";
+import { getRouteRequestContext } from "@/lib/server/request-context";
+import {
+  enforceRateLimit,
+  RateLimitExceededError,
+  recordSecurityEvent,
+} from "@/lib/server/security";
 
 export const runtime = "nodejs";
 
@@ -31,6 +36,30 @@ interface CreateOrderResult {
 export async function POST(request: NextRequest) {
   try {
     const access = await requireAgencyPurchaseAccessForApi();
+    const requestContext = getRouteRequestContext(request);
+
+    await enforceRateLimit({
+      scope: "agency_order_create_user",
+      identifier: access.identity.userId,
+      limit: 12,
+      windowSeconds: 60 * 60,
+      context: requestContext,
+      actorUserId: access.identity.userId,
+      actorEmail: access.identity.email,
+      failClosed: process.env.NODE_ENV === "production",
+    });
+
+    await enforceRateLimit({
+      scope: "agency_order_create_account",
+      identifier: access.agency.id,
+      limit: 30,
+      windowSeconds: 60 * 60,
+      context: requestContext,
+      actorUserId: access.identity.userId,
+      actorEmail: access.identity.email,
+      failClosed: process.env.NODE_ENV === "production",
+    });
+
     const input = parseDraftCheckoutRequest(await request.json());
     const built = buildDraftOrder(input.client, input.cartItems, {
       discountBasisPoints: access.agency.discount_basis_points,
@@ -87,6 +116,22 @@ export async function POST(request: NextRequest) {
         },
       },
     ];
+
+    if (input.client.smsTransactionalConsent) {
+      notifications.push({
+        channel: "sms",
+        template_key: "customer_order_received_sms",
+        recipient: input.client.telephone,
+        sender_email: "",
+        reply_to_email: "",
+        dedupe_key: `customer-order-sms-${access.identity.userId}-${timestamp}`,
+        payload: {
+          clientName: input.client.fullName,
+          agencyName: access.agency.display_name,
+          nextStep: "purchase_order_and_credit_review",
+        },
+      });
+    }
 
     const orderPayload = {
       ...built.orderPayload,
@@ -176,12 +221,19 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Best-effort immediate dispatch so customers and staff do not wait for cron.
-    try {
-      await processNotificationOutbox(10);
-    } catch (deliveryError) {
-      console.error("Order notification processing failed.", deliveryError);
-    }
+    await recordSecurityEvent({
+      eventKey: "order.agency_draft_created",
+      context: requestContext,
+      actorUserId: access.identity.userId,
+      actorEmail: access.identity.email,
+      metadata: {
+        orderId: result.order_id,
+        orderNumber: result.order_number,
+        agencyId: access.agency.id,
+        netContractTotalCents:
+          built.agencyPricing.netContractTotalCents,
+      },
+    });
 
     return NextResponse.json(
       {
@@ -209,6 +261,22 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Agency draft checkout failed", error);
+
+    if (error instanceof RateLimitExceededError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: "RATE_LIMITED",
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(error.retryAfterSeconds),
+          },
+        },
+      );
+    }
 
     if (error instanceof AgencyAccessError) {
       return NextResponse.json(

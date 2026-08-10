@@ -7,15 +7,15 @@
 }
 .header {
   display: flex;
-  min-height: 67.2px;
+  min-height: var(--lg-chrome-height);
   align-items: center;
   justify-content: space-between;
-  padding: 8px clamp(20px, 5vw, 82px);
+  padding: 8px var(--lg-chrome-padding-x);
   border-bottom: 1px solid rgba(183, 192, 255, 0.25);
 }
 .logo {
-  width: 230px;
-  height: 64px;
+  width: clamp(190px, 18vw, 280px);
+  height: clamp(54px, 5vw, 76px);
   object-fit: cover;
   object-position: center 45%;
   mix-blend-mode: screen;

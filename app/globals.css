@@ -33,6 +33,8 @@ main > header img {
   height: 112px !important;
   object-fit: contain !important;
   object-position: left center !important;
+  transform: scale(2.5) !important;
+  transform-origin: left center !important;
 }
 
 main > header nav {

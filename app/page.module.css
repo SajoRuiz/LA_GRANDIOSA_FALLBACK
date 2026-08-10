@@ -554,6 +554,7 @@
 .delivery {
   margin: 16px 0 0;
   color: rgba(232, 236, 255, 0.78);
+  font-size: 25.3px;
 }
 
 .finePrint {
@@ -562,7 +563,7 @@
 }
 
 .ratesDisclaimer {
-  font-size: 24px;
+  font-size: 55.2px;
   line-height: 1.5;
 }
 
@@ -723,11 +724,15 @@
 .signatureDisclaimer {
   margin-top: 18px;
   color: rgba(232, 236, 255, 0.84);
-  font-size: 14px;
+  font-size: 32.2px;
   line-height: 1.5;
   text-transform: none;
   letter-spacing: 0;
   font-weight: 500;
+}
+
+.signatureEstimatedPlays {
+  font-size: 36.8px;
 }
 
 .signaturePanel h2 {

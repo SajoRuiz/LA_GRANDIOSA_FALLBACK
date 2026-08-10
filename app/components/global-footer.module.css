@@ -29,6 +29,8 @@
   max-width: min(470px, 70vw);
   object-fit: contain;
   filter: brightness(1.45) contrast(1.18);
+  transform: scale(2.5);
+  transform-origin: left center;
 }
 
 .footerBrand span {

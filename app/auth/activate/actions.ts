@@ -2,11 +2,45 @@
 
 import { redirect } from "next/navigation";
 import { hashActivationCode } from "@/lib/server/activation-code";
+import { getCommerceServerConfig } from "@/lib/server/config";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function activationError(message: string): never {
   redirect(`/auth/activate?error=${encodeURIComponent(message)}`);
+}
+
+async function queueInviteAcceptedProcessingEmail(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  email: string,
+  requesterName: string,
+  agencyName?: string,
+) {
+  try {
+    const config = getCommerceServerConfig();
+    const normalizedEmail = email.trim().toLowerCase();
+    const dedupeKey = `access-request-processing-${normalizedEmail}-${crypto.randomUUID()}`;
+
+    await admin.from("notification_outbox").insert({
+      channel: "email",
+      template_key: "internal_access_request_processing",
+      recipient: config.internalProcessingEmail,
+      sender_email: config.transactionalFromEmail,
+      reply_to_email: config.salesReplyToEmail,
+      dedupe_key: dedupeKey,
+      priority: 10,
+      payload: {
+        requesterName: requesterName || normalizedEmail,
+        requesterEmail: normalizedEmail,
+        company: agencyName || "",
+        message:
+          "The invited agency user has completed account activation and is ready for onboarding review.",
+        portalUrl: `${config.appBaseUrl}/admin/leads`,
+      },
+    });
+  } catch (notificationError) {
+    console.error("Failed to queue invite-accepted processing email.", notificationError);
+  }
 }
 
 export async function activateAgencyAccount(formData: FormData) {
@@ -92,6 +126,19 @@ export async function activateAgencyAccount(formData: FormData) {
       agency_role: activated.agency_role,
     },
   });
+
+  await Promise.all([
+    admin
+      .from("access_leads")
+      .update({ status: "contacted" })
+      .eq("requester_email", String(claims.email ?? "").trim().toLowerCase()),
+    queueInviteAcceptedProcessingEmail(
+      admin,
+      String(claims.email ?? "").trim(),
+      fullName || username,
+      activated?.agency_id ? undefined : undefined,
+    ),
+  ]);
 
   redirect("/auth/mfa/enroll?next=/portal");
 }

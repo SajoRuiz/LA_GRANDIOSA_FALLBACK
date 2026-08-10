@@ -262,6 +262,12 @@ export function renderNotification(
       body: `${text(payload.requesterName || payload.requesterEmail || "A client")} requested access for ${text(payload.company || "a new account")}${text(payload.requesterEmail) ? ` (${text(payload.requesterEmail)})` : ""}. ${text(payload.message)}`,
       actionLabel: "REVIEW ACCESS REQUEST",
     },
+    internal_access_request_processing: {
+      subject: "Agency access request confirmed",
+      heading: "Agency Access Confirmed",
+      body: `${text(payload.requesterName || payload.requesterEmail || "A client")} has completed the invite activation step for ${text(payload.company || "the requested agency account")}${text(payload.requesterEmail) ? ` (${text(payload.requesterEmail)})` : ""}. ${text(payload.message)}`,
+      actionLabel: "REVIEW ACCESS REQUEST",
+    },
     customer_access_request_received: {
       subject: "Your La Grandiosa access request is received",
       heading: "Access Request Received",

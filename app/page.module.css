@@ -261,7 +261,8 @@
 .screenDiagram,
 .ratesGrid,
 .packageGrid,
-.signature {
+.signature,
+.ratesDisclaimer {
   width: min(1440px, calc(100% - 44px));
   margin: 0 auto;
 }
@@ -566,6 +567,7 @@
 .ratesDisclaimer {
   color: #000000;
   font-size: 12pt;
+  margin: 18px auto 0;
   line-height: 1.5;
   letter-spacing: 0em;
   text-transform: none;
@@ -741,7 +743,7 @@
 }
 
 .signatureEstimatedPlays {
-  font-size: 36.8px;
+  font-size: 16pt;
 }
 
 .signaturePanel h2 {
@@ -936,7 +938,8 @@
   .screenDiagram,
   .ratesGrid,
   .packageGrid,
-  .signature {
+  .signature,
+  .ratesDisclaimer {
     width: min(1440px, calc(100% - 24px));
   }
 

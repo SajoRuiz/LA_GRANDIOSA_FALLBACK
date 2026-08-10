@@ -12,6 +12,15 @@ html, body {
   --lg-chrome-height: 160px;
   --lg-chrome-height-mobile: 128px;
   --lg-chrome-padding-x: clamp(20px, 5vw, 82px);
+  --deep: #030a3f;
+  --navy: #06135e;
+  --panel: #0d185e;
+  --blue: #263cff;
+  --orange: #ff9d00;
+  --white: #ffffff;
+  --mist: #e8ecff;
+  --soft: #b7c0ff;
+  --line: rgba(88, 104, 217, 0.55);
 }
 
 main > header {

@@ -14,16 +14,41 @@ export async function GET() {
     const supabase = createSupabaseAdminClient();
 
     const checks = await Promise.all([
-      supabase.from("orders").select("id,asset_due_at").limit(1),
-      supabase.from("notification_outbox").select("id,max_attempts").limit(1),
-      supabase.from("notification_provider_events").select("id").limit(1),
-      supabase.from("notification_suppressions").select("id").limit(1),
-      supabase.from("automation_job_locks").select("job_key").limit(1),
-      supabase.from("asset_submissions").select("id").limit(1),
+      supabase
+        .from("orders")
+        .select("id,asset_due_at")
+        .limit(1)
+        .then((result) => ({ check: "orders", result })),
+      supabase
+        .from("notification_outbox")
+        .select("id,max_attempts")
+        .limit(1)
+        .then((result) => ({ check: "notification_outbox", result })),
+      supabase
+        .from("notification_provider_events")
+        .select("id")
+        .limit(1)
+        .then((result) => ({ check: "notification_provider_events", result })),
+      supabase
+        .from("notification_suppressions")
+        .select("id")
+        .limit(1)
+        .then((result) => ({ check: "notification_suppressions", result })),
+      supabase
+        .from("automation_job_locks")
+        .select("job_key")
+        .limit(1)
+        .then((result) => ({ check: "automation_job_locks", result })),
+      supabase
+        .from("asset_submissions")
+        .select("id")
+        .limit(1)
+        .then((result) => ({ check: "asset_submissions", result })),
     ]);
-    const failed = checks.find((result) => result.error);
+    const failed = checks.find(({ result }) => result.error);
 
-    if (failed?.error) {
+    if (failed?.result.error) {
+      const error = failed.result.error;
       return NextResponse.json(
         {
           ok: false,
@@ -31,7 +56,11 @@ export async function GET() {
           database: "unavailable",
           message:
             "Supabase is reachable, but the Stage 5 communications migration may not be installed.",
-          detail: failed.error.message,
+          failingCheck: failed.check,
+          detail: error.message,
+          errorCode: error.code ?? null,
+          errorHint: error.hint ?? null,
+          errorDetails: error.details ?? null,
         },
         { status: 503 },
       );

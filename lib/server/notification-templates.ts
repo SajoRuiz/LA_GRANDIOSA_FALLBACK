@@ -292,7 +292,7 @@ export function renderNotification(
   const safeBody = escapeHtml(chosen.body);
   const safeUrl = portalUrl ? escapeHtml(portalUrl) : "";
   const safeSignatureLogoUrl = escapeHtml(
-    resolveBrandAssetUrl(portalUrl, "/la-grandiosa-logo-black.png"),
+    resolveBrandAssetUrl(portalUrl, "/la-grandiosa-logo.png"),
   );
   const safeActionLabel = escapeHtml(
     chosen.actionLabel ?? "OPEN SECURE PORTAL",

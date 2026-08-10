@@ -1,13 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Keep local artifacts isolated in Dropbox workspaces, but preserve
-  // Vercel's expected output directory during cloud builds.
-  // Some local `.env.local` files include `VERCEL=1`; requiring CI avoids
-  // routing local builds into the cloud output directory.
-  distDir:
-    process.env.CI === "true" && process.env.VERCEL === "1"
-      ? ".next"
-      : ".next-local",
+  // Vercel's Next.js builder expects the default build output at `.next`.
+  // A custom `distDir` caused successful builds to be emitted elsewhere,
+  // then deployment packaging failed while looking for `.next/routes-manifest.json`.
+  distDir: ".next",
 };
 
 export default nextConfig;

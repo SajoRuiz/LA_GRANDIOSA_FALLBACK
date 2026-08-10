@@ -186,9 +186,9 @@ export default function HomePage() {
             <Link className={`${styles.button} ${styles.primary}`} href={signInPath}>
               SIGN IN
             </Link>
-            <a className={`${styles.button} ${styles.secondary}`} href="mailto:ventas@lagrandiosapr.com?subject=La%20Grandiosa%20Sign%20Up%20Request">
+            <Link className={`${styles.button} ${styles.secondary}`} href="/auth/signup">
               SIGN UP
-            </a>
+            </Link>
           </div>
         </div>
       </section>

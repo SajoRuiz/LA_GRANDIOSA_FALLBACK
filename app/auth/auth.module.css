@@ -186,7 +186,8 @@
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
   min-height: 56px;
   padding: 0 16px;
@@ -198,14 +199,22 @@
 }
 
 .field input:hover,
-.field select:hover {
+.field select:hover,
+.field textarea:hover {
   border-color: var(--lg-orange);
 }
 
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   outline: 2px solid var(--lg-orange);
   outline-offset: 2px;
+}
+
+.field textarea {
+  min-height: 120px;
+  padding: 12px 16px;
+  resize: vertical;
 }
 
 .fieldGridTwo {

@@ -80,7 +80,7 @@ export default async function LoginPage({
               Continue securely
             </button>
 
-            <Link className={styles.requestAccessCommand} href="/#availability">
+            <Link className={styles.requestAccessCommand} href="/auth/signup">
               Request access
             </Link>
           </form>

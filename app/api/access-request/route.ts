@@ -13,6 +13,14 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function resolveReturnPath(value: string, fallback = "/auth/signup") {
+  const trimmed = value.trim();
+  if (!trimmed || !trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    return fallback;
+  }
+  return trimmed;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -20,9 +28,15 @@ export async function POST(request: NextRequest) {
     const email = normalizeEmail(String(formData.get("email") ?? ""));
     const company = String(formData.get("company") ?? "").trim();
     const message = String(formData.get("message") ?? "").trim();
+    const returnTo = resolveReturnPath(
+      String(formData.get("returnTo") ?? ""),
+      "/auth/signup",
+    );
 
     if (!email || !isValidEmail(email)) {
-      return NextResponse.redirect(new URL("/?accessRequest=invalid", request.url));
+      return NextResponse.redirect(
+        new URL(`${returnTo}?accessRequest=invalid`, request.url),
+      );
     }
 
     const admin = createSupabaseAdminClient();
@@ -78,9 +92,13 @@ export async function POST(request: NextRequest) {
       console.error("Access-request notification processing failed.", deliveryError);
     }
 
-    return NextResponse.redirect(new URL("/?accessRequest=sent", request.url));
+    return NextResponse.redirect(
+      new URL(`${returnTo}?accessRequest=sent`, request.url),
+    );
   } catch (error) {
     console.error("Access request failed.", error);
-    return NextResponse.redirect(new URL("/?accessRequest=invalid", request.url));
+    return NextResponse.redirect(
+      new URL("/auth/signup?accessRequest=invalid", request.url),
+    );
   }
 }

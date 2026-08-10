@@ -554,7 +554,8 @@
 .delivery {
   margin: 16px 0 0;
   color: rgba(232, 236, 255, 0.78);
-  font-size: 25.3px;
+  font-size: 9pt;
+  letter-spacing: 0em;
 }
 
 .finePrint {

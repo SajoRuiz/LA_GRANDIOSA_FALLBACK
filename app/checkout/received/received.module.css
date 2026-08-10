@@ -9,9 +9,9 @@
 
 .header {
   display: flex;
-  min-height: 86px;
+  min-height: 68.8px;
   align-items: center;
-  padding: 12px clamp(22px, 5vw, 82px);
+  padding: 9.6px clamp(22px, 5vw, 82px);
   border-bottom: 1px solid rgba(88, 104, 217, 0.4);
 }
 
@@ -105,7 +105,7 @@
 
 @media (max-width: 680px) {
   .header {
-    min-height: 76px;
+    min-height: 60.8px;
     padding: 8px 18px;
   }
 

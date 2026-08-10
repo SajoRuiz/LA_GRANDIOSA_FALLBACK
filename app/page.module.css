@@ -22,7 +22,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 14px clamp(20px, 4vw, 54px);
+  padding: 11.2px clamp(20px, 4vw, 54px);
   background: linear-gradient(180deg, rgba(3, 10, 63, 0.98), rgba(3, 10, 63, 0.88));
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -790,7 +790,7 @@
   width: 100%;
   max-width: none;
   margin: 0 auto;
-  padding: 34px clamp(24px, 4vw, 72px) 38px;
+  padding: 27.2px clamp(24px, 4vw, 72px) 30.4px;
   display: grid;
   grid-template-columns: 1.25fr 1fr 1fr;
   gap: clamp(20px, 4vw, 54px);

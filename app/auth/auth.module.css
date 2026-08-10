@@ -38,11 +38,11 @@
 
 .header {
   display: flex;
-  min-height: 88px;
+  min-height: 70.4px;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 12px clamp(22px, 5vw, 82px);
+  padding: 9.6px clamp(22px, 5vw, 82px);
   background: rgba(3, 10, 63, 0.84);
   border-bottom: 1px solid rgba(183, 192, 255, 0.24);
   backdrop-filter: blur(18px);
@@ -314,7 +314,7 @@
 
 @media (max-width: 680px) {
   .header {
-    min-height: 76px;
+    min-height: 60.8px;
     padding: 8px 18px;
   }
 

@@ -15,9 +15,32 @@ html, body {
 }
 
 main > header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px;
   min-height: var(--lg-chrome-height) !important;
+  padding-left: var(--lg-chrome-padding-x) !important;
+  padding-right: var(--lg-chrome-padding-x) !important;
   padding-top: 8px !important;
   padding-bottom: 8px !important;
+}
+
+main > header img {
+  width: auto !important;
+  max-width: min(240px, 55vw) !important;
+  height: 56px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+}
+
+main > header nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-left: auto;
 }
 
 body > footer {
@@ -37,8 +60,20 @@ body > footer > div {
 @media (max-width: 900px) {
   main > header {
     min-height: var(--lg-chrome-height-mobile) !important;
+    gap: 10px;
     padding-top: 6px !important;
     padding-bottom: 6px !important;
+  }
+
+  main > header img {
+    height: 44px !important;
+    max-width: min(210px, 62vw) !important;
+  }
+
+  main > header nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 10px;
   }
 
   body > footer {

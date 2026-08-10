@@ -3,11 +3,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST() {
   const supabase = await createSupabaseServerClient();
-  const { data: claimsData, error: claimsError } =
-    await supabase.auth.getClaims();
-  const claims = claimsData?.claims as { sub?: string } | undefined;
+  const { data: userData, error: userError } =
+    await supabase.auth.getUser();
+  const userId = userData.user?.id?.trim();
 
-  if (claimsError || !claims?.sub) {
+  if (userError || !userId) {
     return NextResponse.json(
       { error: "Authentication is required." },
       { status: 401 },

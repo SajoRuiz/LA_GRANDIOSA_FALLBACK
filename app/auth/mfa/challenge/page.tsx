@@ -21,10 +21,10 @@ export default async function MfaChallengePage({
   const params = await searchParams;
   const nextPath = sanitizeNextPath(firstValue(params.next), "/portal");
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims as { sub?: string } | undefined;
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id?.trim();
 
-  if (!claims?.sub) {
+  if (!userId) {
     redirect(`/auth/login?next=${encodeURIComponent(nextPath)}`);
   }
 

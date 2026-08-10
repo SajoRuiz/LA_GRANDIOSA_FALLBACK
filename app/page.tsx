@@ -37,7 +37,17 @@ function RateTable({ title, rates, accent = false }: { title: string; rates: str
           <span className={styles.accentPrice}>{sixty}</span>
         </div>
       ))}
-      <p className={styles.delivery}>Estimated delivery: 22,320 plays at 10 seconds · 14,880 at 15 seconds · 7,440 at 30 seconds · 3,720 at 60 seconds</p>
+      <p className={styles.delivery}>
+        Estimated delivery:
+        <br />
+        22,320 plays at 10 seconds
+        <br />
+        14,880 at 15 seconds
+        <br />
+        7,440 at 30 seconds
+        <br />
+        3,720 at 60 seconds
+      </p>
     </div>
   );
 }

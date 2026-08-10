@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireAgencyPurchaseAccess } from "@/lib/auth/access";
 import { getAgencyCreditSummary } from "@/lib/server/agency-credit";
+import { getCommerceServerConfig } from "@/lib/server/config";
 
 import styles from "./portal.module.css";
 
@@ -20,6 +21,27 @@ function percentage(basisPoints: number): string {
 export default async function AgencyPortalPage() {
   const access = await requireAgencyPurchaseAccess("/portal");
   const credit = await getAgencyCreditSummary(access.agency.id);
+  const config = getCommerceServerConfig();
+  const termsRequestSubject = `Negotiated terms request - ${access.agency.account_number}`;
+  const termsRequestBody = [
+    "Hello Admin Team,",
+    "",
+    "I would like to request a review of our negotiated agency terms.",
+    "",
+    `Agency account: ${access.agency.account_number}`,
+    `Agency name: ${access.agency.display_name}`,
+    `Current discount: ${percentage(access.agency.discount_basis_points)}`,
+    `Current payment terms: Net ${access.agency.payment_terms_days}`,
+    `Current approved credit limit: ${currency.format(credit.approvedCreditLimitCents / 100)}`,
+    "",
+    "Requested terms:",
+    "- Discount:",
+    "- Payment date limit:",
+    "- Credit limit:",
+    "",
+    `Requester: ${access.profile.full_name} (${access.profile.email})`,
+  ].join("\n");
+  const termsRequestHref = `mailto:${config.internalProcessingEmail}?subject=${encodeURIComponent(termsRequestSubject)}&body=${encodeURIComponent(termsRequestBody)}`;
 
   return (
     <main className={styles.page}>
@@ -53,6 +75,50 @@ export default async function AgencyPortalPage() {
       </section>
 
       <section className={styles.grid}>
+        <article className={`${styles.card} ${styles.cardWide}`}>
+          <h2>Agency terms and limits</h2>
+          <p className={styles.note}>
+            This information is read-only. Contact administration to request changes.
+          </p>
+          <dl className={styles.details}>
+            <div>
+              <dt>Agency account</dt>
+              <dd>{access.agency.account_number}</dd>
+            </div>
+            <div>
+              <dt>Legal name</dt>
+              <dd>{access.agency.legal_name}</dd>
+            </div>
+            <div>
+              <dt>Display name</dt>
+              <dd>{access.agency.display_name}</dd>
+            </div>
+            <div>
+              <dt>Negotiated discount</dt>
+              <dd>{percentage(access.agency.discount_basis_points)}</dd>
+            </div>
+            <div>
+              <dt>Payment date limit</dt>
+              <dd>Net {access.agency.payment_terms_days} days</dd>
+            </div>
+            <div>
+              <dt>Approved credit limit</dt>
+              <dd>{currency.format(credit.approvedCreditLimitCents / 100)}</dd>
+            </div>
+            <div>
+              <dt>Available credit</dt>
+              <dd>{currency.format(credit.availableCreditCents / 100)}</dd>
+            </div>
+            <div>
+              <dt>Purchase order required</dt>
+              <dd>{access.agency.po_required ? "Yes" : "No"}</dd>
+            </div>
+          </dl>
+          <a className={styles.secondaryButton} href={termsRequestHref}>
+            Request new negotiated terms from admin
+          </a>
+        </article>
+
         <article className={`${styles.card} ${styles.cardFeatured}`}>
           <h2>Build a campaign</h2>
           <dl className={styles.details}>

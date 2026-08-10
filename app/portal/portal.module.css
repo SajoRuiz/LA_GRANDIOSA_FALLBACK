@@ -133,6 +133,11 @@
   transition: transform 180ms ease, border-color 180ms ease;
 }
 
+.cardWide {
+  min-height: auto;
+  grid-column: 1 / -1;
+}
+
 .card:hover {
   transform: translateY(-3px);
   border-color: var(--lg-orange);

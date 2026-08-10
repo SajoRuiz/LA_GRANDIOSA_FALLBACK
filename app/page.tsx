@@ -42,14 +42,9 @@ function RateTable({ title, rates, accent = false }: { title: string; rates: str
   );
 }
 
-export default function HomePage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const orderPath = withNext("/auth/login", "/portal");
-  const accessRequestStatus = searchParams?.accessRequest;
-  const accessRequestMessage = accessRequestStatus === "sent"
-    ? "Thanks for your request. We will send access instructions shortly."
-    : accessRequestStatus === "invalid"
-      ? "Please enter a valid email address so we can follow up."
-      : null;
+export default function HomePage() {
+  const orderPath = "/order";
+  const signInPath = withNext("/auth/login", "/portal");
 
   return (
     <main className={styles.page}>
@@ -174,8 +169,9 @@ export default function HomePage({ searchParams }: { searchParams?: Record<strin
         <div className={styles.signaturePanel}>
           <p className={`${styles.eyebrow} ${styles.orange}`}>SIGNATURE PRIME PACKAGE</p>
           <h2>All 3 screens.<br />60-second silent video.</h2>
-          <p className={styles.signaturePrice}>$49,140 <span>PER 31-DAY MONTH</span></p>
+          <p className={styles.signaturePrice}>$44,226 <span>PER 31-DAY MONTH</span></p>
           <p>3,720 estimated plays</p>
+          <p className={styles.signatureDisclaimer}>These prices have a 10% discount for continuous runtime of 30-31 days. Creative production is not included.</p>
         </div>
         <div className={styles.signatureCopy}>
           <p className={styles.eyebrow}>PLACE YOUR ORDER</p>
@@ -187,18 +183,13 @@ export default function HomePage({ searchParams }: { searchParams?: Record<strin
           </h3>
           <p>Premium inventory is intentionally limited. Contact our sales team to place your order and confirm campaign availability.</p>
           <div className={styles.signatureActions}>
-            <Link className={`${styles.button} ${styles.primary}`} href={orderPath}>
-              PLACE ORDER
+            <Link className={`${styles.button} ${styles.primary}`} href={signInPath}>
+              SIGN IN
             </Link>
-            <form className={styles.requestAccessForm} action="/api/access-request" method="post">
-              <input name="name" type="text" placeholder="Your name" aria-label="Your name" />
-              <input name="email" type="email" placeholder="Your email" aria-label="Your email" required />
-              <input name="company" type="text" placeholder="Company" aria-label="Company" />
-              <textarea name="message" rows={3} placeholder="Tell us about your interest" aria-label="Tell us about your interest" />
-              <button className={styles.requestAccess} type="submit">Request Access</button>
-            </form>
+            <a className={`${styles.button} ${styles.secondary}`} href="mailto:ventas@lagrandiosapr.com?subject=La%20Grandiosa%20Sign%20Up%20Request">
+              SIGN UP
+            </a>
           </div>
-          {accessRequestMessage ? <p className={styles.requestAccessStatus}>{accessRequestMessage}</p> : null}
         </div>
       </section>
 

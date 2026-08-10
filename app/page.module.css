@@ -719,6 +719,16 @@
   color: var(--white);
 }
 
+.signatureDisclaimer {
+  margin-top: 18px;
+  color: rgba(232, 236, 255, 0.84);
+  font-size: 14px;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
 .signaturePanel h2 {
   font-size: clamp(3rem, 4.8vw, 5.6rem);
   line-height: 0.94;

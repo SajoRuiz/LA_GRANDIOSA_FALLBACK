@@ -42,11 +42,11 @@ function RateTable({ title, rates, accent = false }: { title: string; rates: str
         <br />
         22,320 plays at 10 seconds
         <br />
-        14,880 at 15 seconds
+        14,880 plays at 15 seconds
         <br />
-        7,440 at 30 seconds
+        7,440 plays at 30 seconds
         <br />
-        3,720 at 60 seconds
+        3,720 plays at 60 seconds
       </p>
     </div>
   );

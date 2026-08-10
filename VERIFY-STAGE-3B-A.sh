@@ -7,7 +7,6 @@ if [[ ! -f package.json || ! -d app || ! -d lib ]]; then
 fi
 
 required=(
-  "proxy.ts"
   "app/auth/login/page.tsx"
   "app/auth/callback/route.ts"
   "app/auth/activate/page.tsx"
@@ -26,6 +25,13 @@ required=(
 )
 
 missing=0
+
+# Next.js 14+ projects use middleware.ts; older patches used proxy.ts.
+if [[ ! -f "middleware.ts" && ! -f "proxy.ts" ]]; then
+  echo "MISSING: middleware.ts (or legacy proxy.ts)"
+  missing=1
+fi
+
 for file in "${required[@]}"; do
   if [[ ! -f "$file" ]]; then
     echo "MISSING: $file"

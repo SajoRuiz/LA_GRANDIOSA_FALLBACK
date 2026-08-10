@@ -3,43 +3,15 @@ import styles from "./page.module.css";
 import { withNext } from "@/lib/auth/paths";
 
 const stillRates = [
-  ["Center", "$6,750", "$13,500", "$27,000"],
-  ["Left + Right", "$3,037.50", "$6,075", "$12,150"],
-  ["All 3 Screens", "$8,775", "$17,550", "$35,100"],
+  ["Center", "$4,050", "$6,075", "$12,150", "$24,300"],
+  ["Left + Right", "$1,822.50", "$2,733.75", "$5,467.50", "$10,935"],
+  ["All 3 Screens", "$5,265", "$7,897.50", "$15,795", "$31,590"],
 ];
 
 const videoRates = [
-  ["Center", "$9,450", "$18,900", "$37,800"],
-  ["Left + Right", "$4,252.50", "$8,505", "$17,010"],
-  ["All 3 Screens", "$12,285", "$24,570", "$49,140"],
-];
-
-const packages = [
-  {
-    tier: "Entry Monthly Package",
-    promise: "Frame the landmark",
-    items: [
-      ["Side Frame 15", "Left + Right · 15-sec still", "14,880 plays", "$3,037.50"],
-      ["Side Frame 30", "Left + Right · 30-sec still", "7,440 plays", "$6,075"],
-      ["Side Frame 60", "Left + Right · 60-sec still", "3,720 plays", "$12,150"],
-    ],
-  },
-  {
-    tier: "Mid-Tier Monthly Package",
-    promise: "Command the center",
-    items: [
-      ["Center Impact", "Center · 30-sec still", "7,440 plays", "$13,500"],
-      ["Center Motion", "Center · 30-sec silent video", "7,440 plays", "$18,900"],
-    ],
-  },
-  {
-    tier: "Flagship Monthly Package",
-    promise: "Own the complete structure",
-    items: [
-      ["Landmark Takeover", "All 3 screens · 60-sec still", "3,720 plays", "$35,100"],
-      ["Signature Takeover", "All 3 screens · 60-sec silent video", "3,720 plays", "$49,140"],
-    ],
-  },
+  ["Center", "$5,670", "$8,505", "$17,010", "$34,020"],
+  ["Left + Right", "$2,551.50", "$3,827.25", "$7,654.50", "$15,309"],
+  ["All 3 Screens", "$7,371", "$11,056.50", "$22,113", "$44,226"],
 ];
 
 function RateTable({ title, rates, accent = false }: { title: string; rates: string[][]; accent?: boolean }) {
@@ -51,19 +23,21 @@ function RateTable({ title, rates, accent = false }: { title: string; rates: str
       </div>
       <div className={`${styles.rateRow} ${styles.rateHead}`}>
         <span>Screen package</span>
+        <span>10 sec</span>
         <span>15 sec</span>
         <span>30 sec</span>
         <span>60 sec</span>
       </div>
-      {rates.map(([name, fifteen, thirty, sixty]) => (
+      {rates.map(([name, ten, fifteen, thirty, sixty]) => (
         <div className={styles.rateRow} key={name}>
           <strong>{name}</strong>
+          <span>{ten}</span>
           <span>{fifteen}</span>
           <span>{thirty}</span>
           <span className={styles.accentPrice}>{sixty}</span>
         </div>
       ))}
-      <p className={styles.delivery}>Estimated delivery: 14,880 plays at 15 seconds · 7,440 at 30 seconds · 3,720 at 60 seconds</p>
+      <p className={styles.delivery}>Estimated delivery: 22,320 plays at 10 seconds · 14,880 at 15 seconds · 7,440 at 30 seconds · 3,720 at 60 seconds</p>
     </div>
   );
 }
@@ -86,7 +60,6 @@ export default function HomePage({ searchParams }: { searchParams?: Record<strin
         <nav className={styles.mainNav} aria-label="Main navigation">
           <a href="#experience">Experience</a>
           <a href="#canvas">The Canvas</a>
-          <a href="#packages">Packages</a>
           <a href="#rates">Rates</a>
           <Link className={styles.navCta} href={orderPath}>
             PLACE ORDER
@@ -187,46 +160,14 @@ export default function HomePage({ searchParams }: { searchParams?: Record<strin
 
       <section className={`${styles.section} ${styles.ratesSection}`} id="rates">
         <div className={`${styles.sectionHeading} ${styles.ratesHeading} ${styles.narrow}`}>
-          <p className={styles.eyebrow}>HIGH-VALUE COMBINATIONS</p>
-          <h2 className={styles.ratesTitle}>Premium formats<br />designed to command attention.</h2>
+          <p className={`${styles.eyebrow} ${styles.ratesEyebrow}`}>HIGH-VALUE COMBINATIONS</p>
+          <h2 className={styles.ratesTitle}>Premium formats designed to command attention.</h2>
         </div>
         <div className={styles.ratesGrid}>
           <RateTable title="Still Image" rates={stillRates} />
           <RateTable title="Silent Video" rates={videoRates} accent />
         </div>
-        <p className={styles.finePrint}>Silent video rates include the 40% format premium. Prime daypart pricing is included. Creative production is not included.</p>
-      </section>
-
-      <section className={`${styles.section} ${styles.packageSection}`} id="packages">
-        <div className={`${styles.sectionHeading} ${styles.packagesHeading}`}>
-          <p className={styles.eyebrow}>A CLEAR PATH TO OWNERSHIP</p>
-          <h2 className={styles.packagesTitle}>Seven packages. Three<br />levels of impact.</h2>
-          <p>Move from a strong architectural frame to complete three-screen ownership.</p>
-        </div>
-        <div className={styles.packageGrid}>
-          {packages.map((pkg, index) => (
-            <article
-              className={`${styles.packageCard} ${index === 2 ? styles.packageCardFeatured : styles.packageCardLight}`}
-              key={pkg.tier}
-            >
-              <p className={styles.tier}>{pkg.tier}</p>
-              <h3>{pkg.promise}</h3>
-              {pkg.items.map(([name, description, plays, price]) => (
-                <div className={styles.packageItem} key={name}>
-                  <h4>{name}</h4>
-                  <p>{description}</p>
-                  <div>
-                    <span>{plays}</span>
-                    <strong>{price}</strong>
-                  </div>
-                </div>
-              ))}
-              <Link className={`${styles.button} ${styles.primary} ${styles.packageButton}`} href={orderPath}>
-                PLACE ORDER
-              </Link>
-            </article>
-          ))}
-        </div>
+        <p className={`${styles.finePrint} ${styles.ratesDisclaimer}`}>These prices have a 10% discount for continuous runtime of 30-31 days. Creative production is not included.</p>
       </section>
 
       <section className={styles.signature} id="availability">
@@ -271,7 +212,6 @@ export default function HomePage({ searchParams }: { searchParams?: Record<strin
           <nav className={styles.footerNav} aria-label="Footer navigation">
             <a href="#experience">Experience</a>
             <a href="#canvas">The Canvas</a>
-            <a href="#packages">Packages</a>
             <a href="#rates">Rates</a>
           </nav>
 

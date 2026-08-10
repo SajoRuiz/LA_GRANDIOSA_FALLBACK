@@ -35,10 +35,7 @@ export default async function CartPage() {
         <p className={styles.eyebrow}>SHOPPING CART · CONTRACT PREVIEW</p>
         <h1>Review your campaign contract.</h1>
         <p>
-          This protected cart belongs to {access.agency.display_name}. The
-          negotiated agency discount and approved-credit projection are shown
-          before client information is submitted. The server recalculates all
-          amounts when the order record is created.
+          This protected contract preview belongs to {access.agency.display_name}. Sign in or request access to continue to client information and submit your order. The negotiated agency discount and approved-credit projection are shown before submission, and the server recalculates all amounts when the order record is created.
         </p>
       </section>
 

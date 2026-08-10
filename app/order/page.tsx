@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireAgencyPurchaseAccess } from "@/lib/auth/access";
 import BookingConfigurator from "./BookingConfigurator";
 import styles from "./order.module.css";
 
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default async function OrderPage() {
-  const access = await requireAgencyPurchaseAccess("/order");
-
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -25,8 +22,8 @@ export default async function OrderPage() {
         </Link>
 
         <div className={styles.headerActions}>
-          <Link className={styles.backLink} href="/portal">
-            {access.agency.account_number}
+          <Link className={styles.backLink} href="/">
+            Back to home
           </Link>
           <Link className={styles.cartLink} href="/cart">
             View contract
@@ -38,10 +35,9 @@ export default async function OrderPage() {
         <p className={styles.eyebrow}>PLACE YOUR ORDER</p>
         <h1>Build your campaign.</h1>
         <p>
-          Signed in for {access.agency.display_name}. Every purchase includes
-          the complete daily operating window: 12 hours on regular open days,
-          14 hours on configured extended holidays, and no delivery on closed
-          holidays. Add multiple combinations to one contract.
+          Explore available dates and package combinations first. Sign in or
+          request access after clicking “Add to contract” to review and submit
+          your purchase.
         </p>
       </section>
 

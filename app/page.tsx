@@ -166,11 +166,13 @@ export default function HomePage() {
       </section>
 
       <section className={styles.signature} id="availability">
-        <div className={styles.signaturePanel}>
-          <p className={`${styles.eyebrow} ${styles.orange}`}>SIGNATURE PRIME PACKAGE</p>
-          <h2>All 3 screens.<br />60-second silent video.</h2>
-          <p className={styles.signaturePrice}>$44,226 <span>PER 31-DAY MONTH</span></p>
-          <p className={styles.signatureEstimatedPlays}>3,720 estimated plays</p>
+        <div className={styles.signatureOffer}>
+          <div className={styles.signaturePanel}>
+            <p className={`${styles.eyebrow} ${styles.orange}`}>SIGNATURE PRIME PACKAGE</p>
+            <h2>All 3 screens.<br />60-second silent video.</h2>
+            <p className={styles.signaturePrice}>$44,226 <span>PER 31-DAY MONTH</span></p>
+            <p className={styles.signatureEstimatedPlays}>3,720 estimated plays</p>
+          </div>
           <p className={styles.signatureDisclaimer}>These prices have a 10% discount for continuous runtime of 30-31 days. Creative production is not included.</p>
         </div>
         <div className={styles.signatureCopy}>

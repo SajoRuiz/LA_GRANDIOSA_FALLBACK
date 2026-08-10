@@ -554,7 +554,7 @@
 .delivery {
   margin: 16px 0 0;
   color: rgba(232, 236, 255, 0.78);
-  font-size: 9pt;
+  font-size: 11pt;
   letter-spacing: 0em;
 }
 
@@ -711,6 +711,11 @@
   scroll-margin-top: 92px;
 }
 
+.signatureOffer {
+  display: grid;
+  gap: 14px;
+}
+
 .signaturePanel {
   padding: 44px 42px;
   background: #101c82;
@@ -723,12 +728,12 @@
 }
 
 .signatureDisclaimer {
-  margin-top: 18px;
-  color: rgba(232, 236, 255, 0.84);
-  font-size: 32.2px;
+  margin: 0;
+  color: #000000;
+  font-size: 12pt;
   line-height: 1.5;
   text-transform: none;
-  letter-spacing: 0;
+  letter-spacing: 0em;
   font-weight: 500;
 }
 

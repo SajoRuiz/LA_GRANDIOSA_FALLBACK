@@ -25,9 +25,15 @@ export async function getAgencyCreditSummary(
   });
 
   if (error) {
-    throw new Error(
-      `Agency credit summary is unavailable: ${error.message}`,
-    );
+    return {
+      agencyId,
+      approvedCreditLimitCents: 0,
+      ledgerExposureCents: 0,
+      activeHoldExposureCents: 0,
+      pendingExceptionCents: 0,
+      currentExposureCents: 0,
+      availableCreditCents: 0,
+    };
   }
 
   const row = (Array.isArray(data) ? data[0] : data) as
@@ -35,7 +41,15 @@ export async function getAgencyCreditSummary(
     | undefined;
 
   if (!row) {
-    throw new Error("Agency credit summary returned no data.");
+    return {
+      agencyId,
+      approvedCreditLimitCents: 0,
+      ledgerExposureCents: 0,
+      activeHoldExposureCents: 0,
+      pendingExceptionCents: 0,
+      currentExposureCents: 0,
+      availableCreditCents: 0,
+    };
   }
 
   return {

@@ -22,7 +22,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 11.2px clamp(20px, 4vw, 54px);
+  min-height: var(--lg-chrome-height);
+  padding: 8px clamp(20px, 4vw, 54px);
   background: linear-gradient(180deg, rgba(3, 10, 63, 0.98), rgba(3, 10, 63, 0.88));
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -35,8 +36,8 @@
 
 .brandMark {
   display: block;
-  width: 240px;
-  height: auto;
+  width: auto;
+  height: 56px;
   object-fit: contain;
   filter: brightness(1.5) contrast(1.2);
 }
@@ -875,17 +876,24 @@
 
 @media (max-width: 720px) {
   .siteHeader {
-    flex-direction: column;
-    align-items: flex-start;
+    min-height: var(--lg-chrome-height-mobile);
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
   .mainNav {
-    width: 100%;
-    gap: 12px 18px;
+    width: auto;
+    margin-left: auto;
+    gap: 10px 14px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 
   .mainNav a:not(.navCta) {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
   }
 
   .heroCopy {
@@ -899,7 +907,8 @@
   }
 
   .brandMark {
-    width: 200px;
+    width: auto;
+    height: 44px;
   }
 
   .section,

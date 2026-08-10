@@ -7,3 +7,47 @@ html, body {
 }
 
 * { box-sizing: border-box; }
+
+:root {
+  --lg-chrome-height: 80px;
+  --lg-chrome-height-mobile: 64px;
+  --lg-chrome-padding-x: clamp(20px, 5vw, 82px);
+}
+
+main > header {
+  min-height: var(--lg-chrome-height) !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+body > footer {
+  min-height: var(--lg-chrome-height);
+  display: flex;
+  align-items: center;
+}
+
+body > footer > div {
+  width: 100%;
+  min-height: var(--lg-chrome-height);
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  align-items: center !important;
+}
+
+@media (max-width: 900px) {
+  main > header {
+    min-height: var(--lg-chrome-height-mobile) !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  body > footer {
+    min-height: var(--lg-chrome-height-mobile);
+  }
+
+  body > footer > div {
+    min-height: var(--lg-chrome-height-mobile);
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+}

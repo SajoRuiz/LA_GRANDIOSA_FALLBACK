@@ -8,6 +8,7 @@ import {
   CommerceConfigurationError,
   getCommerceServerConfig,
 } from "@/lib/server/config";
+import { processNotificationOutbox } from "@/lib/server/notification-delivery";
 import { parseDraftCheckoutRequest } from "@/lib/server/checkout-input";
 import { buildDraftOrder } from "@/lib/server/order-draft";
 
@@ -189,6 +190,13 @@ export async function POST(request: NextRequest) {
           shortfallCents: Number(result.credit_shortfall_cents),
         },
       });
+    }
+
+    // Best-effort immediate dispatch so customers and staff do not wait for cron.
+    try {
+      await processNotificationOutbox(10);
+    } catch (deliveryError) {
+      console.error("Order notification processing failed.", deliveryError);
     }
 
     return NextResponse.json(

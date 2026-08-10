@@ -5,6 +5,7 @@ import {
   requireAgencyPurchaseAccessForApi,
 } from "@/lib/auth/access";
 import { getCommerceServerConfig } from "@/lib/server/config";
+import { processNotificationOutbox } from "@/lib/server/notification-delivery";
 import { PURCHASE_ORDER_BUCKET } from "@/lib/server/procurement";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -128,6 +129,13 @@ export async function POST(request: NextRequest) {
         },
       },
     ]);
+
+    // Best-effort immediate dispatch so PO confirmation/review emails are prompt.
+    try {
+      await processNotificationOutbox(10);
+    } catch (deliveryError) {
+      console.error("Purchase-order notification processing failed.", deliveryError);
+    }
 
     return NextResponse.json({
       ok: true,

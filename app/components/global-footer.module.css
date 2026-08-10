@@ -25,8 +25,8 @@
 
 .footerLogo {
   width: auto;
-  height: 52px;
-  max-width: min(235px, 55vw);
+  height: 104px;
+  max-width: min(470px, 70vw);
   object-fit: contain;
   filter: brightness(1.45) contrast(1.18);
 }
@@ -73,8 +73,8 @@
   }
 
   .footerLogo {
-    height: 44px;
-    max-width: min(210px, 62vw);
+    height: 88px;
+    max-width: min(420px, 78vw);
   }
 
   .footerBrand span,

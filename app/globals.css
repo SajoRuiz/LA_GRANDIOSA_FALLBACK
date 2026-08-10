@@ -9,8 +9,8 @@ html, body {
 * { box-sizing: border-box; }
 
 :root {
-  --lg-chrome-height: 80px;
-  --lg-chrome-height-mobile: 64px;
+  --lg-chrome-height: 160px;
+  --lg-chrome-height-mobile: 128px;
   --lg-chrome-padding-x: clamp(20px, 5vw, 82px);
 }
 
@@ -29,8 +29,8 @@ main > header {
 
 main > header img {
   width: auto !important;
-  max-width: min(240px, 55vw) !important;
-  height: 56px !important;
+  max-width: min(480px, 70vw) !important;
+  height: 112px !important;
   object-fit: contain !important;
   object-position: left center !important;
 }
@@ -66,8 +66,8 @@ body > footer > div {
   }
 
   main > header img {
-    height: 44px !important;
-    max-width: min(210px, 62vw) !important;
+    height: 88px !important;
+    max-width: min(420px, 78vw) !important;
   }
 
   main > header nav {

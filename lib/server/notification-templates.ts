@@ -274,6 +274,18 @@ export function renderNotification(
       body: `Thanks for reaching out. We will review your request and follow up with access instructions shortly. ${text(payload.portalUrl) ? `You can also sign in here: ${text(payload.portalUrl)}` : ""}`,
       actionLabel: "OPEN SECURE PORTAL",
     },
+    customer_account_purchase_enabled: {
+      subject: "Your La Grandiosa account is active",
+      heading: "Account Active for Purchasing",
+      body: `Your agency buyer account is now active for purchasing and ordering.${text(payload.agencyName) ? ` Agency: ${text(payload.agencyName)}.` : ""}${text(payload.agencyAccountNumber) ? ` Account: ${text(payload.agencyAccountNumber)}.` : ""} Sign in with your email and password to continue.`,
+      actionLabel: "SIGN IN TO PORTAL",
+    },
+    internal_new_client_credit_assignment_required: {
+      subject: "New agency client requires discount and credit assignment",
+      heading: "Assign Discount and Credit Limit",
+      body: `${text(payload.requesterName || payload.requesterEmail || "A new client")} completed account setup${text(payload.requesterEmail) ? ` (${text(payload.requesterEmail)})` : ""}. Assign negotiated discount and approved credit limit in Supabase/Admin before financial onboarding is complete.${text(payload.agencyName) ? ` Agency: ${text(payload.agencyName)}.` : ""}${text(payload.agencyAccountNumber) ? ` Account: ${text(payload.agencyAccountNumber)}.` : ""}`,
+      actionLabel: "OPEN AGENCY CREDIT ADMIN",
+    },
   };
 
   const chosen =

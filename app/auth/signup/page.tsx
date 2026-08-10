@@ -18,11 +18,15 @@ export default async function SignupPage({
   const status = firstValue(params.accessRequest);
   const success =
     status === "sent"
-      ? "Thanks. Your access request was received and our team will follow up shortly."
+      ? "Your agency account is now active. Check your email for account confirmation and sign in to start ordering."
+      : "";
+  const exists =
+    status === "exists"
+      ? "This email is already registered. Sign in to continue purchasing."
       : "";
   const error =
     status === "invalid"
-      ? "Enter a valid email address so we can contact you."
+      ? "Use a valid email address and matching password fields (minimum 12 characters)."
       : "";
 
   return (
@@ -43,17 +47,19 @@ export default async function SignupPage({
       <section className={styles.shell}>
         <div className={styles.intro}>
           <p className={styles.eyebrow}>AGENCY ONBOARDING</p>
-          <h1>Request secure access.</h1>
+          <h1>Create secure access.</h1>
           <p>
-            Submit your agency details and we will confirm eligibility,
-            account setup, and next steps for secure purchasing access.
+            Enter your email and password to create an active agency buyer
+            account for secure purchasing. Admin receives a separate request
+            to assign negotiated discount and credit limits.
           </p>
         </div>
 
         <section className={styles.card}>
-          <p className={styles.eyebrow}>SIGN UP REQUEST</p>
+          <p className={styles.eyebrow}>SIGN UP</p>
           {error ? <p className={styles.error}>{error}</p> : null}
           {success ? <p className={styles.success}>{success}</p> : null}
+          {exists ? <p className={styles.success}>{exists}</p> : null}
 
           <form className={styles.form} action="/api/access-request" method="post">
             <input name="returnTo" type="hidden" value="/auth/signup" />
@@ -75,6 +81,30 @@ export default async function SignupPage({
             </label>
 
             <label className={styles.field}>
+              <span>Create password</span>
+              <input
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={12}
+                maxLength={128}
+              />
+            </label>
+
+            <label className={styles.field}>
+              <span>Confirm password</span>
+              <input
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={12}
+                maxLength={128}
+              />
+            </label>
+
+            <label className={styles.field}>
               <span>Company</span>
               <input name="company" type="text" maxLength={180} />
             </label>
@@ -85,7 +115,7 @@ export default async function SignupPage({
             </label>
 
             <button className={styles.button} type="submit">
-              Send access request
+              Create account
             </button>
 
             <Link className={styles.requestAccessCommand} href="/auth/login">

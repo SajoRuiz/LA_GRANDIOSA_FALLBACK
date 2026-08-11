@@ -35,11 +35,21 @@ export interface CommerceServerConfig {
   transactionalFromEmail: string;
   resendApiKey: string;
   resendWebhookSecret: string;
+  twilioAccountSid: string;
+  twilioAuthToken: string;
+  twilioFromNumber: string;
+  twilioMessagingServiceSid: string;
+  twilioStatusCallbackUrl: string;
   cronSecret: string;
   /** Backward-compatible alias used by the Stage 4 worker. */
   notificationCronSecret: string;
   businessTimeZone: string;
   notificationBatchSize: number;
+  securityHashSalt: string;
+  ledProviderMode: "manual" | "api";
+  ledProviderApiBaseUrl: string;
+  ledProviderApiKey: string;
+  ledProviderWebhookSecret: string;
 }
 
 export function getCommerceServerConfig(): CommerceServerConfig {
@@ -66,11 +76,36 @@ export function getCommerceServerConfig(): CommerceServerConfig {
     resendWebhookSecret: optionalServerEnvironment(
       "RESEND_WEBHOOK_SECRET",
     ),
+    twilioAccountSid: optionalServerEnvironment("TWILIO_ACCOUNT_SID"),
+    twilioAuthToken: optionalServerEnvironment("TWILIO_AUTH_TOKEN"),
+    twilioFromNumber: optionalServerEnvironment("TWILIO_FROM_NUMBER"),
+    twilioMessagingServiceSid: optionalServerEnvironment(
+      "TWILIO_MESSAGING_SERVICE_SID",
+    ),
+    twilioStatusCallbackUrl:
+      optionalServerEnvironment("TWILIO_STATUS_CALLBACK_URL") ||
+      `${appBaseUrl}/api/webhooks/twilio/status`,
     cronSecret,
     notificationCronSecret: cronSecret,
     businessTimeZone:
       optionalServerEnvironment("BUSINESS_TIME_ZONE") ||
       "America/Puerto_Rico",
     notificationBatchSize: optionalInteger("NOTIFICATION_BATCH_SIZE", 25),
+    securityHashSalt:
+      optionalServerEnvironment("SECURITY_HASH_SALT") ||
+      (process.env.NODE_ENV === "production"
+        ? requireServerEnvironment("SECURITY_HASH_SALT")
+        : "la-grandiosa-local-development-only"),
+    ledProviderMode:
+      optionalServerEnvironment("LED_PROVIDER_MODE") === "api"
+        ? "api"
+        : "manual",
+    ledProviderApiBaseUrl: optionalServerEnvironment(
+      "LED_PROVIDER_API_BASE_URL",
+    ),
+    ledProviderApiKey: optionalServerEnvironment("LED_PROVIDER_API_KEY"),
+    ledProviderWebhookSecret: optionalServerEnvironment(
+      "LED_PROVIDER_WEBHOOK_SECRET",
+    ),
   };
 }

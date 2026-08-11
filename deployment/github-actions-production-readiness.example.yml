@@ -1,0 +1,46 @@
+name: Production Readiness
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      APP_BASE_URL: https://www.lagrandiosapr.com
+      INTERNAL_PROCESSING_EMAIL: processing@lagrandiosapr.com
+      SALES_REPLY_TO_EMAIL: ventas@lagrandiosapr.com
+      TRANSACTIONAL_FROM_EMAIL: orders@lagrandiosapr.com
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_WEBHOOK_SECRET: ${{ secrets.RESEND_WEBHOOK_SECRET }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      SECURITY_HASH_SALT: ${{ secrets.SECURITY_HASH_SALT }}
+      BUSINESS_TIME_ZONE: America/Puerto_Rico
+      NOTIFICATION_BATCH_SIZE: "25"
+      LED_PROVIDER_MODE: manual
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Scan tracked files for recognized secrets
+        run: node scripts/check-for-secrets.mjs
+
+      - name: Validate production environment
+        run: node scripts/verify-production-env.mjs
+
+      - name: Build Next.js application
+        run: npm run build

@@ -7,6 +7,10 @@
     {
       "path": "/api/internal/reminders/process",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/internal/security/maintenance",
+      "schedule": "30 12 * * *"
     }
   ]
 }

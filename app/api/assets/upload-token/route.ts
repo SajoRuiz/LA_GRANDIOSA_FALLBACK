@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { AgencyAccessError } from "@/lib/auth/access";
 import { CAMPAIGN_ASSET_BUCKET, cleanAssetFilename, requireAssetSlotViewer } from "@/lib/server/assets";
 import { getCommerceServerConfig } from "@/lib/server/config";
+import { getRouteRequestContext } from "@/lib/server/request-context";
+import {
+  enforceRateLimit,
+  RateLimitExceededError,
+} from "@/lib/server/security";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -16,6 +21,18 @@ export async function POST(request: NextRequest) {
     const fileSize = Number(body.fileSize ?? 0);
     const viewer = await requireAssetSlotViewer(slotId);
     if (viewer.isStaff) throw new AgencyAccessError("Agency upload access is required.", 403, "AGENCY_UPLOAD_REQUIRED");
+
+    const requestContext = getRouteRequestContext(request);
+    await enforceRateLimit({
+      scope: "asset_upload_token_user",
+      identifier: viewer.userId,
+      limit: 120,
+      windowSeconds: 60 * 60,
+      context: requestContext,
+      actorUserId: viewer.userId,
+      actorEmail: viewer.email,
+      failClosed: process.env.NODE_ENV === "production",
+    });
 
     const spec = (viewer.slot.specification_snapshot ?? {}) as Record<string, unknown>;
     const allowed = Array.isArray(spec.allowedMimeTypes) ? spec.allowedMimeTypes.map(String) : [];
@@ -38,6 +55,19 @@ export async function POST(request: NextRequest) {
       chunkSize: 6 * 1024 * 1024,
     });
   } catch (error) {
+    if (error instanceof RateLimitExceededError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: "RATE_LIMITED",
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(error.retryAfterSeconds) },
+        },
+      );
+    }
     if (error instanceof AgencyAccessError) return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
     return NextResponse.json({ error: error instanceof Error ? error.message : "Asset upload preparation failed." }, { status: 400 });
   }

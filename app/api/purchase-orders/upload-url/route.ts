@@ -11,6 +11,11 @@ import {
   MAX_PO_BYTES,
   PURCHASE_ORDER_BUCKET,
 } from "@/lib/server/procurement";
+import { getRouteRequestContext } from "@/lib/server/request-context";
+import {
+  enforceRateLimit,
+  RateLimitExceededError,
+} from "@/lib/server/security";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -18,6 +23,19 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const access = await requireAgencyPurchaseAccessForApi();
+    const requestContext = getRouteRequestContext(request);
+
+    await enforceRateLimit({
+      scope: "purchase_order_upload_token_user",
+      identifier: access.identity.userId,
+      limit: 30,
+      windowSeconds: 60 * 60,
+      context: requestContext,
+      actorUserId: access.identity.userId,
+      actorEmail: access.identity.email,
+      failClosed: process.env.NODE_ENV === "production",
+    });
+
     const body = (await request.json()) as Record<string, unknown>;
     const orderId = String(body.orderId ?? "");
     const filename = cleanPdfFilename(
@@ -86,6 +104,20 @@ export async function POST(request: NextRequest) {
       expiresInSeconds: 7200,
     });
   } catch (error) {
+    if (error instanceof RateLimitExceededError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: "RATE_LIMITED",
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(error.retryAfterSeconds) },
+        },
+      );
+    }
+
     if (error instanceof AgencyAccessError) {
       return NextResponse.json(
         { error: error.message, code: error.code },

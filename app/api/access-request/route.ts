@@ -50,6 +50,10 @@ async function nextAvailableUsername(
   return `client-${crypto.randomUUID().slice(0, 12)}`;
 }
 
+function isValidPasswordCandidate(value: string) {
+  return typeof value === "string" && value.length >= 12;
+}
+
 function resolveReturnPath(value: string, fallback = "/auth/signup") {
   const trimmed = value.trim();
   if (!trimmed || !trimmed.startsWith("/") || trimmed.startsWith("//")) {
@@ -64,8 +68,6 @@ export async function POST(request: NextRequest) {
     const name = String(formData.get("name") ?? "").trim();
     const email = normalizeEmail(String(formData.get("email") ?? ""));
     const company = String(formData.get("company") ?? "").trim();
-    const password = String(formData.get("password") ?? "");
-    const confirmPassword = String(formData.get("confirmPassword") ?? "");
     const message = String(formData.get("message") ?? "").trim();
     const returnTo = resolveReturnPath(
       String(formData.get("returnTo") ?? ""),
@@ -73,12 +75,6 @@ export async function POST(request: NextRequest) {
     );
 
     if (!email || !isValidEmail(email)) {
-      return NextResponse.redirect(
-        new URL(`${returnTo}?accessRequest=invalid`, request.url),
-      );
-    }
-
-    if (password.length < 12 || password !== confirmPassword) {
       return NextResponse.redirect(
         new URL(`${returnTo}?accessRequest=invalid`, request.url),
       );
@@ -100,99 +96,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: created, error: createUserError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: name || email,
-        company_name: company || null,
-      },
-    });
-
-    if (createUserError || !created.user?.id) {
-      const messageText = createUserError?.message?.toLowerCase() ?? "";
-      if (messageText.includes("already") || messageText.includes("exists")) {
-        return NextResponse.redirect(
-          new URL(`${returnTo}?accessRequest=exists`, request.url),
-        );
-      }
-
-      throw new Error(createUserError?.message || "Auth user could not be created.");
-    }
-
-    const userId = created.user.id;
-    const username = await nextAvailableUsername(admin, email);
-    const agencyName = company || `${name || "New"} Agency`;
-
-    const { data: agency, error: agencyError } = await admin
-      .from("agency_accounts")
-      .insert({
-        legal_name: agencyName,
-        display_name: agencyName,
-        status: "active",
-        discount_basis_points: 0,
-        approved_credit_limit_cents: 0,
-        payment_terms_days: 30,
-        discount_policy: "stack",
-        po_required: true,
-        authorized_email_domains: [],
-        created_by_user_id: userId,
-      })
-      .select("id,account_number,display_name")
-      .single();
-
-    if (agencyError || !agency?.id) {
-      throw new Error(agencyError?.message || "Agency account could not be created.");
-    }
-
-    const { error: profileError } = await admin.from("user_profiles").insert({
-      user_id: userId,
-      username,
-      email,
-      full_name: name || email,
-      status: "active",
-      mfa_required: true,
-    });
-
-    if (profileError) {
-      throw new Error(profileError.message);
-    }
-
-    const { error: memberError } = await admin.from("agency_members").insert({
-      agency_id: agency.id,
-      user_id: userId,
-      role: "agency_buyer",
-      status: "active",
-      can_purchase: true,
-      invited_by_user_id: userId,
-      activated_at: new Date().toISOString(),
-    });
-
-    if (memberError) {
-      throw new Error(memberError.message);
-    }
-
-    await admin.auth.admin.updateUserById(userId, {
-      app_metadata: {
-        agency_id: agency.id,
-        agency_role: "agency_buyer",
-      },
-    });
-
-    await admin.from("agency_account_history").insert({
-      agency_id: agency.id,
-      actor_user_id: userId,
-      event_key: "agency.account_created_from_signup",
-      metadata: {
-        requesterEmail: email,
-        requesterName: name || email,
-        accountNumber: agency.account_number,
-        defaultDiscountBasisPoints: 0,
-        defaultApprovedCreditLimitCents: 0,
-      },
-    });
-
     await admin.from("access_leads").insert({
       requester_name: name || null,
       requester_email: email,
@@ -201,6 +104,8 @@ export async function POST(request: NextRequest) {
       source: "homepage_access_request",
       status: "contacted",
     });
+
+    const agencyName = company || `${name || "New"} Agency`;
 
     await admin.from("notification_outbox").insert([
       {
@@ -214,8 +119,8 @@ export async function POST(request: NextRequest) {
         payload: {
           requesterName: name,
           requesterEmail: email,
-          agencyAccountNumber: agency.account_number,
-          agencyName: agency.display_name,
+          agencyAccountNumber: "PENDING",
+          agencyName,
           company,
           message,
           portalUrl: `${config.appBaseUrl}/admin/agencies/credit`,
@@ -223,7 +128,7 @@ export async function POST(request: NextRequest) {
       },
       {
         channel: "email",
-        template_key: "customer_account_purchase_enabled",
+        template_key: "customer_access_request_received",
         recipient: email,
         sender_email: config.transactionalFromEmail,
         reply_to_email: config.salesReplyToEmail,
@@ -231,8 +136,7 @@ export async function POST(request: NextRequest) {
         priority: 10,
         payload: {
           requesterName: name,
-          agencyName: agency.display_name,
-          agencyAccountNumber: agency.account_number,
+          agencyName,
           portalUrl: `${config.appBaseUrl}/auth/login`,
         },
       },

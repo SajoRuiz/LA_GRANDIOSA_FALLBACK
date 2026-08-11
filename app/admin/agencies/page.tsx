@@ -44,6 +44,8 @@ export default async function AgencyAdministrationPage() {
           <Link href="/admin/purchase-orders">PO review</Link>
           <Link href="/admin/invoices">Invoices</Link>
           <Link href="/admin/remittance">Remittance</Link>
+          <Link href="/admin/security">Security</Link>
+          <Link href="/admin/launch">Launch</Link>
           <span className={styles.headerMeta}>
             {staff.profile.full_name} · {staff.staff.role.replaceAll("_", " ")}
           </span>

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+
 import {
   CommerceConfigurationError,
   getCommerceServerConfig,
 } from "@/lib/server/config";
+import { getStage6SecurityReport } from "@/lib/server/security";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,68 +16,61 @@ export async function GET() {
     const supabase = createSupabaseAdminClient();
 
     const checks = await Promise.all([
-      supabase
-        .from("orders")
-        .select("id,asset_due_at")
-        .limit(1)
-        .then((result) => ({ check: "orders", result })),
-      supabase
-        .from("notification_outbox")
-        .select("id,max_attempts")
-        .limit(1)
-        .then((result) => ({ check: "notification_outbox", result })),
-      supabase
-        .from("notification_provider_events")
-        .select("id")
-        .limit(1)
-        .then((result) => ({ check: "notification_provider_events", result })),
-      supabase
-        .from("notification_suppressions")
-        .select("id")
-        .limit(1)
-        .then((result) => ({ check: "notification_suppressions", result })),
-      supabase
-        .from("automation_job_locks")
-        .select("job_key")
-        .limit(1)
-        .then((result) => ({ check: "automation_job_locks", result })),
-      supabase
-        .from("asset_submissions")
-        .select("id")
-        .limit(1)
-        .then((result) => ({ check: "asset_submissions", result })),
+      supabase.from("orders").select("id,asset_due_at").limit(1),
+      supabase.from("notification_outbox").select("id,max_attempts").limit(1),
+      supabase.from("asset_submissions").select("id").limit(1),
+      supabase.from("security_events").select("id").limit(1),
+      supabase.from("rate_limit_buckets").select("key_hash").limit(1),
+      supabase.from("launch_checklist_items").select("id").limit(1),
     ]);
-    const failed = checks.find(({ result }) => result.error);
+    const failed = checks.find((result) => result.error);
 
-    if (failed?.result.error) {
-      const error = failed.result.error;
+    if (failed?.error) {
       return NextResponse.json(
         {
           ok: false,
-          stage: "5",
+          stage: "6",
           database: "unavailable",
           message:
-            "Supabase is reachable, but the Stage 5 communications migration may not be installed.",
-          failingCheck: failed.check,
-          detail: error.message,
-          errorCode: error.code ?? null,
-          errorHint: error.hint ?? null,
-          errorDetails: error.details ?? null,
+            "Supabase is reachable, but the Stage 6 production-security migration may not be installed.",
+          detail: failed.error.message,
         },
         { status: 503 },
       );
     }
 
-    const { data: buckets } = await supabase.storage.listBuckets();
+    const [{ data: buckets }, report] = await Promise.all([
+      supabase.storage.listBuckets(),
+      getStage6SecurityReport(),
+    ]);
+
     const campaignStorageReady =
-      buckets?.some((bucket) => bucket.id === "campaign-assets") ?? false;
+      buckets?.some(
+        (bucket) =>
+          bucket.id === "campaign-assets" &&
+          bucket.public === false,
+      ) ?? false;
+
+    const purchaseOrderStorageReady =
+      buckets?.some(
+        (bucket) =>
+          bucket.id === "purchase-orders" &&
+          bucket.public === false,
+      ) ?? false;
 
     const emailConfigured = Boolean(
       config.resendApiKey && config.resendWebhookSecret,
     );
+    const smsConfigured = Boolean(
+      config.twilioAccountSid &&
+        config.twilioAuthToken &&
+        (config.twilioMessagingServiceSid ||
+          config.twilioFromNumber),
+    );
+
     return NextResponse.json({
       ok: true,
-      stage: "5",
+      stage: "6",
       database: "ready",
       authentication: "invite-only email/password + TOTP MFA",
       agencyPricing: "active",
@@ -84,23 +79,45 @@ export async function GET() {
       invoicing: "active",
       assetRepository: "active",
       assetReview: "active",
-      releaseQueue: "manual pending LED API",
-      campaignAssetStorage: campaignStorageReady ? "ready" : "missing",
-      emailDelivery: emailConfigured ? "configured" : "queue only",
-      smsDelivery: "disabled",
+      releaseQueue:
+        config.ledProviderMode === "manual"
+          ? "manual pending LED API"
+          : "API adapter selected",
+      campaignAssetStorage: campaignStorageReady
+        ? "ready"
+        : "missing",
+      purchaseOrderStorage: purchaseOrderStorageReady
+        ? "ready"
+        : "missing",
+      emailDelivery: emailConfigured
+        ? "configured"
+        : "queue only",
+      smsDelivery: smsConfigured
+        ? "configured"
+        : "queue only",
       reminders: "active",
-      automationSecurity: config.cronSecret ? "configured" : "manual staff only",
+      securityHeaders: "active",
+      rateLimiting: "active",
+      securityAudit: "active",
+      launchCertification: "active",
+      requiredLaunchChecksOpen:
+        report.requiredLaunchChecksOpen,
+      automationSecurity: config.cronSecret
+        ? "configured"
+        : "manual staff only",
       businessTimeZone: config.businessTimeZone,
       notificationBatchSize: config.notificationBatchSize,
-      internalProcessingEmail: config.internalProcessingEmail,
+      internalProcessingEmail:
+        config.internalProcessingEmail,
       salesReplyToEmail: config.salesReplyToEmail,
-      transactionalFromEmail: config.transactionalFromEmail,
+      transactionalFromEmail:
+        config.transactionalFromEmail,
     });
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
-        stage: "5",
+        stage: "6",
         database: "not_configured",
         message:
           error instanceof CommerceConfigurationError

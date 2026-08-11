@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, MouseEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -140,6 +140,28 @@ export default function PurchaseOrderClient({
     }
   }
 
+  function openDatePicker(event: MouseEvent<HTMLButtonElement>) {
+    const input = event.currentTarget
+      .closest("label")
+      ?.querySelector("input[type='date']");
+
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const pickerInput = input as HTMLInputElement & {
+      showPicker?: () => void;
+    };
+
+    if (typeof pickerInput.showPicker === "function") {
+      pickerInput.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  }
+
   return (
     <form className={styles.form} onSubmit={submit}>
       <p className={styles.eyebrow}>ORDER {orderNumber}</p>
@@ -158,7 +180,15 @@ export default function PurchaseOrderClient({
 
         <label className={styles.field}>
           <span>PO issue date</span>
-          <input name="issueDate" type="date" />
+          <div className={styles.dateControl}>
+            <input className={styles.dateInput} name="issueDate" type="date" />
+            <button
+              aria-label="Open calendar for PO issue date"
+              className={styles.calendarTrigger}
+              onClick={openDatePicker}
+              type="button"
+            />
+          </div>
         </label>
 
         <label className={`${styles.field} ${styles.full}`}>

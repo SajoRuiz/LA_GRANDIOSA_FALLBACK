@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, MouseEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import DateRangeCalendar from "./DateRangeCalendar";
 import {
@@ -132,6 +132,28 @@ export default function BookingConfigurator() {
     router.push("/cart");
   }
 
+  function openDatePicker(event: MouseEvent<HTMLButtonElement>) {
+    const input = event.currentTarget
+      .closest("label")
+      ?.querySelector("input[type='date']");
+
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const pickerInput = input as HTMLInputElement & {
+      showPicker?: () => void;
+    };
+
+    if (typeof pickerInput.showPicker === "function") {
+      pickerInput.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  }
+
   return (
     <form className={styles.builder} onSubmit={handleSubmit}>
       <section className={styles.panel}>
@@ -150,24 +172,42 @@ export default function BookingConfigurator() {
         <div className={styles.fieldGridTwo}>
           <label className={styles.field}>
             <span>Start date</span>
-            <input
-              type="date"
-              min={today}
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-              required
-            />
+            <div className={styles.dateControl}>
+              <input
+                className={styles.dateInput}
+                type="date"
+                min={today}
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                required
+              />
+              <button
+                aria-label="Open calendar for start date"
+                className={styles.calendarTrigger}
+                onClick={openDatePicker}
+                type="button"
+              />
+            </div>
           </label>
 
           <label className={styles.field}>
             <span>End date</span>
-            <input
-              type="date"
-              min={startDate || today}
-              value={endDate}
-              onChange={(event) => setEndDate(event.target.value)}
-              required
-            />
+            <div className={styles.dateControl}>
+              <input
+                className={styles.dateInput}
+                type="date"
+                min={startDate || today}
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                required
+              />
+              <button
+                aria-label="Open calendar for end date"
+                className={styles.calendarTrigger}
+                onClick={openDatePicker}
+                type="button"
+              />
+            </div>
           </label>
         </div>
 

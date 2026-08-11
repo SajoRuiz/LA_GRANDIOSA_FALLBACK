@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, MouseEvent, useState } from "react";
 
 import styles from "./invoices.module.css";
 
@@ -40,6 +40,75 @@ export default function InvoiceAdminClient({
 }) {
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
+
+  function openDatePicker(event: MouseEvent<HTMLButtonElement>) {
+    const input = event.currentTarget
+      .closest("label")
+      ?.querySelector("input[type='date']");
+
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const pickerInput = input as HTMLInputElement & {
+      showPicker?: () => void;
+    };
+
+    if (typeof pickerInput.showPicker === "function") {
+      pickerInput.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  }
+
+  async function voidSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setBusy("bulk-void");
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/list-actions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          entity: "invoice",
+          action: "void",
+          ids: selectedIds,
+        }),
+      });
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Invoices could not be voided.");
+      }
+
+      window.location.reload();
+    } catch (voidError) {
+      setError(
+        voidError instanceof Error
+          ? voidError.message
+          : "Invoices could not be voided.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
 
   async function issue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -194,6 +263,19 @@ export default function InvoiceAdminClient({
 
       <section className={styles.panel}>
         <h2>Invoice register and payments</h2>
+        {invoices.length > 0 ? (
+          <p>
+            <button
+              disabled={busy === "bulk-void" || selectedIds.length === 0}
+              type="button"
+              onClick={voidSelected}
+            >
+              {busy === "bulk-void"
+                ? "Voiding…"
+                : `Void selected (${selectedIds.length})`}
+            </button>
+          </p>
+        ) : null}
         <div className={styles.list}>
           {invoices.length === 0 ? (
             <p>No invoices have been issued.</p>
@@ -202,6 +284,15 @@ export default function InvoiceAdminClient({
               <article className={styles.card} key={invoice.id}>
                 <div className={styles.heading}>
                   <div>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(invoice.id)}
+                        onChange={() => toggleSelected(invoice.id)}
+                        disabled={Boolean(busy)}
+                      />{" "}
+                      Select
+                    </label>
                     <p>{invoice.agencyName}</p>
                     <h3>{invoice.invoiceNumber}</h3>
                   </div>
@@ -262,14 +353,23 @@ export default function InvoiceAdminClient({
                     </label>
                     <label>
                       <span>Received date</span>
-                      <input
-                        name="receivedDate"
-                        type="date"
-                        required
-                        defaultValue={new Date()
-                          .toISOString()
-                          .slice(0, 10)}
-                      />
+                      <div className={styles.dateControl}>
+                        <input
+                          className={styles.dateInput}
+                          name="receivedDate"
+                          type="date"
+                          required
+                          defaultValue={new Date()
+                            .toISOString()
+                            .slice(0, 10)}
+                        />
+                        <button
+                          aria-label={`Open calendar for ${invoice.invoiceNumber}`}
+                          className={styles.calendarTrigger}
+                          onClick={openDatePicker}
+                          type="button"
+                        />
+                      </div>
                     </label>
                     <label>
                       <span>Reference</span>

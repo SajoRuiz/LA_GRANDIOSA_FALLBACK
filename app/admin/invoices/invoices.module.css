@@ -91,6 +91,45 @@
   border: 1px solid var(--line);
   font: inherit;
 }
+.dateControl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 8px;
+  align-items: stretch;
+}
+.dateInput {
+  min-width: 0;
+}
+.dateInput::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  pointer-events: none;
+}
+.calendarTrigger {
+  position: relative;
+  min-height: 48px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+.calendarTrigger::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 13px;
+  width: 20px;
+  height: 17px;
+  border: 2px solid #071053;
+  box-sizing: border-box;
+}
+.calendarTrigger::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 13px;
+  width: 20px;
+  height: 5px;
+  background: #071053;
+}
 .form button,
 .payment button {
   min-height: 48px;

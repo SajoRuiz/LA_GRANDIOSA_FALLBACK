@@ -63,7 +63,7 @@ export class HttpLedScreenProvider implements LedScreenProvider {
   async submitCampaign(
     release: LedCampaignRelease,
   ): Promise<LedSubmitResult> {
-    return this.request<LedSubmitResult>("/campaigns", {
+    return this.request<LedSubmitResult>("campaigns", {
       method: "POST",
       body: JSON.stringify(release),
     });
@@ -73,7 +73,7 @@ export class HttpLedScreenProvider implements LedScreenProvider {
     externalReference: string,
   ): Promise<LedStatusResult> {
     return this.request<LedStatusResult>(
-      `/campaigns/${encodeURIComponent(externalReference)}`,
+      `campaigns/${encodeURIComponent(externalReference)}`,
       { method: "GET" },
     );
   }
@@ -82,7 +82,7 @@ export class HttpLedScreenProvider implements LedScreenProvider {
     externalReference: string,
   ): Promise<LedStatusResult> {
     return this.request<LedStatusResult>(
-      `/campaigns/${encodeURIComponent(externalReference)}`,
+      `campaigns/${encodeURIComponent(externalReference)}`,
       { method: "DELETE" },
     );
   }

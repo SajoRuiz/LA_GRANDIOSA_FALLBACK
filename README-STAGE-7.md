@@ -9,12 +9,14 @@ Stage 7 adds:
 - Cron-safe LED release worker processing
 - Secure LED status webhook scaffold
 - Local simulated provider harness for pre-contractor validation
+- Seeded internal test route for queue-linked webhook transition checks
 - Contractor request packet for the real provider API contract
 
 ## New internal routes
 
 ```text
 /api/internal/releases/process
+/api/internal/releases/seed
 /api/internal/led/simulated-provider/campaigns
 /api/internal/led/simulated-provider/campaigns/[externalReference]
 /api/internal/led/simulated-provider/campaigns/[externalReference]/status

@@ -54,7 +54,24 @@ node scripts/led-simulator-smoke.mjs
 
 Update `SIM_BASE_URL` if Next.js starts on a different port.
 
-## 6. Manual admin validation
+## 6. Run queue-linked webhook e2e smoke
+
+This validates the full local transition path using a seeded release row tied to
+real `orders`, `asset_submissions`, and `asset_release_queue` records.
+
+```bash
+SIM_BASE_URL=http://localhost:3000 \
+CRON_SECRET=your-cron-secret \
+LED_PROVIDER_WEBHOOK_SECRET=local-webhook-secret \
+node scripts/led-release-queue-e2e.mjs
+```
+
+Expected final output includes:
+
+- `snapshot-after-released` with `queueStatus = released` and `orderStatus = released`
+- `snapshot-after-live` with `queueStatus = live` and `orderStatus = live`
+
+## 7. Manual admin validation
 
 Open:
 
@@ -69,7 +86,7 @@ In API mode, verify the UI shows:
 - Cancel provider campaign
 - Existing manual release controls preserved
 
-## 7. Build validation
+## 8. Build validation
 
 Run this only when the dev server is stopped to avoid `.next` collisions:
 

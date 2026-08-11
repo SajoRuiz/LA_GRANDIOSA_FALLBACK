@@ -46,6 +46,20 @@
 3. In manual mode, confirm it reports a skipped LED provider run.
 4. In API mode, confirm it attempts queue processing.
 
+## Queue-linked webhook transition (seeded)
+
+1. Start app in API mode with simulator base URL.
+2. Run `node scripts/led-release-queue-e2e.mjs` with `CRON_SECRET` and `LED_PROVIDER_WEBHOOK_SECRET`.
+3. Confirm the script logs `seed` with a real `releaseId`.
+4. Confirm worker processing assigns a non-empty `externalReference`.
+5. Confirm `snapshot-after-released` reports:
+   - `queueStatus = released`
+   - `orderStatus = released`
+6. Confirm `snapshot-after-live` reports:
+   - `queueStatus = live`
+   - `orderStatus = live`
+7. Confirm final `ok` output includes the same `releaseId` and resolved `externalReference`.
+
 ## Clean build
 
 1. Stop the dev server.

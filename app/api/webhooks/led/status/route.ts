@@ -76,6 +76,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      /Release queue row was not found/i.test(error.message)
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 404 },
+      );
+    }
+
     return NextResponse.json(
       {
         error:

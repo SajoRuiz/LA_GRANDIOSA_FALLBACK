@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { LedCampaignRelease } from "@/lib/led/types";
 import { getCommerceServerConfig } from "@/lib/server/config";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSimulatorRecord } from "@/lib/server/led-simulator-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
     }
 
     const externalReference = `sim-${release.releaseId}-${randomUUID().slice(0, 8)}`;
-    const admin = createSupabaseAdminClient();
     const payload = {
       acceptedAt: new Date().toISOString(),
       assetCount: Array.isArray(release.assets) ? release.assets.length : 0,
@@ -44,20 +43,16 @@ export async function POST(request: NextRequest) {
       orderNumber: release.orderNumber,
     };
 
-    const { error } = await admin.from("led_provider_simulations").insert({
+    await createSimulatorRecord({
       external_reference: externalReference,
       release_id: release.releaseId,
       order_id: release.orderId,
       provider_key: "simulated_led_provider",
       status: "submitted",
-      request_payload: release,
+      request_payload: release as unknown as Record<string, unknown>,
       status_payload: payload,
       message: "Simulated provider accepted the campaign.",
     });
-
-    if (error) {
-      throw new Error(error.message);
-    }
 
     return NextResponse.json({
       providerKey: "simulated_led_provider",

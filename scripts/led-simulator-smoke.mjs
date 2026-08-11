@@ -12,7 +12,7 @@ if (!apiKey) {
 }
 
 const providerBase = new URL(
-  "/api/internal/led/simulated-provider",
+  "/api/internal/led/simulated-provider/",
   baseUrl,
 );
 const webhookUrl = new URL("/api/webhooks/led/status", baseUrl);
@@ -50,7 +50,7 @@ async function main() {
     metadata: { source: "led-simulator-smoke" },
   };
 
-  const submitted = await request(new URL("/campaigns", providerBase), {
+  const submitted = await request(new URL("campaigns", providerBase), {
     method: "POST",
     headers,
     body: JSON.stringify(release),
@@ -58,11 +58,11 @@ async function main() {
   console.log("submit", submitted);
 
   const campaignUrl = new URL(
-    `/campaigns/${encodeURIComponent(submitted.externalReference)}`,
+    `campaigns/${encodeURIComponent(submitted.externalReference)}`,
     providerBase,
   );
   const statusUrl = new URL(
-    `/campaigns/${encodeURIComponent(submitted.externalReference)}/status`,
+    `campaigns/${encodeURIComponent(submitted.externalReference)}/status`,
     providerBase,
   );
 
@@ -83,22 +83,29 @@ async function main() {
   );
 
   if (webhookSecret) {
-    console.log(
-      "webhook",
-      await request(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-led-signature": webhookSecret,
-        },
-        body: JSON.stringify({
-          providerKey: "simulated_led_provider",
-          externalReference: submitted.externalReference,
-          status: "live",
-          message: "Simulator webhook marked campaign live.",
+    try {
+      console.log(
+        "webhook",
+        await request(webhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-led-signature": webhookSecret,
+          },
+          body: JSON.stringify({
+            providerKey: "simulated_led_provider",
+            externalReference: submitted.externalReference,
+            status: "live",
+            message: "Simulator webhook marked campaign live.",
+          }),
         }),
-      }),
-    );
+      );
+    } catch (error) {
+      console.log(
+        "webhook-warning",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   } else {
     console.log("webhook skipped: LED_PROVIDER_WEBHOOK_SECRET not set");
   }

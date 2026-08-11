@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCommerceServerConfig } from "@/lib/server/config";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import type { LedSimulatorRecord } from "@/lib/server/led-simulator-store";
+import { updateSimulatorRecord } from "@/lib/server/led-simulator-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,23 +54,22 @@ export async function POST(
       );
     }
 
-    const admin = createSupabaseAdminClient();
-    const { data, error } = await admin
-      .from("led_provider_simulations")
-      .update({
-        status,
+    const nextStatus = status as LedSimulatorRecord["status"];
+
+    const data = await updateSimulatorRecord(
+      context.params.externalReference,
+      {
+        status: nextStatus,
         status_payload: {
-          status,
+          status: nextStatus,
           updatedAt: new Date().toISOString(),
         },
         message:
-          message || `Simulated provider moved campaign to ${status}.`,
-      })
-      .eq("external_reference", context.params.externalReference)
-      .select("provider_key,external_reference,status,status_payload,message")
-      .single();
+          message || `Simulated provider moved campaign to ${nextStatus}.`,
+      },
+    );
 
-    if (error || !data) {
+    if (!data) {
       return NextResponse.json(
         { error: "Simulated campaign was not found." },
         { status: 404 },

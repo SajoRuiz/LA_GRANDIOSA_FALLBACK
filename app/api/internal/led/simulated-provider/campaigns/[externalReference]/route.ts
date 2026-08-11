@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCommerceServerConfig } from "@/lib/server/config";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import {
+  getSimulatorRecord,
+  updateSimulatorRecord,
+} from "@/lib/server/led-simulator-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,14 +31,8 @@ export async function GET(
       );
     }
 
-    const admin = createSupabaseAdminClient();
-    const { data, error } = await admin
-      .from("led_provider_simulations")
-      .select("provider_key,external_reference,status,status_payload,message")
-      .eq("external_reference", context.params.externalReference)
-      .single();
-
-    if (error || !data) {
+    const data = await getSimulatorRecord(context.params.externalReference);
+    if (!data) {
       return NextResponse.json(
         { error: "Simulated campaign was not found." },
         { status: 404 },
@@ -74,21 +71,18 @@ export async function DELETE(
       );
     }
 
-    const admin = createSupabaseAdminClient();
-    const { data, error } = await admin
-      .from("led_provider_simulations")
-      .update({
+    const data = await updateSimulatorRecord(
+      context.params.externalReference,
+      {
         status: "cancelled",
         status_payload: {
           cancelledAt: new Date().toISOString(),
         },
         message: "Simulated provider cancelled the campaign.",
-      })
-      .eq("external_reference", context.params.externalReference)
-      .select("provider_key,external_reference,status,status_payload,message")
-      .single();
+      },
+    );
 
-    if (error || !data) {
+    if (!data) {
       return NextResponse.json(
         { error: "Simulated campaign was not found." },
         { status: 404 },

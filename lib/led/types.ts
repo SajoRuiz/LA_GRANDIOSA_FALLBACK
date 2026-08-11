@@ -2,6 +2,7 @@ export type LedReleaseStatus =
   | "pending"
   | "submitted"
   | "acknowledged"
+  | "released"
   | "live"
   | "failed"
   | "cancelled";

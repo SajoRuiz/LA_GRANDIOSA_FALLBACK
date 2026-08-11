@@ -15,6 +15,12 @@ import {
 import { estimatePlaysForServiceHours } from "../service-calendar";
 import type { ClientInformationInput } from "./checkout-input";
 
+const PUERTO_RICO_B2B_TAX_RATE = 0.04;
+
+function calculatePuertoRicoB2BTaxCents(netContractTotalCents: number): number {
+  return Math.round(netContractTotalCents * PUERTO_RICO_B2B_TAX_RATE);
+}
+
 export interface DraftOrderLine {
   cartItem: ContractCartItem;
   combination: AdCombination;
@@ -127,7 +133,9 @@ export function buildDraftOrder(
       agencyPricing.agencyDiscountBaseCents,
     agencyDiscountCents: agencyPricing.agencyDiscountCents,
     netContractTotalCents: agencyPricing.netContractTotalCents,
-    taxCents: 0,
+    taxCents: calculatePuertoRicoB2BTaxCents(
+      agencyPricing.netContractTotalCents,
+    ),
   };
 
   const clientPayload = {

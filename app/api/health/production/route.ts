@@ -13,6 +13,32 @@ export async function GET() {
     const report = await getStage6SecurityReport();
     const admin = createSupabaseAdminClient();
 
+    const [openChecksResult, deadLettersResult] =
+      await Promise.all([
+        admin
+          .from("launch_checklist_items")
+          .select("id", { count: "exact", head: true })
+          .eq("required", true)
+          .not("status", "in", "(passed,waived)"),
+        admin
+          .from("notification_outbox")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "dead_letter"),
+      ]);
+
+    if (openChecksResult.error) {
+      throw new Error(openChecksResult.error.message);
+    }
+
+    if (deadLettersResult.error) {
+      throw new Error(deadLettersResult.error.message);
+    }
+
+    const requiredLaunchChecksOpen =
+      openChecksResult.count ?? report.requiredLaunchChecksOpen;
+    const deadLetterNotifications =
+      deadLettersResult.count ?? report.deadLetterNotifications;
+
     const { data: buckets } = await admin.storage.listBuckets();
     const requiredBuckets = [
       "purchase-orders",
@@ -64,7 +90,7 @@ export async function GET() {
 
     const launchReady =
       automaticBlockers.length === 0 &&
-      report.requiredLaunchChecksOpen === 0;
+      requiredLaunchChecksOpen === 0;
 
     return NextResponse.json(
       {
@@ -76,8 +102,7 @@ export async function GET() {
             : "development",
         launchReady,
         automaticBlockers,
-        requiredLaunchChecksOpen:
-          report.requiredLaunchChecksOpen,
+        requiredLaunchChecksOpen,
         security: {
           rlsMissing: report.rlsMissing.length,
           anonGrants: report.anonGrants.length,
@@ -88,8 +113,7 @@ export async function GET() {
             report.activeBuyersWithoutVerifiedMfa,
         },
         operations: {
-          deadLetterNotifications:
-            report.deadLetterNotifications,
+          deadLetterNotifications,
           failedReleaseQueueItems:
             report.failedReleaseQueueItems,
           overdueInvoices: report.overdueInvoices,

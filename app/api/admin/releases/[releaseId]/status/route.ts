@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AgencyAccessError, requireStaffAccessForApi } from "@/lib/auth/access";
 import { getCommerceServerConfig } from "@/lib/server/config";
+import {
+  cancelLedRelease,
+  submitLedRelease,
+  syncLedReleaseStatus,
+} from "@/lib/server/led-release";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest, context: { params: { releaseId: string } }) {
@@ -10,7 +15,41 @@ export async function POST(request: NextRequest, context: { params: { releaseId:
     const action = String(body.action ?? "");
     const note = String(body.note ?? "").trim();
     const externalReference = String(body.externalReference ?? "").trim();
-    if (!['released','live','failed'].includes(action)) throw new Error("Release action is invalid.");
+    if (!['released','live','failed','submit','sync','cancel'].includes(action)) throw new Error("Release action is invalid.");
+
+    if (action === "submit") {
+      const outcome = await submitLedRelease(
+        context.params.releaseId,
+        staff.identity.userId,
+      );
+      return NextResponse.json({
+        ok: true,
+        status: outcome.status,
+        externalReference: outcome.externalReference,
+      });
+    }
+
+    if (action === "sync") {
+      const outcome = await syncLedReleaseStatus(
+        context.params.releaseId,
+        staff.identity.userId,
+      );
+      return NextResponse.json({
+        ok: true,
+        status: outcome.status,
+        externalReference: outcome.externalReference,
+      });
+    }
+
+    if (action === "cancel") {
+      const outcome = await cancelLedRelease(context.params.releaseId);
+      return NextResponse.json({
+        ok: true,
+        status: outcome.status,
+        externalReference: outcome.externalReference,
+      });
+    }
+
     const admin = createSupabaseAdminClient();
     const { data, error } = await admin.rpc("update_asset_release_status", {
       p_release_queue_id: context.params.releaseId,

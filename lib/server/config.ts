@@ -49,6 +49,7 @@ export interface CommerceServerConfig {
   ledProviderMode: "manual" | "api";
   ledProviderApiBaseUrl: string;
   ledProviderApiKey: string;
+  ledProviderWebhookSecret: string;
 }
 
 export function getCommerceServerConfig(): CommerceServerConfig {
@@ -103,5 +104,8 @@ export function getCommerceServerConfig(): CommerceServerConfig {
       "LED_PROVIDER_API_BASE_URL",
     ),
     ledProviderApiKey: optionalServerEnvironment("LED_PROVIDER_API_KEY"),
+    ledProviderWebhookSecret: optionalServerEnvironment(
+      "LED_PROVIDER_WEBHOOK_SECRET",
+    ),
   };
 }

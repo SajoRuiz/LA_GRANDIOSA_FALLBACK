@@ -22,6 +22,7 @@ interface ReleaseQueueRow {
   order_id: string;
   asset_submission_id: string;
   status: QueueStatus;
+  attempts?: number;
   external_reference: string | null;
 }
 
@@ -49,13 +50,32 @@ function mapProviderStatus(status: LedReleaseStatus): QueueStatus {
   }
 }
 
+function normalizeIncomingStatus(value: string): QueueStatus {
+  const normalized = value.trim().toLowerCase();
+  switch (normalized) {
+    case "pending":
+    case "processing":
+    case "submitted":
+    case "acknowledged":
+    case "released":
+    case "live":
+    case "failed":
+    case "cancelled":
+      return normalized;
+    default:
+      throw new Error(`Unsupported LED status: ${value}`);
+  }
+}
+
 async function getReleaseQueueRow(
   releaseId: string,
 ): Promise<ReleaseQueueRow> {
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin
     .from("asset_release_queue")
-    .select("id,order_id,asset_submission_id,status,external_reference")
+    .select(
+      "id,order_id,asset_submission_id,status,attempts,external_reference",
+    )
     .eq("id", releaseId)
     .single();
 
@@ -364,6 +384,58 @@ export async function cancelLedRelease(
   return { status, externalReference };
 }
 
+export async function applyLedWebhookStatus(input: {
+  externalReference: string;
+  providerKey: string;
+  status: string;
+  message?: string;
+  raw?: Record<string, unknown>;
+  actorUserId?: string;
+}) {
+  const status = normalizeIncomingStatus(input.status);
+  const actorUserId =
+    input.actorUserId ?? "04fcfe2a-0078-46c6-8828-2d93ccf8a454";
+  const admin = createSupabaseAdminClient();
+
+  const { data, error } = await admin
+    .from("asset_release_queue")
+    .select(
+      "id,order_id,asset_submission_id,status,attempts,external_reference",
+    )
+    .eq("external_reference", input.externalReference)
+    .single();
+
+  if (error || !data) {
+    throw new Error(
+      error?.message ??
+        `Release queue row was not found for ${input.externalReference}.`,
+    );
+  }
+
+  const release = data as ReleaseQueueRow;
+  await persistProviderState({
+    releaseId: release.id,
+    providerKey: input.providerKey,
+    externalReference: input.externalReference,
+    status,
+    raw: input.raw,
+    note: input.message,
+  });
+
+  await completeStatusEffects(
+    release.id,
+    status,
+    input.externalReference,
+    actorUserId,
+  );
+
+  return {
+    releaseId: release.id,
+    status,
+    externalReference: input.externalReference,
+  };
+}
+
 export async function processLedReleaseQueue(
   limit = 10,
   actorUserId = "04fcfe2a-0078-46c6-8828-2d93ccf8a454",
@@ -400,6 +472,7 @@ export async function processLedReleaseQueue(
   const rows = (data ?? []) as Array<{
     id: string;
     status: QueueStatus;
+    attempts?: number;
   }>;
   const results: Array<Record<string, unknown>> = [];
 
@@ -439,7 +512,7 @@ export async function processLedReleaseQueue(
         .from("asset_release_queue")
         .update({
           status: "failed",
-          attempts: 1,
+          attempts: (row.attempts ?? 0) + 1,
           last_error: message,
           processing_started_at: null,
           updated_at: new Date().toISOString(),

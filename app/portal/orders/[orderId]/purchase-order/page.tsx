@@ -61,6 +61,14 @@ export default async function PurchaseOrderPage({
           Upload the approved agency PO as a PDF. Every revision is
           retained in the secure repository.
         </p>
+        <div className={styles.heroActions}>
+          <Link href="/portal/orders">
+            Open agency purchase-order review list
+          </Link>
+          <Link href={`/portal/orders/${order.id}/assets`}>
+            Upload assets for review
+          </Link>
+        </div>
       </section>
 
       <div className={styles.layout}>

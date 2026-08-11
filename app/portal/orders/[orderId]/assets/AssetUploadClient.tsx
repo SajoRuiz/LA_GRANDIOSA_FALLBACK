@@ -89,7 +89,7 @@ export default function AssetUploadClient({ orderId, orderNumber, orderStatus, a
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const editable = ["awaiting_assets", "revision_requested", "assets_received"].includes(orderStatus);
+  const editable = ["po_submitted", "po_revision_requested", "awaiting_assets", "revision_requested", "assets_received"].includes(orderStatus);
   const allReady = slots.length > 0 && slots.every((slot) => Boolean(slot.currentFile));
 
   function choose(slotId: string, file?: File) {

@@ -4,6 +4,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import styles from "./orders.module.css";
 
 const ASSET_STATUSES = new Set([
+  "po_submitted",
+  "po_revision_requested",
   "awaiting_assets",
   "assets_received",
   "under_review",
@@ -136,17 +138,15 @@ export default async function AgencyOrdersPage() {
                     </Link>
                   ) : null}
 
-                  {invoice?.id ? (
-                    <Link href={`/portal/invoices/${invoice.id}`}>
-                      View invoice
+                  {purchaseOrder?.id && ASSET_STATUSES.has(order.status) ? (
+                    <Link href={`/portal/orders/${order.id}/assets`}>
+                      Upload assets for review
                     </Link>
                   ) : null}
 
-                  {ASSET_STATUSES.has(order.status) ? (
-                    <Link href={`/portal/orders/${order.id}/assets`}>
-                      {order.status === "revision_requested"
-                        ? "Upload revisions"
-                        : "Open asset repository"}
+                  {invoice?.id ? (
+                    <Link href={`/portal/invoices/${invoice.id}`}>
+                      View invoice
                     </Link>
                   ) : null}
                 </div>

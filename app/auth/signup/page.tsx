@@ -18,7 +18,7 @@ export default async function SignupPage({
   const status = firstValue(params.accessRequest);
   const success =
     status === "sent"
-      ? "Your agency account is now active. Check your email for account confirmation and sign in to start ordering."
+      ? "Your request was received. An administrator will review it and invite your agency if approved."
       : "";
   const exists =
     status === "exists"
@@ -26,7 +26,7 @@ export default async function SignupPage({
       : "";
   const error =
     status === "invalid"
-      ? "Use a valid email address and matching password fields (minimum 12 characters)."
+      ? "Use a valid email address to request agency access."
       : "";
 
   return (
@@ -47,11 +47,11 @@ export default async function SignupPage({
       <section className={styles.shell}>
         <div className={styles.intro}>
           <p className={styles.eyebrow}>AGENCY ONBOARDING</p>
-          <h1>Create secure access.</h1>
+          <h1>Request secure access.</h1>
           <p>
-            Enter your email and password to create an active agency buyer
-            account for secure purchasing. Admin receives a separate request
-            to assign negotiated discount and credit limits.
+            Public registration is disabled. Submit your company details and
+            an administrator will review the request, then send an invite if
+            the agency is approved.
           </p>
         </div>
 
@@ -81,30 +81,6 @@ export default async function SignupPage({
             </label>
 
             <label className={styles.field}>
-              <span>Create password</span>
-              <input
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={12}
-                maxLength={128}
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span>Confirm password</span>
-              <input
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={12}
-                maxLength={128}
-              />
-            </label>
-
-            <label className={styles.field}>
               <span>Company</span>
               <input name="company" type="text" maxLength={180} />
             </label>
@@ -115,7 +91,7 @@ export default async function SignupPage({
             </label>
 
             <button className={styles.button} type="submit">
-              Create account
+              Request invite
             </button>
 
             <Link className={styles.requestAccessCommand} href="/auth/login">

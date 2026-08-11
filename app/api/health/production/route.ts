@@ -17,12 +17,12 @@ export async function GET() {
       await Promise.all([
         admin
           .from("launch_checklist_items")
-          .select("id", { count: "exact", head: true })
+          .select("id")
           .eq("required", true)
           .not("status", "in", "(passed,waived)"),
         admin
           .from("notification_outbox")
-          .select("id", { count: "exact", head: true })
+          .select("id")
           .eq("status", "dead_letter"),
       ]);
 
@@ -35,9 +35,11 @@ export async function GET() {
     }
 
     const requiredLaunchChecksOpen =
-      openChecksResult.count ?? report.requiredLaunchChecksOpen;
+      openChecksResult.data?.length ??
+      report.requiredLaunchChecksOpen;
     const deadLetterNotifications =
-      deadLettersResult.count ?? report.deadLetterNotifications;
+      deadLettersResult.data?.length ??
+      report.deadLetterNotifications;
 
     const { data: buckets } = await admin.storage.listBuckets();
     const requiredBuckets = [

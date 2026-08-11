@@ -127,3 +127,17 @@ Before enabling `LED_PROVIDER_MODE=api`, obtain a provider API pack containing:
 8. Throughput/rate limits and batching limits.
 
 Until this package is received and tested, keep production in manual mode.
+
+## Local simulator
+
+Stage 7 branch includes a simulator matching the current generic provider
+contract:
+
+- `POST /api/internal/led/simulated-provider/campaigns`
+- `GET /api/internal/led/simulated-provider/campaigns/:externalReference`
+- `DELETE /api/internal/led/simulated-provider/campaigns/:externalReference`
+- `POST /api/internal/led/simulated-provider/campaigns/:externalReference/status`
+- `POST /api/webhooks/led/status`
+
+Use `scripts/led-simulator-smoke.mjs` to validate submit/status/cancel flow and
+optional webhook application before contractor API access is available.

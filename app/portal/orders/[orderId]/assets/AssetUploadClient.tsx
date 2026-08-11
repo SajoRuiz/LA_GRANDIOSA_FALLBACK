@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as tus from "tus-js-client";
 import styles from "./assets.module.css";
@@ -81,6 +82,42 @@ function uploadTus(file: File, tokenInfo: { endpoint: string; bucket: string; pa
   });
 }
 
+function formatMegabytes(value: unknown): string {
+  const bytes = Number(value ?? 0);
+
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "Not configured";
+  }
+
+  return `${Math.round(bytes / 1024 / 1024)} MB`;
+}
+
+function formatResolution(specification: Record<string, unknown>): string {
+  const width = Number(specification.expectedWidthPixels ?? 0);
+  const height = Number(specification.expectedHeightPixels ?? 0);
+
+  if (
+    Number.isFinite(width) &&
+    Number.isFinite(height) &&
+    width > 0 &&
+    height > 0
+  ) {
+    return `${width} x ${height} px`;
+  }
+
+  return "Pending final LED provider confirmation";
+}
+
+function formatTolerance(value: unknown): string {
+  const tolerance = Number(value ?? 0);
+
+  if (!Number.isFinite(tolerance) || tolerance <= 0) {
+    return "Not specified";
+  }
+
+  return `${tolerance.toFixed(Number.isInteger(tolerance) ? 0 : 1)} sec`;
+}
+
 export default function AssetUploadClient({ orderId, orderNumber, orderStatus, assetDueAt, assetDueNote, slots }: { orderId: string; orderNumber: string; orderStatus: string; assetDueAt: string; assetDueNote: string; slots: Slot[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Record<string, File | undefined>>({});
@@ -140,16 +177,37 @@ export default function AssetUploadClient({ orderId, orderNumber, orderStatus, a
       <div><p>FINAL ASSET DEADLINE</p><strong>{new Date(assetDueAt).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}</strong></div>
       {assetDueNote ? <span>{assetDueNote}</span> : null}
     </aside> : <aside className={styles.deadlineMissing}>The processing team has not assigned a final asset deadline yet.</aside>}
+    <section className={styles.guidePanel}>
+      <div>
+        <p>UPLOAD GUIDE</p>
+        <h2>Review every live specification before you send files.</h2>
+        <span>The requirements below come from the order-specific asset specification snapshot, including file types, file-size limits, resolution targets, duration checks, and notes.</span>
+      </div>
+      <Link className={styles.guideLink} href={`/portal/orders/${orderId}/assets/instructions`}>
+        Open step-by-step instructions
+      </Link>
+    </section>
     {error ? <p className={styles.error}>{error}</p> : null}
     {message ? <p className={styles.success}>{message}</p> : null}
     <section className={styles.slots}>
       {slots.map((slot) => {
         const spec = slot.specification ?? {};
         const allowed = Array.isArray(spec.allowedMimeTypes) ? spec.allowedMimeTypes.join(", ") : "Configured file types";
+        const notes = typeof spec.notes === "string" && spec.notes.trim().length > 0 ? spec.notes.trim() : "No additional technical notes.";
         const durationMismatch = slot.currentFile?.durationSeconds != null && slot.format === "silent-video" && Math.abs(slot.currentFile.durationSeconds - slot.durationSeconds) > Number(spec.durationToleranceSeconds ?? .5);
         return <article className={styles.slot} key={slot.id}>
           <div className={styles.slotHeading}><div><p>{slot.screenLabel}</p><h2>{slot.format === "silent-video" ? `${slot.durationSeconds}-second silent video` : "Still image"}</h2></div><span>{slot.status.replaceAll("_", " ")}</span></div>
-          <p className={styles.spec}>Accepted: {allowed}. Maximum {Math.round(Number(spec.maxFileSizeBytes ?? 0) / 1024 / 1024)} MB. Pixel dimensions remain pending the final LED provider specification.</p>
+          <div className={styles.specPanel}>
+            <p className={styles.spec}>Use the locked order spec below for this upload.</p>
+            <dl className={styles.specList}>
+              <div><dt>Accepted file types</dt><dd>{allowed}</dd></div>
+              <div><dt>Max file size</dt><dd>{formatMegabytes(spec.maxFileSizeBytes)}</dd></div>
+              <div><dt>Expected resolution</dt><dd>{formatResolution(spec)}</dd></div>
+              <div><dt>Target duration</dt><dd>{slot.format === "silent-video" ? `${slot.durationSeconds} sec` : "Not applicable"}</dd></div>
+              <div><dt>Duration tolerance</dt><dd>{slot.format === "silent-video" ? formatTolerance(spec.durationToleranceSeconds) : "Not applicable"}</dd></div>
+              <div><dt>Technical notes</dt><dd>{notes}</dd></div>
+            </dl>
+          </div>
           {slot.currentFile ? <div className={styles.current}>
             {slot.currentFile.mimeType.startsWith("image/") ? <img src={`/api/assets/files/${slot.currentFile.id}`} alt={`${slot.screenLabel} current asset`} /> : <video src={`/api/assets/files/${slot.currentFile.id}`} controls preload="metadata" />}
             <dl><div><dt>Current version</dt><dd>{slot.currentFile.versionNumber}</dd></div><div><dt>Filename</dt><dd>{slot.currentFile.filename}</dd></div><div><dt>Dimensions</dt><dd>{slot.currentFile.width && slot.currentFile.height ? `${slot.currentFile.width} × ${slot.currentFile.height}` : "Not reported"}</dd></div><div><dt>Duration</dt><dd>{slot.currentFile.durationSeconds != null ? `${slot.currentFile.durationSeconds.toFixed(2)} sec` : "—"}</dd></div></dl>

@@ -149,6 +149,11 @@ export default async function OrderAssetsPage({
           Upload and preview every screen asset, preserve revision history, and
           make one final submission for processing-team review.
         </p>
+        <div className={styles.heroActions}>
+          <Link href={`/portal/orders/${order.id}/assets/instructions`}>
+            View upload instructions
+          </Link>
+        </div>
       </section>
 
       <AssetUploadClient

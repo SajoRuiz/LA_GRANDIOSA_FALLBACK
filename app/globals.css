@@ -28,7 +28,7 @@ html, body {
   The homepage keeps its original typography via the .landing-page marker.
 */
 main:not(.landing-page) h1 {
-  font-size: 50% !important;
+  font-size: clamp(50px, 5vw, 104px) !important;
 }
 
 main > header {

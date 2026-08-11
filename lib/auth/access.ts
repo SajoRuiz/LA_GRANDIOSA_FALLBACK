@@ -190,7 +190,15 @@ export async function getStaffAccess(): Promise<StaffAccess | null> {
 }
 
 function agencyDatesAreActive(agency: AgencyRecord): boolean {
-  const today = new Date().toISOString().slice(0, 10);
+  // Agency effective/expiry dates are business-local. Using UTC can reject
+  // valid users around day boundaries in Puerto Rico.
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Puerto_Rico",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const today = formatter.format(new Date());
 
   return (
     agency.effective_date <= today &&

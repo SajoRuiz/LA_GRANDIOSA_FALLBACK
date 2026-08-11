@@ -11,6 +11,193 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
+interface PurchaseOrderSubmitResult {
+  purchase_order_id: string;
+  order_number: string;
+  po_status: string;
+  document_version: number;
+}
+
+function isAmbiguousPurchaseOrderIdError(message: string): boolean {
+  return /purchase_order_id/i.test(message) && /ambiguous/i.test(message);
+}
+
+async function submitPurchaseOrderFallback(input: {
+  orderId: string;
+  poNumber: string;
+  issueDate: string | null;
+  note: string;
+  storagePath: string;
+  originalFilename: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  actorUserId: string;
+}): Promise<PurchaseOrderSubmitResult> {
+  const admin = createSupabaseAdminClient();
+
+  const { data: order, error: orderError } = await admin
+    .from("orders")
+    .select("id,order_number,status,credit_status,agency_id,client_contact_id")
+    .eq("id", input.orderId)
+    .maybeSingle();
+
+  if (orderError || !order) {
+    throw new Error(orderError?.message ?? "Order not found.");
+  }
+
+  if (
+    ![
+      "client_information_received",
+      "po_submitted",
+      "po_revision_requested",
+    ].includes(String(order.status))
+  ) {
+    throw new Error("This order is not accepting a purchase order.");
+  }
+
+  if (String(order.credit_status) === "exception_declined") {
+    throw new Error("The order credit exception was declined.");
+  }
+
+  let purchaseOrderId = "";
+  const { data: existingPo, error: existingPoError } = await admin
+    .from("purchase_orders")
+    .select("id")
+    .eq("order_id", input.orderId)
+    .maybeSingle();
+
+  if (existingPoError) {
+    throw new Error(existingPoError.message);
+  }
+
+  if (!existingPo) {
+    const { data: createdPo, error: createPoError } = await admin
+      .from("purchase_orders")
+      .insert({
+        order_id: input.orderId,
+        agency_id: order.agency_id,
+        po_number: input.poNumber,
+        issue_date: input.issueDate,
+        status: "submitted",
+        note: input.note || null,
+        submitted_by_user_id: input.actorUserId,
+        submitted_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+
+    if (createPoError || !createdPo) {
+      throw new Error(
+        createPoError?.message ??
+          "Purchase order could not be created.",
+      );
+    }
+
+    purchaseOrderId = String(createdPo.id);
+  } else {
+    purchaseOrderId = String(existingPo.id);
+    const { error: updatePoError } = await admin
+      .from("purchase_orders")
+      .update({
+        po_number: input.poNumber,
+        issue_date: input.issueDate,
+        status: "submitted",
+        note: input.note || null,
+        submitted_by_user_id: input.actorUserId,
+        submitted_at: new Date().toISOString(),
+        reviewer_user_id: null,
+        reviewer_note: null,
+        reviewed_at: null,
+      })
+      .eq("id", purchaseOrderId);
+
+    if (updatePoError) {
+      throw new Error(updatePoError.message);
+    }
+  }
+
+  const { data: latestDoc, error: latestDocError } = await admin
+    .from("purchase_order_documents")
+    .select("version_number")
+    .eq("purchase_order_id", purchaseOrderId)
+    .order("version_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (latestDocError) {
+    throw new Error(latestDocError.message);
+  }
+
+  const documentVersion = Number(latestDoc?.version_number ?? 0) + 1;
+
+  const { error: documentError } = await admin
+    .from("purchase_order_documents")
+    .insert({
+      purchase_order_id: purchaseOrderId,
+      version_number: documentVersion,
+      storage_path: input.storagePath,
+      original_filename: input.originalFilename,
+      mime_type: input.mimeType,
+      file_size_bytes: input.fileSizeBytes,
+      uploaded_by_user_id: input.actorUserId,
+    });
+
+  if (documentError) {
+    throw new Error(documentError.message);
+  }
+
+  if (String(order.status) !== "po_submitted") {
+    const { error: transitionError } = await admin.rpc(
+      "transition_order_status",
+      {
+        p_order_id: input.orderId,
+        p_new_status: "po_submitted",
+        p_actor_user_id: input.actorUserId,
+        p_note: "Agency purchase order submitted.",
+        p_metadata: {
+          purchase_order_id: purchaseOrderId,
+          po_number: input.poNumber,
+          document_version: documentVersion,
+        },
+      },
+    );
+
+    if (transitionError) {
+      throw new Error(transitionError.message);
+    }
+  }
+
+  const { error: clientError } = await admin
+    .from("client_contacts")
+    .update({ purchase_order_number: input.poNumber })
+    .eq("id", order.client_contact_id);
+
+  if (clientError) {
+    throw new Error(clientError.message);
+  }
+
+  await admin.from("audit_log").insert({
+    order_id: input.orderId,
+    actor_user_id: input.actorUserId,
+    event_key: "purchase_order.submitted",
+    entity_type: "purchase_order",
+    entity_id: purchaseOrderId,
+    metadata: {
+      po_number: input.poNumber,
+      document_version: documentVersion,
+      storage_path: input.storagePath,
+      fallback: "api-route",
+    },
+  });
+
+  return {
+    purchase_order_id: purchaseOrderId,
+    order_number: String(order.order_number),
+    po_status: "submitted",
+    document_version: documentVersion,
+  };
+}
+
 function folderAndName(path: string): {
   folder: string;
   name: string;
@@ -85,11 +272,24 @@ export async function POST(request: NextRequest) {
       },
     );
 
+    let result = Array.isArray(data) ? data[0] : data;
     if (error) {
-      throw new Error(error.message);
-    }
+      if (!isAmbiguousPurchaseOrderIdError(error.message)) {
+        throw new Error(error.message);
+      }
 
-    const result = Array.isArray(data) ? data[0] : data;
+      result = await submitPurchaseOrderFallback({
+        orderId,
+        poNumber,
+        issueDate,
+        note,
+        storagePath,
+        originalFilename,
+        mimeType,
+        fileSizeBytes,
+        actorUserId: access.identity.userId,
+      });
+    }
     const config = getCommerceServerConfig();
 
     await admin.from("notification_outbox").insert([

@@ -46,6 +46,7 @@ export default function PurchaseOrderClient({
         "/api/purchase-orders/upload-url",
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -97,6 +98,7 @@ export default function PurchaseOrderClient({
         "/api/purchase-orders/submit",
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

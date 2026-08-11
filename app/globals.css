@@ -23,6 +23,14 @@ html, body {
   --line: rgba(88, 104, 217, 0.55);
 }
 
+/*
+  Post-landing heading scale-down.
+  The homepage keeps its original typography via the .landing-page marker.
+*/
+main:not(.landing-page) h1 {
+  font-size: 50% !important;
+}
+
 main > header {
   display: flex !important;
   flex-direction: row !important;

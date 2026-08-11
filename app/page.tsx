@@ -57,7 +57,7 @@ export default function HomePage() {
   const signInPath = withNext("/auth/login", "/portal");
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} landing-page`}>
       <header className={styles.siteHeader}>
         <a className={styles.brand} href="#top" aria-label="La Grandiosa home">
           <img className={styles.brandMark} src="/la-grandiosa-logo.png" alt="La Grandiosa" />

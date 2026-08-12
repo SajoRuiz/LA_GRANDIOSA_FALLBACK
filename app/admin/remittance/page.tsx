@@ -41,30 +41,17 @@ export default async function RemittanceAdminPage() {
       </section>
 
       <div className={styles.layout}>
-        <RemittanceAdminClient />
-
-        <section className={styles.panel}>
-          <h2>Account register</h2>
-          {(accounts ?? []).length === 0 ? (
-            <p>No remittance account has been configured.</p>
-          ) : (
-            (accounts ?? []).map((account) => (
-              <article className={styles.account} key={account.id}>
-                <div>
-                  <strong>{account.display_name}</strong>
-                  <span>
-                    {account.active ? "ACTIVE" : "INACTIVE"}
-                  </span>
-                </div>
-                <p>
-                  {account.bank_name} · {account.account_type} ending{" "}
-                  {account.account_last4}
-                </p>
-                <p>{account.beneficiary_name}</p>
-              </article>
-            ))
-          )}
-        </section>
+        <RemittanceAdminClient
+          accounts={(accounts ?? []).map((account) => ({
+            id: String(account.id),
+            display_name: String(account.display_name),
+            bank_name: String(account.bank_name),
+            beneficiary_name: String(account.beneficiary_name),
+            account_type: String(account.account_type),
+            account_last4: String(account.account_last4),
+            active: Boolean(account.active),
+          }))}
+        />
       </div>
     </main>
   );

@@ -56,6 +56,53 @@ export default function CreditAdminClient({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
+
+  async function declineSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/list-actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entity: "creditReview",
+          action: "decline",
+          ids: selectedIds,
+        }),
+      });
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Credit reviews could not be declined.");
+      }
+
+      setMessage("Selected credit exceptions were declined.");
+      window.location.reload();
+    } catch (reviewError) {
+      setError(
+        reviewError instanceof Error
+          ? reviewError.message
+          : "Credit reviews could not be declined.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function resolveReview(
     reviewId: string,
@@ -192,6 +239,19 @@ export default function CreditAdminClient({
       <section className={styles.panel}>
         <p className={styles.eyebrow}>PENDING EXCEPTIONS</p>
         <h2>Finance review queue</h2>
+        {reviews.length > 0 ? (
+          <p>
+            <button
+              type="button"
+              disabled={busy || selectedIds.length === 0}
+              onClick={declineSelected}
+            >
+              {busy
+                ? "Declining…"
+                : `Decline selected (${selectedIds.length})`}
+            </button>
+          </p>
+        ) : null}
         {reviews.length === 0 ? (
           <p className={styles.empty}>No credit exceptions are pending.</p>
         ) : (
@@ -203,6 +263,15 @@ export default function CreditAdminClient({
               return (
                 <article className={styles.reviewCard} key={review.id}>
                   <div>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(review.id)}
+                        onChange={() => toggleSelected(review.id)}
+                        disabled={busy}
+                      />{" "}
+                      Select
+                    </label>
                     <strong>{agency?.display_name ?? "Agency"}</strong>
                     <span>
                       {agency?.account_number ?? ""} · {order?.order_number ?? ""}

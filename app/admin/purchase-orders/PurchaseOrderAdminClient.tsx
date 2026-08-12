@@ -28,6 +28,53 @@ export default function PurchaseOrderAdminClient({
 }) {
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
+
+  async function declineSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setBusy("bulk-decline");
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/list-actions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          entity: "purchaseOrder",
+          action: "decline",
+          ids: selectedIds,
+        }),
+      });
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Selected purchase orders could not be declined.");
+      }
+
+      window.location.reload();
+    } catch (actionError) {
+      setError(
+        actionError instanceof Error
+          ? actionError.message
+          : "Selected purchase orders could not be declined.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
 
   async function review(
     id: string,
@@ -87,6 +134,19 @@ export default function PurchaseOrderAdminClient({
   return (
     <section className={styles.list}>
       {error ? <p className={styles.error}>{error}</p> : null}
+      {purchaseOrders.length > 0 ? (
+        <p>
+          <button
+            type="button"
+            disabled={busy === "bulk-decline" || selectedIds.length === 0}
+            onClick={declineSelected}
+          >
+            {busy === "bulk-decline"
+              ? "Declining…"
+              : `Decline selected (${selectedIds.length})`}
+          </button>
+        </p>
+      ) : null}
 
       {purchaseOrders.length === 0 ? (
         <p>No purchase orders are awaiting review.</p>
@@ -95,6 +155,15 @@ export default function PurchaseOrderAdminClient({
           <article className={styles.card} key={po.id}>
             <div className={styles.heading}>
               <div>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(po.id)}
+                    onChange={() => toggleSelected(po.id)}
+                    disabled={Boolean(busy)}
+                  />{" "}
+                  Select
+                </label>
                 <p>
                   {po.accountNumber} · {po.agencyName}
                 </p>

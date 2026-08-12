@@ -4,10 +4,76 @@ import { FormEvent, useState } from "react";
 
 import styles from "./remittance.module.css";
 
-export default function RemittanceAdminClient() {
+interface RemittanceAccountRow {
+  id: string;
+  display_name: string;
+  bank_name: string;
+  beneficiary_name: string;
+  account_type: string;
+  account_last4: string;
+  active: boolean;
+}
+
+export default function RemittanceAdminClient({
+  accounts,
+}: {
+  accounts: RemittanceAccountRow[];
+}) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
+
+  async function deactivateSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/list-actions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          entity: "remittance",
+          action: "deactivate",
+          ids: selectedIds,
+        }),
+      });
+      const result = (await response.json()) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ?? "Remittance accounts could not be deactivated.",
+        );
+      }
+
+      window.location.reload();
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Remittance accounts could not be deactivated.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -65,98 +131,145 @@ export default function RemittanceAdminClient() {
   }
 
   return (
-    <form className={styles.form} onSubmit={submit}>
-      <p className={styles.eyebrow}>SECURE BANK SETUP</p>
-      <h2>Add existing business bank account</h2>
-      <p className={styles.help}>
-        Routing and account numbers are encrypted in Supabase Vault.
-        They are never stored in source code or GitHub.
-      </p>
+    <>
+      <form className={styles.form} onSubmit={submit}>
+        <p className={styles.eyebrow}>SECURE BANK SETUP</p>
+        <h2>Add existing business bank account</h2>
+        <p className={styles.help}>
+          Routing and account numbers are encrypted in Supabase Vault.
+          They are never stored in source code or GitHub.
+        </p>
 
-      <div className={styles.grid}>
-        <label>
-          <span>Internal display name</span>
-          <input
-            name="displayName"
-            required
-            placeholder="Banco Popular operating account"
-          />
-        </label>
-        <label>
-          <span>Bank name</span>
-          <input name="bankName" required />
-        </label>
-        <label>
-          <span>Beneficiary / legal account name</span>
-          <input name="beneficiaryName" required />
-        </label>
-        <label>
-          <span>Account type</span>
-          <select name="accountType" defaultValue="checking">
-            <option value="checking">Checking</option>
-            <option value="savings">Savings</option>
-          </select>
-        </label>
-        <label>
-          <span>Routing number</span>
-          <input
-            name="routingNumber"
-            inputMode="numeric"
-            required
-            minLength={9}
-            maxLength={9}
-          />
-        </label>
-        <label>
-          <span>Account number</span>
-          <input
-            name="accountNumber"
-            inputMode="numeric"
-            required
-            minLength={4}
-            maxLength={24}
-          />
-        </label>
-        <label>
-          <span>Remittance email</span>
-          <input
-            name="remittanceEmail"
-            type="email"
-            defaultValue="processing@lagrandiosapr.com"
-          />
-        </label>
-        <label className={styles.check}>
-          <input
-            name="achEnabled"
-            type="checkbox"
-            defaultChecked
-          />
-          <span>ACH enabled</span>
-        </label>
-        <label className={styles.check}>
-          <input
-            name="wireEnabled"
-            type="checkbox"
-            defaultChecked
-          />
-          <span>Wire enabled</span>
-        </label>
-        <label className={styles.full}>
-          <span>Additional remittance instructions</span>
-          <textarea name="instructions" rows={4} />
-        </label>
-      </div>
+        <div className={styles.grid}>
+          <label>
+            <span>Internal display name</span>
+            <input
+              name="displayName"
+              required
+              placeholder="Banco Popular operating account"
+            />
+          </label>
+          <label>
+            <span>Bank name</span>
+            <input name="bankName" required />
+          </label>
+          <label>
+            <span>Beneficiary / legal account name</span>
+            <input name="beneficiaryName" required />
+          </label>
+          <label>
+            <span>Account type</span>
+            <select name="accountType" defaultValue="checking">
+              <option value="checking">Checking</option>
+              <option value="savings">Savings</option>
+            </select>
+          </label>
+          <label>
+            <span>Routing number</span>
+            <input
+              name="routingNumber"
+              inputMode="numeric"
+              required
+              minLength={9}
+              maxLength={9}
+            />
+          </label>
+          <label>
+            <span>Account number</span>
+            <input
+              name="accountNumber"
+              inputMode="numeric"
+              required
+              minLength={4}
+              maxLength={24}
+            />
+          </label>
+          <label>
+            <span>Remittance email</span>
+            <input
+              name="remittanceEmail"
+              type="email"
+              defaultValue="processing@lagrandiosapr.com"
+            />
+          </label>
+          <label className={styles.check}>
+            <input
+              name="achEnabled"
+              type="checkbox"
+              defaultChecked
+            />
+            <span>ACH enabled</span>
+          </label>
+          <label className={styles.check}>
+            <input
+              name="wireEnabled"
+              type="checkbox"
+              defaultChecked
+            />
+            <span>Wire enabled</span>
+          </label>
+          <label className={styles.full}>
+            <span>Additional remittance instructions</span>
+            <textarea name="instructions" rows={4} />
+          </label>
+        </div>
 
-      {error ? <p className={styles.error}>{error}</p> : null}
-      {message ? (
-        <p className={styles.success}>{message}</p>
-      ) : null}
+        {error ? <p className={styles.error}>{error}</p> : null}
+        {message ? (
+          <p className={styles.success}>{message}</p>
+        ) : null}
 
-      <button disabled={busy} type="submit">
-        {busy
-          ? "Saving securely…"
-          : "Save active remittance account"}
-      </button>
-    </form>
+        <button disabled={busy} type="submit">
+          {busy
+            ? "Saving securely…"
+            : "Save active remittance account"}
+        </button>
+      </form>
+
+      <section className={styles.panel}>
+        <h2>Account register</h2>
+        {accounts.length > 0 ? (
+          <p>
+            <button
+              type="button"
+              disabled={busy || selectedIds.length === 0}
+              onClick={deactivateSelected}
+            >
+              {busy
+                ? "Deactivating…"
+                : `Deactivate selected (${selectedIds.length})`}
+            </button>
+          </p>
+        ) : null}
+        {accounts.length === 0 ? (
+          <p>No remittance account has been configured.</p>
+        ) : (
+          accounts.map((account) => (
+            <article className={styles.account} key={account.id}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(account.id)}
+                  onChange={() => toggleSelected(account.id)}
+                  disabled={busy}
+                />{" "}
+                Select
+              </label>
+              <div>
+                <strong>{account.display_name}</strong>
+                <span>
+                  {account.active ? "ACTIVE" : "INACTIVE"}
+                </span>
+              </div>
+              <p>
+                {account.bank_name} · {account.account_type} ending{" "}
+                {account.account_last4}
+              </p>
+              <p>{account.beneficiary_name}</p>
+            </article>
+          ))
+        )}
+      </section>
+    </>
   );
 }

@@ -23,6 +23,53 @@ export default function LaunchChecklistClient({
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
+
+  async function waiveSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setBusy("bulk-waive");
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/list-actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entity: "launchChecklist",
+          action: "waive",
+          ids: selectedIds,
+        }),
+      });
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Selected checklist items could not be waived.");
+      }
+
+      setMessage("Selected launch checklist items were waived.");
+      window.location.reload();
+    } catch (actionError) {
+      setError(
+        actionError instanceof Error
+          ? actionError.message
+          : "Selected checklist items could not be waived.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
 
   async function saveItem(
     event: FormEvent<HTMLFormElement>,
@@ -137,6 +184,19 @@ export default function LaunchChecklistClient({
       {message ? (
         <p className={styles.success}>{message}</p>
       ) : null}
+      {items.length > 0 ? (
+        <p>
+          <button
+            type="button"
+            disabled={busy === "bulk-waive" || selectedIds.length === 0}
+            onClick={waiveSelected}
+          >
+            {busy === "bulk-waive"
+              ? "Waiving…"
+              : `Waive selected (${selectedIds.length})`}
+          </button>
+        </p>
+      ) : null}
 
       <section className={styles.groups}>
         {Object.entries(grouped).map(([category, rows]) => (
@@ -152,6 +212,15 @@ export default function LaunchChecklistClient({
                 }
               >
                 <div className={styles.itemCopy}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(item.id)}
+                      onChange={() => toggleSelected(item.id)}
+                      disabled={Boolean(busy)}
+                    />{" "}
+                    Select
+                  </label>
                   <p>
                     {item.required ? "REQUIRED" : "OPTIONAL"}
                   </p>

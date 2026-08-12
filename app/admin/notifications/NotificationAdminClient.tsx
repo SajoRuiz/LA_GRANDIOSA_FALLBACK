@@ -30,6 +30,15 @@ export default function NotificationAdminClient({
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
 
   async function invoke(
     key: string,
@@ -74,6 +83,22 @@ export default function NotificationAdminClient({
     }
   }
 
+  async function deleteSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    await invoke("delete-selected", "/api/admin/list-actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        entity: "notification",
+        action: "delete",
+        ids: selectedIds,
+      }),
+    });
+  }
+
   return (
     <>
       <section className={styles.controls}>
@@ -93,6 +118,15 @@ export default function NotificationAdminClient({
             {busy === "deliver"
               ? "Sending…"
               : "Send queued notifications now"}
+          </button>
+          <button
+            className={styles.secondaryButton}
+            disabled={Boolean(busy) || selectedIds.length === 0}
+            onClick={() => deleteSelected()}
+          >
+            {busy === "delete-selected"
+              ? "Deleting…"
+              : `Delete selected (${selectedIds.length})`}
           </button>
           <button
             className={styles.secondaryButton}
@@ -118,6 +152,15 @@ export default function NotificationAdminClient({
             <article key={row.id}>
               <div className={styles.notificationHeading}>
                 <div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(row.id)}
+                      onChange={() => toggleSelected(row.id)}
+                      disabled={Boolean(busy)}
+                    />{" "}
+                    Select
+                  </label>
                   <strong>{row.templateKey}</strong>
                   <span>
                     {row.channel} · {row.recipient}

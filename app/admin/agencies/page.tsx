@@ -4,12 +4,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import AgencyAdminClient from "./AgencyAdminClient";
 import styles from "./admin.module.css";
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
 export default async function AgencyAdministrationPage() {
   const staff = await requireStaffAccess("/admin/agencies", [
     "finance",
@@ -63,35 +57,20 @@ export default async function AgencyAdministrationPage() {
       </section>
 
       <section className={styles.workspace}>
-        <AgencyAdminClient agencies={agencyOptions} />
-
-        <section className={`${styles.panel} ${styles.agencyList}`}>
-          <p className={styles.eyebrow}>CURRENT AGENCIES</p>
-          <h2>Account register</h2>
-
-          {(agencies ?? []).length === 0 ? (
-            <p>No agency accounts have been created.</p>
-          ) : (
-            (agencies ?? []).map((agency) => (
-              <article className={styles.agencyRow} key={agency.id}>
-                <div>
-                  <strong>{agency.display_name}</strong>
-                  <span>{agency.account_number}</span>
-                </div>
-                <span>{agency.status}</span>
-                <span>
-                  {(Number(agency.discount_basis_points) / 100).toFixed(2)}%
-                </span>
-                <span>
-                  {currency.format(
-                    Number(agency.approved_credit_limit_cents) / 100,
-                  )}
-                </span>
-                <span>Net {agency.payment_terms_days}</span>
-              </article>
-            ))
-          )}
-        </section>
+        <AgencyAdminClient
+          agencies={agencyOptions}
+          register={(agencies ?? []).map((agency) => ({
+            id: String(agency.id),
+            account_number: String(agency.account_number),
+            display_name: String(agency.display_name),
+            status: String(agency.status),
+            discount_basis_points: Number(agency.discount_basis_points),
+            approved_credit_limit_cents: Number(
+              agency.approved_credit_limit_cents,
+            ),
+            payment_terms_days: Number(agency.payment_terms_days),
+          }))}
+        />
       </section>
     </main>
   );

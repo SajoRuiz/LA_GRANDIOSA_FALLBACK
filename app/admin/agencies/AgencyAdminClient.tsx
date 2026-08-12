@@ -9,12 +9,21 @@ interface AgencyOption {
   display_name: string;
 }
 
+interface AgencyRegisterRow extends AgencyOption {
+  status: string;
+  discount_basis_points: number;
+  approved_credit_limit_cents: number;
+  payment_terms_days: number;
+}
+
 interface AgencyAdminClientProps {
   agencies: AgencyOption[];
+  register: AgencyRegisterRow[];
 }
 
 export default function AgencyAdminClient({
   agencies,
+  register,
 }: AgencyAdminClientProps) {
   const [agencyMessage, setAgencyMessage] = useState("");
   const [agencyError, setAgencyError] = useState("");
@@ -22,6 +31,55 @@ export default function AgencyAdminClient({
   const [activationCode, setActivationCode] = useState("");
   const [inviteSummary, setInviteSummary] = useState("");
   const [busy, setBusy] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const currency = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((entry) => entry !== id)
+        : [...current, id],
+    );
+  }
+
+  async function suspendSelected() {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setBusy(true);
+    setAgencyError("");
+
+    try {
+      const response = await fetch("/api/admin/list-actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entity: "agency",
+          action: "suspend",
+          ids: selectedIds,
+        }),
+      });
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Agencies could not be suspended.");
+      }
+
+      window.location.reload();
+    } catch (error) {
+      setAgencyError(
+        error instanceof Error ? error.message : "Agencies could not be suspended.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function createAgency(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -289,6 +347,57 @@ export default function AgencyAdminClient({
             </p>
           </aside>
         ) : null}
+      </section>
+
+      <section className={`${styles.panel} ${styles.agencyList}`}>
+        <p className={styles.eyebrow}>CURRENT AGENCIES</p>
+        <h2>Account register</h2>
+        {register.length > 0 ? (
+          <p>
+            <button
+              className={styles.button}
+              type="button"
+              disabled={busy || selectedIds.length === 0}
+              onClick={suspendSelected}
+            >
+              {busy
+                ? "Suspending…"
+                : `Suspend selected (${selectedIds.length})`}
+            </button>
+          </p>
+        ) : null}
+
+        {register.length === 0 ? (
+          <p>No agency accounts have been created.</p>
+        ) : (
+          register.map((agency) => (
+            <article className={styles.agencyRow} key={agency.id}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(agency.id)}
+                  onChange={() => toggleSelected(agency.id)}
+                  disabled={busy}
+                />{" "}
+                Select
+              </label>
+              <div>
+                <strong>{agency.display_name}</strong>
+                <span>{agency.account_number}</span>
+              </div>
+              <span>{agency.status}</span>
+              <span>
+                {(Number(agency.discount_basis_points) / 100).toFixed(2)}%
+              </span>
+              <span>
+                {currency.format(
+                  Number(agency.approved_credit_limit_cents) / 100,
+                )}
+              </span>
+              <span>Net {agency.payment_terms_days}</span>
+            </article>
+          ))
+        )}
       </section>
     </>
   );

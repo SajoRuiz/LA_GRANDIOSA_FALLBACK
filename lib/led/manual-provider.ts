@@ -3,6 +3,8 @@ import type {
   LedScreenProvider,
   LedStatusResult,
   LedSubmitResult,
+  LedVerifyInput,
+  LedWebhookSubscriptionResult,
 } from "./types";
 
 export class ManualLedScreenProvider implements LedScreenProvider {
@@ -42,6 +44,30 @@ export class ManualLedScreenProvider implements LedScreenProvider {
       externalReference,
       status: "cancelled",
       message: "Manual release cancelled.",
+    };
+  }
+
+  async verifyCampaignStatus(
+    input: LedVerifyInput,
+  ): Promise<LedStatusResult> {
+    return {
+      providerKey: this.key,
+      externalReference: input.externalReference,
+      status: "pending",
+      message: "Manual provider does not support signed verification pulls.",
+    };
+  }
+
+  async subscribeSolutionChangeNotifications(
+    callbackUrl: string,
+  ): Promise<LedWebhookSubscriptionResult> {
+    return {
+      providerKey: this.key,
+      subscribed: false,
+      callbackUrl,
+      raw: {
+        message: "Manual provider does not support webhook subscriptions.",
+      },
     };
   }
 }

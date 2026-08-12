@@ -16,6 +16,8 @@ const providerBase = new URL(
   baseUrl,
 );
 const webhookUrl = new URL("/api/webhooks/led/status", baseUrl);
+const subscribeUrl = new URL("/api/internal/releases/subscribe", baseUrl);
+const cronSecret = process.env.CRON_SECRET?.trim() || "";
 const headers = {
   Authorization: `Bearer ${apiKey}`,
   "Content-Type": "application/json",
@@ -31,6 +33,24 @@ async function request(url, init = {}) {
 }
 
 async function main() {
+  if (cronSecret && webhookSecret) {
+    console.log(
+      "subscribe",
+      await request(subscribeUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${cronSecret}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          callbackUrl: `${baseUrl}/api/webhooks/led/status?token=${encodeURIComponent(
+            webhookSecret,
+          )}`,
+        }),
+      }),
+    );
+  }
+
   const unique = Date.now();
   const release = {
     releaseId: `sim-release-${unique}`,
@@ -103,7 +123,7 @@ async function main() {
     } catch (error) {
       console.log(
         "webhook-warning",
-        error instanceof Error ? error.message : String(error),
+        `${error instanceof Error ? error.message : String(error)} (expected when simulated campaign is not linked to asset_release_queue)`,
       );
     }
   } else {

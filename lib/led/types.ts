@@ -42,6 +42,18 @@ export interface LedStatusResult {
   raw?: Record<string, unknown>;
 }
 
+export interface LedWebhookSubscriptionResult {
+  providerKey: string;
+  subscribed: boolean;
+  callbackUrl: string;
+  raw?: Record<string, unknown>;
+}
+
+export interface LedVerifyInput {
+  externalReference: string;
+  playerIds?: string[];
+}
+
 export interface LedScreenProvider {
   readonly key: string;
   readonly mode: "manual" | "api";
@@ -57,4 +69,12 @@ export interface LedScreenProvider {
   cancelCampaign(
     externalReference: string,
   ): Promise<LedStatusResult>;
+
+  verifyCampaignStatus(
+    input: LedVerifyInput,
+  ): Promise<LedStatusResult>;
+
+  subscribeSolutionChangeNotifications(
+    callbackUrl: string,
+  ): Promise<LedWebhookSubscriptionResult>;
 }

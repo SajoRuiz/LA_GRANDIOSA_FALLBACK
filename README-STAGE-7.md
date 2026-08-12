@@ -17,6 +17,7 @@ Stage 7 adds:
 ```text
 /api/internal/releases/process
 /api/internal/releases/seed
+/api/internal/releases/subscribe
 /api/internal/led/simulated-provider/campaigns
 /api/internal/led/simulated-provider/campaigns/[externalReference]
 /api/internal/led/simulated-provider/campaigns/[externalReference]/status
@@ -34,7 +35,12 @@ Stage 7 adds:
 LED_PROVIDER_MODE=manual
 LED_PROVIDER_API_BASE_URL=
 LED_PROVIDER_API_KEY=
+LED_PROVIDER_API_SECRET=
 LED_PROVIDER_WEBHOOK_SECRET=
+LED_PROVIDER_PLAYER_IDS=
+LED_PROVIDER_STATUS_PATH=v2/player/config/status
+LED_PROVIDER_LOGS_PATH=v2/player/logs
+LED_PROVIDER_SUBSCRIBE_PATH=v2/subscription/solution/change
 ```
 
 For simulator testing only, set:
@@ -42,7 +48,27 @@ For simulator testing only, set:
 - `LED_PROVIDER_MODE=api`
 - `LED_PROVIDER_API_BASE_URL=http://localhost:3000/api/internal/led/simulated-provider`
 - `LED_PROVIDER_API_KEY=local-test-key`
+- `LED_PROVIDER_API_SECRET=local-test-secret`
 - `LED_PROVIDER_WEBHOOK_SECRET=local-webhook-secret`
+
+## Webhook subscription registration
+
+Use the internal route (or helper script) to register/refresh solution-change
+subscriptions:
+
+```text
+POST /api/internal/releases/subscribe
+```
+
+Helper script:
+
+```bash
+CRON_SECRET=... node scripts/led-subscribe.mjs
+```
+
+Optional override:
+
+- `LED_CALLBACK_URL=https://your-domain.example/api/webhooks/led/status?token=...`
 
 ## Important
 

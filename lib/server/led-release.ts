@@ -333,7 +333,7 @@ export async function syncLedReleaseStatus(
   }
 
   const statusResult: LedStatusResult =
-    await provider.getCampaignStatus(externalReference);
+    await provider.verifyCampaignStatus({ externalReference });
   const status = mapProviderStatus(statusResult.status);
 
   await persistProviderState({
@@ -403,16 +403,26 @@ export async function applyLedWebhookStatus(input: {
       "id,order_id,asset_submission_id,status,attempts,external_reference",
     )
     .eq("external_reference", input.externalReference)
-    .single();
+    .limit(2);
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const matches = (data ?? []) as ReleaseQueueRow[];
+  if (matches.length === 0) {
     throw new Error(
-      error?.message ??
-        `Release queue row was not found for ${input.externalReference}.`,
+      `Release queue row was not found for ${input.externalReference}.`,
     );
   }
 
-  const release = data as ReleaseQueueRow;
+  if (matches.length > 1) {
+    throw new Error(
+      `Multiple release queue rows matched ${input.externalReference}.`,
+    );
+  }
+
+  const release = matches[0];
   await persistProviderState({
     releaseId: release.id,
     providerKey: input.providerKey,
@@ -532,5 +542,26 @@ export async function processLedReleaseQueue(
     skipped: false,
     claimed: rows.length,
     results,
+  };
+}
+
+export async function subscribeLedSolutionChangeNotifications(
+  callbackUrl: string,
+) {
+  const provider = getLedScreenProvider();
+  if (provider.mode !== "api") {
+    return {
+      skipped: true,
+      reason: "LED provider API mode is disabled.",
+    };
+  }
+
+  const result = await provider.subscribeSolutionChangeNotifications(
+    callbackUrl,
+  );
+
+  return {
+    skipped: false,
+    ...result,
   };
 }

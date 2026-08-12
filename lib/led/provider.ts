@@ -9,7 +9,12 @@ export function getLedScreenProvider(): LedScreenProvider {
   if (config.ledProviderMode === "api") {
     return new HttpLedScreenProvider({
       baseUrl: config.ledProviderApiBaseUrl,
-      apiKey: config.ledProviderApiKey,
+      appKey: config.ledProviderApiKey,
+      appSecret: config.ledProviderApiSecret,
+      playerIds: config.ledProviderPlayerIds,
+      statusPath: config.ledProviderStatusPath,
+      logsPath: config.ledProviderLogsPath,
+      subscribePath: config.ledProviderSubscribePath,
     });
   }
 

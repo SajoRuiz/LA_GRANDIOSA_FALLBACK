@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
+import { getLedScreenProvider } from "@/lib/led/provider";
 import { getCommerceServerConfig } from "@/lib/server/config";
 import { applyLedWebhookStatus } from "@/lib/server/led-release";
 
@@ -26,18 +27,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const provided =
-      request.headers.get("x-led-signature")?.trim() ?? "";
-    if (!provided) {
-      return NextResponse.json(
-        { error: "LED webhook signature is required." },
-        { status: 401 },
-      );
-    }
+    const provided = request.headers.get("x-led-signature")?.trim() ?? "";
+    const queryToken = request.nextUrl.searchParams
+      .get("token")
+      ?.trim() ?? "";
 
-    if (!signatureIsValid(provided, config.ledProviderWebhookSecret)) {
+    const signatureValid =
+      !!provided && signatureIsValid(provided, config.ledProviderWebhookSecret);
+    const queryTokenValid =
+      !!queryToken &&
+      signatureIsValid(queryToken, config.ledProviderWebhookSecret);
+
+    if (!signatureValid && !queryTokenValid) {
       return NextResponse.json(
-        { error: "LED webhook signature is invalid." },
+        { error: "LED webhook authentication is invalid." },
         { status: 401 },
       );
     }
@@ -52,11 +55,10 @@ export async function POST(request: NextRequest) {
     ).trim();
     const status = String(body.status ?? "").trim();
 
-    if (!externalReference || !status) {
+    if (!externalReference) {
       return NextResponse.json(
         {
-          error:
-            "Webhook payload requires externalReference and status.",
+          error: "Webhook payload requires externalReference.",
         },
         { status: 400 },
       );
@@ -66,12 +68,40 @@ export async function POST(request: NextRequest) {
     const providerKey =
       String(body.providerKey ?? "").trim() || "led_provider_api";
 
+    // NovaCloud callbacks are treated as untrusted triggers.
+    // We pull signed status/log data before applying internal state changes.
+    let verifiedStatus = status;
+    let verifiedRaw = body;
+    let verifiedMessage = message;
+    const provider = getLedScreenProvider();
+    if (provider.mode === "api") {
+      const verified = await provider.verifyCampaignStatus({
+        externalReference,
+      });
+      verifiedStatus = verified.status;
+      verifiedRaw = {
+        callback: body,
+        verified: verified.raw ?? {},
+      };
+      verifiedMessage =
+        verified.message ??
+        message ??
+        "Webhook trigger verified via signed provider pull.";
+    }
+
+    if (!verifiedStatus) {
+      return NextResponse.json(
+        { error: "Verified webhook status is missing." },
+        { status: 400 },
+      );
+    }
+
     const result = await applyLedWebhookStatus({
       externalReference,
-      status,
+      status: verifiedStatus,
       providerKey,
-      message,
-      raw: body,
+      message: verifiedMessage,
+      raw: verifiedRaw,
     });
 
     return NextResponse.json({ ok: true, ...result });
@@ -83,6 +113,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: error.message },
         { status: 404 },
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      /Multiple release queue rows matched/i.test(error.message)
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 409 },
       );
     }
 

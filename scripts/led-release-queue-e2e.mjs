@@ -74,7 +74,7 @@ async function main() {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (message.includes('"submitted"')) {
+      if (/submitted/i.test(message)) {
         workerBlockedBySchema = true;
         console.log("worker-warning", "submitted status enum not available; continuing with seeded external reference");
         break;
@@ -100,9 +100,39 @@ async function main() {
       "schema-warning",
       "Apply 202608110002_stage_7_led_api_release_statuses.sql to validate submitted/acknowledged states end-to-end.",
     );
+
+    console.log(
+      "skipped",
+      "Webhook verification flow requires a provider-created external reference; queue worker submit is currently blocked by enum schema.",
+    );
+    return;
   }
 
   const webhookUrl = new URL("/api/webhooks/led/status", baseUrl);
+  const providerBase = new URL(
+    "/api/internal/led/simulated-provider/",
+    baseUrl,
+  );
+  const providerStatusUrl = new URL(
+    `campaigns/${encodeURIComponent(externalReference)}/status`,
+    providerBase,
+  );
+  const providerHeaders = {
+    Authorization: `Bearer ${process.env.SIM_API_KEY?.trim() || process.env.LED_PROVIDER_API_KEY?.trim() || ""}`,
+    "Content-Type": "application/json",
+  };
+
+  console.log(
+    "provider-released",
+    await request(providerStatusUrl, {
+      method: "POST",
+      headers: providerHeaders,
+      body: JSON.stringify({
+        status: "released",
+        message: "Stage 7 e2e provider released transition.",
+      }),
+    }),
+  );
 
   console.log(
     "webhook-released",
@@ -115,14 +145,25 @@ async function main() {
       body: JSON.stringify({
         providerKey: "simulated_led_provider",
         externalReference,
-        status: "released",
-        message: "Stage 7 e2e release transition.",
+        message: "Stage 7 e2e release trigger callback.",
       }),
     }),
   );
 
   const afterReleased = await getSnapshot(releaseId);
   console.log("snapshot-after-released", afterReleased);
+
+  console.log(
+    "provider-live",
+    await request(providerStatusUrl, {
+      method: "POST",
+      headers: providerHeaders,
+      body: JSON.stringify({
+        status: "live",
+        message: "Stage 7 e2e provider live transition.",
+      }),
+    }),
+  );
 
   console.log(
     "webhook-live",
@@ -135,8 +176,7 @@ async function main() {
       body: JSON.stringify({
         providerKey: "simulated_led_provider",
         externalReference,
-        status: "live",
-        message: "Stage 7 e2e live transition.",
+        message: "Stage 7 e2e live trigger callback.",
       }),
     }),
   );

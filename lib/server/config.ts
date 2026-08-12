@@ -49,7 +49,12 @@ export interface CommerceServerConfig {
   ledProviderMode: "manual" | "api";
   ledProviderApiBaseUrl: string;
   ledProviderApiKey: string;
+  ledProviderApiSecret: string;
   ledProviderWebhookSecret: string;
+  ledProviderPlayerIds: string[];
+  ledProviderStatusPath: string;
+  ledProviderLogsPath: string;
+  ledProviderSubscribePath: string;
 }
 
 export function getCommerceServerConfig(): CommerceServerConfig {
@@ -104,8 +109,26 @@ export function getCommerceServerConfig(): CommerceServerConfig {
       "LED_PROVIDER_API_BASE_URL",
     ),
     ledProviderApiKey: optionalServerEnvironment("LED_PROVIDER_API_KEY"),
+    ledProviderApiSecret: optionalServerEnvironment(
+      "LED_PROVIDER_API_SECRET",
+    ),
     ledProviderWebhookSecret: optionalServerEnvironment(
       "LED_PROVIDER_WEBHOOK_SECRET",
     ),
+    ledProviderPlayerIds: optionalServerEnvironment(
+      "LED_PROVIDER_PLAYER_IDS",
+    )
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+    ledProviderStatusPath:
+      optionalServerEnvironment("LED_PROVIDER_STATUS_PATH") ||
+      "v2/player/config/status",
+    ledProviderLogsPath:
+      optionalServerEnvironment("LED_PROVIDER_LOGS_PATH") ||
+      "v2/player/logs",
+    ledProviderSubscribePath:
+      optionalServerEnvironment("LED_PROVIDER_SUBSCRIBE_PATH") ||
+      "v2/subscription/solution/change",
   };
 }

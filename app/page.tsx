@@ -1,7 +1,6 @@
 import Link from "next/link";
 import styles from "./page.module.css";
 import { withNext } from "@/lib/auth/paths";
-import HeroMotion from "./HeroMotion";
 
 const stillRates = [
   ["Center", "$4,050", "$6,075", "$12,150", "$24,300"],
@@ -74,7 +73,6 @@ export default function HomePage() {
       </header>
 
       <section className={styles.hero} id="top">
-        <HeroMotion />
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>THE NEW MALL OF SAN JUAN DIGITAL AD SPACE IS NOW AVAILABLE.</p>
           <h1>

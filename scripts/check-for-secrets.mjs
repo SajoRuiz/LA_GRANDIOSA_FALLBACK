@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { extname } from "node:path";
 
 const ignored = new Set([
-  ".env.example",
   "README-STAGE-6.md",
   "PRODUCTION-LAUNCH-CHECKLIST.md",
   "VERCEL-PRODUCTION-SETUP.md",

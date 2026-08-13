@@ -47,9 +47,12 @@ For simulator testing only, set:
 
 - `LED_PROVIDER_MODE=api`
 - `LED_PROVIDER_API_BASE_URL=http://localhost:3000/api/internal/led/simulated-provider`
-- `LED_PROVIDER_API_KEY=local-test-key`
-- `LED_PROVIDER_API_SECRET=local-test-secret`
-- `LED_PROVIDER_WEBHOOK_SECRET=local-webhook-secret`
+- `LED_PROVIDER_API_KEY=replace-with-local-simulator-api-key`
+- `LED_PROVIDER_API_SECRET=replace-with-local-simulator-api-secret`
+- `LED_PROVIDER_WEBHOOK_SECRET=replace-with-local-simulator-webhook-secret`
+
+Generate local-only simulator secrets with a command such as `openssl rand -hex 16`
+for the API key and `openssl rand -hex 32` for shared secrets.
 
 ## Webhook subscription registration
 

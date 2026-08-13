@@ -16,8 +16,16 @@ Add the following to `.env.local` for simulator testing:
 ```env
 LED_PROVIDER_MODE=api
 LED_PROVIDER_API_BASE_URL=http://localhost:3000/api/internal/led/simulated-provider
-LED_PROVIDER_API_KEY=local-test-key
-LED_PROVIDER_WEBHOOK_SECRET=local-webhook-secret
+LED_PROVIDER_API_KEY=replace-with-local-simulator-api-key
+LED_PROVIDER_API_SECRET=replace-with-local-simulator-api-secret
+LED_PROVIDER_WEBHOOK_SECRET=replace-with-local-simulator-webhook-secret
+```
+
+Generate local-only simulator secrets, for example:
+
+```bash
+openssl rand -hex 16
+openssl rand -hex 32
 ```
 
 Never commit `.env.local`.
@@ -47,8 +55,8 @@ If port 3000 is busy, Next.js will move to 3001 automatically.
 
 ```bash
 SIM_BASE_URL=http://localhost:3000 \
-SIM_API_KEY=local-test-key \
-LED_PROVIDER_WEBHOOK_SECRET=local-webhook-secret \
+SIM_API_KEY=replace-with-local-simulator-api-key \
+LED_PROVIDER_WEBHOOK_SECRET=replace-with-local-simulator-webhook-secret \
 node scripts/led-simulator-smoke.mjs
 ```
 
@@ -62,7 +70,7 @@ real `orders`, `asset_submissions`, and `asset_release_queue` records.
 ```bash
 SIM_BASE_URL=http://localhost:3000 \
 CRON_SECRET=your-cron-secret \
-LED_PROVIDER_WEBHOOK_SECRET=local-webhook-secret \
+LED_PROVIDER_WEBHOOK_SECRET=replace-with-local-simulator-webhook-secret \
 node scripts/led-release-queue-e2e.mjs
 ```
 

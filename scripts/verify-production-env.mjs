@@ -32,6 +32,9 @@ const placeholderValues = new Set([
   "local-test-key",
   "local-test-secret",
   "local-webhook-secret",
+  "replace-with-local-simulator-api-key",
+  "replace-with-local-simulator-api-secret",
+  "replace-with-local-simulator-webhook-secret",
   "generated-value",
   "your-cron-secret",
 ]);
